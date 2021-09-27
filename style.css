@@ -29,46 +29,52 @@ header{
     grid-template-columns: 20% 80%;
    padding: 1em;
 }
-.categories{
-    padding: 1em;
-    margin: 5em;
-    font-size: 10px;
-    margin-top: 70px;
-   
-}
-.details{
-    
-    padding: 0em;
-    margin: 5em;
-}
 h2, p{
     padding-bottom: 25px;
 }
 a{
     margin-right: 1em;
 }
+.subtitle{
+  
+
+}
 .name{
     font-size: 60px;
     opacity: .85;
+        color: black;
+     
 }
-p, h2{
+
+
+h2{
 
     color: rgb(94, 98, 105);
+}
+.highlight{
+    color: rgb(19, 18, 18);
+}
+h2, h3{
+    font-weight: 500;
 }
 a{
     text-decoration: none;
     color: rgb(94, 98, 105);
 }
 
-a:hover{
+.nav-link:hover{
     color: black;
-    font-weight: 600;
+    font-weight: 500;
 }
 img:hover{
     transform: scale(1.04);
 }
 .name:hover{
     opacity: 1.0;
-    font-weight: 1000;
+    font-weight: bold;
 }
+main > div{
+    padding-bottom: 15em;
+}
+
 
