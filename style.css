@@ -35,12 +35,9 @@ h2, p{
 a{
     margin-right: 1em;
 }
-.subtitle{
-  
 
-}
 .name{
-    font-size: 60px;
+    font-size: 40px;
     opacity: .85;
         color: black;
      
@@ -48,7 +45,7 @@ a{
 
 
 h2{
-
+    font-size: 20px;
     color: rgb(94, 98, 105);
 }
 .highlight{
