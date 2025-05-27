@@ -35,7 +35,7 @@
 
         <v-card-text class="text-white">
           @ {{ new Date().getFullYear() }} —
-          <strong>AAE IdeaPro All Rights Reserved</strong>
+          <strong>Baguio Web Development Services All Rights Reserved</strong>
         </v-card-text>
       </v-card>
     </v-footer>
