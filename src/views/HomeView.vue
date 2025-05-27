@@ -6,7 +6,7 @@
         <v-row>
           <v-col cols="5">
             <div style="position: relative" class="mt-16">
-              <h1 class="text-grey">Hello,</h1>
+              <h1 class="text-grey">Naimbag nga bigat (Hello),</h1>
               <h1 class="text-white">I'M Christian Colewan</h1>
               <span class="text-grey">Web Designer & Developer</span><br />
 
