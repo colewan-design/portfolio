@@ -10,8 +10,8 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { id: 'index', label: 'index', index: '00' },
-  { id: 'about', label: 'about', index: '01' },
-  { id: 'work', label: 'work', index: '02' },
+  { id: 'work', label: 'work', index: '01' },
+  { id: 'about', label: 'about', index: '02' },
   { id: 'tools', label: 'tools', index: '03' },
   { id: 'services', label: 'services', index: '04' },
   { id: 'pricing', label: 'pricing', index: '05', to: '/pricing' },

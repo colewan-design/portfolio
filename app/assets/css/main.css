@@ -149,6 +149,13 @@
     scroll-padding-top: 4rem;
   }
 
+  /* The work viewer is a modal dialog over the whole viewport. A modal blocks
+     clicks on the page behind it but not the wheel, so without this the page
+     scrolls away underneath and is somewhere else when the viewer shuts. */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
   body {
     @apply bg-bg text-ink font-sans text-base antialiased;
     overflow-x: hidden;

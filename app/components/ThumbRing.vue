@@ -61,6 +61,7 @@ const cards = computed(() =>
     aria-hidden="true"
     class="ring-stage pointer-events-none select-none"
     :class="props.half === 'near' ? 'ring-stage--near' : 'ring-stage--far'"
+    :style="{ '--slots': SLOTS }"
   >
     <div class="ring-tilt">
       <figure
@@ -90,7 +91,14 @@ const cards = computed(() =>
      At 20 cards that means a pitch of 2πr / 20, so the width tracks the radius
      up through the breakpoints rather than being chosen for legibility. */
   --ring-radius: 170px;
-  --card-w: 76px;
+  --card-max: 76px;
+
+  /* The deck grows with the project list while the radius does not, so the
+     width is the designed one only for as long as it fits its slot. Past that
+     it gives way to the pitch; left fixed, the cards start to lap over each
+     other and the band smears. */
+  --slots-shown: calc(var(--slots) / 2);
+  --card-w: min(var(--card-max), calc(6.2832 * var(--ring-radius) / var(--slots-shown)));
 
   position: absolute;
   inset: 0;
@@ -114,21 +122,22 @@ const cards = computed(() =>
 @media (min-width: 640px) {
   .ring-stage {
     --ring-radius: 280px;
-    --card-w: 88px;
+    --card-max: 88px;
+    --slots-shown: var(--slots);
   }
 }
 
 @media (min-width: 1024px) {
   .ring-stage {
     --ring-radius: 390px;
-    --card-w: 106px;
+    --card-max: 106px;
   }
 }
 
 @media (min-width: 1440px) {
   .ring-stage {
     --ring-radius: 430px;
-    --card-w: 116px;
+    --card-max: 116px;
   }
 }
 

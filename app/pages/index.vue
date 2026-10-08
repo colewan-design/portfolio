@@ -4,6 +4,12 @@
 
     <!-- Each block owns its own top spacing so sections can be reordered
          without the rhythm collapsing. -->
+    <!-- The work comes straight after the hero: the page is a gallery first,
+         and everything about the person hanging it follows. -->
+    <div class="pt-section">
+      <WorkGallery />
+    </div>
+
     <div class="pt-section">
       <StatementBlock
         eyebrow="Approach"
@@ -14,14 +20,6 @@
 
     <div class="pt-section">
       <AboutBlock />
-    </div>
-
-    <div class="pt-section">
-      <ProjectIndex />
-    </div>
-
-    <div class="pt-section">
-      <WorkGrid />
     </div>
 
     <div class="pt-section">
