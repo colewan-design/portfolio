@@ -1,0 +1,517 @@
+@import 'tailwindcss';
+
+/* Not a git repo, so v4's auto source detection has no root to anchor to —
+   point it at the app dir explicitly. */
+@source '../../';
+
+/* ---------------------------------------------------------------------------
+   Fonts
+   Barlow Condensed / Geist / Geist Mono are fetched and self-hosted by
+   @nuxt/fonts. Geist Pixel is Vercel's pixel variant, self-hosted from
+   /public/fonts, and now carries only the footer wordmark.
+--------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Geist Pixel';
+  src: url('/fonts/GeistPixel-Square.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------------------------------------------------------------------------
+   Theme — colors.
+   Dark only. One ground, one ink, a neutral ramp between them, and a single
+   accent. Channels rather than colors so alpha applies at point of use.
+--------------------------------------------------------------------------- */
+@theme inline {
+  --color-bg: rgb(var(--bg));
+  --color-ink: rgb(var(--ink));
+
+  --color-gray-100: rgb(var(--gray-100));
+  --color-gray-200: rgb(var(--gray-200));
+  --color-gray-300: rgb(var(--gray-300));
+  --color-gray-400: rgb(var(--gray-400));
+  --color-gray-500: rgb(var(--gray-500));
+  --color-gray-600: rgb(var(--gray-600));
+  --color-gray-700: rgb(var(--gray-700));
+  --color-gray-800: rgb(var(--gray-800));
+  --color-gray-900: rgb(var(--gray-900));
+
+  --color-accent: rgb(var(--accent));
+
+  /* The cold wash behind the figure. Its own token because the hero, the
+     second statement block, and the arc all sample it. */
+  --color-wash: rgb(var(--wash));
+}
+
+@theme {
+  --font-display: 'Barlow Condensed', 'Oswald', 'Arial Narrow', sans-serif;
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --font-pixel: 'Geist Pixel', 'Geist Mono', ui-monospace, monospace;
+
+  /* Micro register: the tiny tracked-out caps that label everything. */
+  --text-micro: 9px;
+  --text-micro--line-height: 1.5;
+  --text-2xs: 10px;
+  --text-2xs--line-height: 1.5;
+  --text-xs: 11px;
+  --text-xs--line-height: 1.6;
+  --text-sm: 13px;
+  --text-sm--line-height: 1.65;
+  --text-base: 15px;
+  --text-base--line-height: 1.7;
+  --text-lg: 17px;
+  --text-lg--line-height: 1.6;
+
+  /* Display register: fluid, and tuned to sit tight. Condensed faces can
+     take far less tracking and leading than a normal-width grotesque. */
+  --text-h3: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+  --text-h3--line-height: 1.05;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h2: clamp(2rem, 1.3rem + 3.2vw, 3.75rem);
+  --text-h2--line-height: 1;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h1: clamp(2.75rem, 1.2rem + 7.2vw, 7.5rem);
+  --text-h1--line-height: 0.88;
+  --text-h1--letter-spacing: -0.02em;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --spacing-section: clamp(5rem, 10vw, 11rem);
+
+  --container-page: 82rem;
+  --container-measure: 34rem;
+
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-fade-up: fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-pulse: pulse 2.4s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.25;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Tokens
+--------------------------------------------------------------------------- */
+@layer base {
+  :root {
+    --bg: 10 10 10;
+    --ink: 250 250 249;
+
+    /* Ramp runs dark → light, the inverse of a light theme's. */
+    --gray-100: 20 20 20;
+    --gray-200: 30 30 30;
+    --gray-300: 44 44 44;
+    --gray-400: 64 64 64;
+    --gray-500: 115 115 115;
+    --gray-600: 150 150 148;
+    --gray-700: 180 180 178;
+    --gray-800: 210 210 208;
+    --gray-900: 235 235 233;
+
+    --accent: 232 232 228;
+
+    /* Cold, faintly green — the light source behind the figure. */
+    --wash: 190 205 196;
+
+    --dot: rgb(250 250 249 / 0.5);
+
+    --hairline: rgb(250 250 249 / 0.14);
+    --hairline-strong: rgb(250 250 249 / 0.28);
+
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    scroll-padding-top: 4rem;
+  }
+
+  body {
+    @apply bg-bg text-ink font-sans text-base antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Hairlines carry the whole grid in this design, so they default to the
+     translucent rule rather than currentColor. */
+  *,
+  *::before,
+  *::after {
+    border-color: var(--hairline);
+  }
+
+  ::selection {
+    background-color: rgb(var(--ink));
+    color: rgb(var(--bg));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--ink));
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--gray-400)) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--bg));
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--gray-400));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Components
+--------------------------------------------------------------------------- */
+@layer components {
+  /* The register that labels everything: 9px mono, tracked wide, uppercase. */
+  .micro {
+    @apply font-mono text-micro uppercase text-gray-600;
+    letter-spacing: 0.16em;
+  }
+
+  .micro-ink {
+    @apply font-mono text-micro uppercase text-ink;
+    letter-spacing: 0.16em;
+  }
+
+  /* Oversized condensed uppercase — the voice of the whole page. */
+  .display {
+    @apply font-display uppercase text-ink;
+    font-weight: 700;
+  }
+
+  /* Half of every headline is set in gray. The contrast between the two is
+     the typographic idea, so it gets a class rather than a utility. */
+  .display-dim {
+    color: rgb(var(--gray-500));
+  }
+
+  /* Bracketed link: [ EXPLORE PROJECTS ]. The brackets are generated so the
+     spacing stays even and they never get selected with the label. */
+  .bracket {
+    @apply inline-flex items-center gap-2 font-mono text-micro uppercase text-gray-700;
+    letter-spacing: 0.16em;
+    transition: color 240ms ease;
+  }
+  .bracket::before {
+    content: '[';
+  }
+  .bracket::after {
+    content: ']';
+  }
+  .bracket::before,
+  .bracket::after {
+    color: rgb(var(--gray-500));
+    transition: color 240ms ease;
+  }
+  .bracket:hover {
+    color: rgb(var(--ink));
+  }
+  .bracket:hover::before,
+  .bracket:hover::after {
+    color: rgb(var(--ink));
+  }
+
+  /* Solid counterpart, used once per view at most. */
+  .bracket-solid {
+    @apply inline-flex items-center gap-2 font-mono text-micro uppercase;
+    background-color: rgb(var(--ink));
+    color: rgb(var(--bg));
+    letter-spacing: 0.16em;
+    padding: 10px 18px;
+    transition: opacity 240ms ease;
+  }
+  .bracket-solid:hover {
+    opacity: 0.82;
+  }
+
+  /* A rule with a square node on each end — the reference's divider motif. */
+  .rule-node {
+    @apply relative h-px w-full;
+    background-color: var(--hairline);
+  }
+  .rule-node::before,
+  .rule-node::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    background-color: rgb(var(--gray-600));
+    transform: translateY(-50%);
+  }
+  .rule-node::before {
+    left: 0;
+  }
+  .rule-node::after {
+    right: 0;
+  }
+
+  /* Dense index rows. Hairline top only, so consecutive rows read as a table
+     without doubling up the borders. */
+  .row {
+    @apply grid items-center gap-4 border-t py-3;
+    transition: background-color 240ms ease;
+  }
+  .row:hover {
+    background-color: rgb(var(--gray-100));
+  }
+
+  .tile {
+    @apply relative block overflow-hidden border bg-gray-100;
+    transition:
+      border-color 320ms ease,
+      transform 480ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tile:hover {
+    border-color: var(--hairline-strong);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Texture and motion
+--------------------------------------------------------------------------- */
+@layer utilities {
+  /* The cold light behind the figure. Two stacked radials: a tight core and a
+     wide bloom, so the falloff is not a single flat circle. */
+  .wash {
+    background-image:
+      radial-gradient(30% 26% at 50% 34%, rgb(var(--wash) / 0.34) 0%, transparent 70%),
+      radial-gradient(58% 48% at 50% 44%, rgb(var(--wash) / 0.16) 0%, transparent 72%),
+      radial-gradient(95% 80% at 50% 58%, rgb(var(--wash) / 0.07) 0%, transparent 76%);
+  }
+
+  .halftone {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.1px);
+    background-size: 8px 8px;
+  }
+
+  .mask-b {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  }
+  .mask-t {
+    -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+    mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+  }
+  /* The figure dissolves into the ground rather than ending. The fade is held
+     right down at the hem: the torso is what occludes the orbit, and any
+     earlier fade makes it translucent exactly where the band crosses, so cards
+     ghost through the chest. The second gradient softens the left and right
+     edges, which the crossed arms run into at the bottom of the frame. */
+  .mask-figure {
+    -webkit-mask-image:
+      linear-gradient(to bottom, #000 86%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to bottom, #000 86%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+    mask-composite: intersect;
+  }
+  /* Marquee tapes fade at both ends rather than hitting the viewport edge. */
+  .mask-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 12%,
+      #000 88%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  }
+
+  /* Grain. A single inline SVG turbulence, tiled — cheap, and it keeps the
+     large flat blacks from banding. */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+  }
+
+  /* Scroll-driven entrance. Base state is visible, so if the timeline never
+     attaches nothing is stranded at opacity 0. */
+  .rise {
+    opacity: 1;
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .rise {
+        animation: rise linear both;
+        animation-timeline: view();
+        animation-range: entry 4% cover 20%;
+      }
+    }
+  }
+
+  .reveal {
+    @apply animate-fade-up;
+  }
+  .reveal-1 {
+    animation-delay: 90ms;
+  }
+  .reveal-2 {
+    animation-delay: 180ms;
+  }
+  .reveal-3 {
+    animation-delay: 270ms;
+  }
+  .reveal-4 {
+    animation-delay: 360ms;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Marquee. Translating exactly -50% of a list rendered twice makes the loop
+   seamless regardless of content width. */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* One lap of the cylinder. Starting at 90deg puts phase 0 at the right-hand
+   edge, where the card is edge-on: that makes 0-50% the far half and 50-100%
+   the near half, and puts both layer handovers at an invisible moment. */
+@keyframes ring-orbit {
+  from {
+    transform: rotateY(90deg) translateZ(var(--ring-radius));
+  }
+  to {
+    transform: rotateY(450deg) translateZ(var(--ring-radius));
+  }
+}
+
+/* Only opacity — perspective already supplies the size falloff. Phase 25% is
+   the deep back of the lap, where the card is both smallest and dimmest; 75%
+   is the near arc, which passes in front of the figure. */
+@keyframes ring-depth {
+  0% {
+    opacity: 0.7;
+  }
+  25% {
+    opacity: 0.34;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+/* Half-lap gating. The ring is rendered twice — one copy behind the figure, one
+   in front — because a card cannot change stacking layer part-way through an
+   animation. Each copy blanks itself for the half it does not own, so a single
+   card reads as one object that slides behind the shoulder, is hidden by the
+   body, and re-emerges on the other side.
+   The 0.02% ramp exists because visibility interpolates as visible whenever
+   either end of a step is visible: a stop that close keeps the double-drawn
+   moment under a frame, and the card is edge-on there in any case. */
+@keyframes ring-half-far {
+  0% {
+    visibility: visible;
+  }
+  49.98% {
+    visibility: visible;
+  }
+  50% {
+    visibility: hidden;
+  }
+  100% {
+    visibility: hidden;
+  }
+}
+
+@keyframes ring-half-near {
+  0% {
+    visibility: hidden;
+  }
+  49.98% {
+    visibility: hidden;
+  }
+  50% {
+    visibility: visible;
+  }
+  100% {
+    visibility: visible;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The design must be complete when perfectly still.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
