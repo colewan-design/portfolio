@@ -5,6 +5,13 @@ const active = useActiveSection(navIds)
 const sectionHref = useSectionHref()
 const route = useRoute()
 
+/* Resolved here, by its literal name, because a string handed to `:is` at
+   runtime is only looked up among globally registered components — and Nuxt's
+   are auto-imported, not registered. Passed as 'NuxtLink' it resolves to
+   nothing and renders an inert <nuxtlink> element that looks like a link and
+   goes nowhere. */
+const NuxtLink = resolveComponent('NuxtLink')
+
 /* An item with its own route is marked from the path; the rest follow the
    scroll spy, which only has sections to observe on the index. */
 function isActive(item: (typeof navItems)[number]) {
@@ -53,7 +60,7 @@ onMounted(() => {
             <!-- Section links stay plain anchors so the CSS smooth scroll keeps
                  owning the motion; only a real route goes through the router. -->
             <component
-              :is="item.to ? 'NuxtLink' : 'a'"
+              :is="item.to ? NuxtLink : 'a'"
               v-bind="item.to ? { to: item.to } : { href: sectionHref(item.id) }"
               class="micro transition-colors duration-200 hover:text-ink"
               :class="isActive(item) && 'text-ink'"

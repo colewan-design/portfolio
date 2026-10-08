@@ -6,6 +6,9 @@ const email = 'cts.colewan@gmail.com'
 /* The outro is rendered on the pricing page too, so its index column can no
    longer assume the sections are on the current page. */
 const sectionHref = useSectionHref()
+
+/* By literal name, not as a string in the template: see SiteNav. */
+const NuxtLink = resolveComponent('NuxtLink')
 </script>
 
 <template>
@@ -35,7 +38,7 @@ const sectionHref = useSectionHref()
           <ul class="space-y-2.5">
             <li v-for="item in navItems" :key="item.id">
               <component
-                :is="item.to ? 'NuxtLink' : 'a'"
+                :is="item.to ? NuxtLink : 'a'"
                 v-bind="item.to ? { to: item.to } : { href: sectionHref(item.id) }"
                 class="bracket"
               >
