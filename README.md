@@ -41,6 +41,13 @@ To generate a static output instead, run:
 npm run generate
 ```
 
+Run the full static-site validation to regenerate the site and check routes,
+metadata, sitemap discovery, and referenced assets:
+
+```bash
+npm run validate
+```
+
 ## Project structure
 
 ```text
@@ -73,6 +80,7 @@ Before committing a change, run:
 ```bash
 npm ci
 npm run build
+npm run validate
 ```
 
 The automation progress log is stored in `.automation/state.json` so completed work is not repeated.
