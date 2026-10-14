@@ -1,75 +1,78 @@
-# Nuxt Minimal Starter
+# Christian Colewan Portfolio
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Source for [christiancolewan.tech](https://christiancolewan.tech), a dark, typography-led portfolio for Christian Colewan. The site presents selected projects, services, tools, pricing, and contact information.
 
-## Setup
+## Stack
 
-Make sure to install dependencies:
+- Nuxt 4 and Vue 3
+- Tailwind CSS 4 through the Vite plugin
+- `@nuxt/fonts` for Barlow Condensed, Geist, and Geist Mono
+- A self-hosted Geist Pixel display font
+
+## Routes
+
+- `/` — portfolio homepage
+- `/pricing` — service packages and pricing details
+
+## Local development
+
+Install the exact dependency versions recorded in the lockfile:
 
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+npm ci
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+Start the development server at `http://localhost:3000`:
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
+Create and preview a production build:
 
 ```bash
-# npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+npm run preview
 ```
 
-Locally preview production build:
+To generate a static output instead, run:
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+npm run generate
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Project structure
+
+```text
+app/
+  assets/css/main.css   Design tokens, typography, utilities, and global styles
+  components/           Portfolio sections and shared interface components
+  composables/          Active-section tracking and section-link helpers
+  data/                 Navigation, projects, tools, and pricing content
+  pages/                Home and pricing routes
+public/
+  fonts/                 Self-hosted display font
+  images/                Portrait, project, service, and brand assets
+nuxt.config.ts           Nuxt, fonts, metadata, and Tailwind configuration
+skill.md                 Repository design guidance
+```
+
+Most portfolio content can be updated without changing component markup:
+
+- Projects: `app/data/projects.ts`
+- Pricing: `app/data/pricing.ts`
+- Tools: `app/data/tools.ts`
+- Navigation: `app/data/nav.ts`
+
+## Design and quality rules
+
+Follow `skill.md` when changing the interface. Preserve the established typography, spacing, motion, accessibility, and monochrome design guidance unless a deliberate redesign is requested.
+
+Before committing a change, run:
+
+```bash
+npm ci
+npm run build
+```
+
+The automation progress log is stored in `.automation/state.json` so completed work is not repeated.
