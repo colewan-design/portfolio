@@ -56,6 +56,44 @@ function structuredData(html, label) {
   )
 }
 
+function validateAccessibility(html, label) {
+  for (const landmark of ['nav', 'main', 'footer']) {
+    const count = tags(html, landmark).length
+    if (count !== 1) fail(`${label}: expected one <${landmark}> landmark, found ${count}`)
+  }
+
+  requireTag(html, 'main', { id: 'main' }, label)
+  requireTag(html, 'a', { href: '#main' }, label)
+
+  const headingLevels = [...html.matchAll(/<h([1-6])\b/gi)].map(([, level]) => Number(level))
+  const topLevelHeadings = headingLevels.filter((level) => level === 1).length
+  if (topLevelHeadings !== 1) {
+    fail(`${label}: expected one <h1>, found ${topLevelHeadings}`)
+  }
+
+  for (let index = 1; index < headingLevels.length; index += 1) {
+    if (headingLevels[index] > headingLevels[index - 1] + 1) {
+      fail(
+        `${label}: heading level skips from h${headingLevels[index - 1]} to h${headingLevels[index]}`
+      )
+    }
+  }
+
+  for (const image of tags(html, 'img')) {
+    if (!Object.hasOwn(image.attributes, 'alt')) {
+      fail(`${label}: image is missing an alt attribute: ${image.raw}`)
+    }
+  }
+
+  for (const link of tags(html, 'a')) {
+    if (link.attributes.target !== '_blank') continue
+    const relationships = new Set((link.attributes.rel || '').split(/\s+/).filter(Boolean))
+    if (!relationships.has('noopener')) {
+      fail(`${label}: target=_blank link is missing rel=noopener: ${link.raw}`)
+    }
+  }
+}
+
 async function requireFile(relativePath, label = relativePath) {
   try {
     await access(join(outputDir, relativePath))
@@ -89,6 +127,7 @@ for (const route of routes) {
   }
 
   if (!/<title>[^<]+<\/title>/i.test(html)) fail(`${label}: missing non-empty title`)
+  validateAccessibility(html, label)
   generatedPages.push(html)
 }
 
@@ -144,5 +183,5 @@ for (const html of generatedPages) {
 for (const assetPath of assetPaths) await requireFile(assetPath, `referenced asset /${assetPath}`)
 
 console.log(
-  `Validated ${routes.length} routes, metadata, Person structured data, sitemap discovery, and ${assetPaths.size} assets.`
+  `Validated ${routes.length} routes, accessibility, metadata, Person structured data, sitemap discovery, and ${assetPaths.size} assets.`
 )
