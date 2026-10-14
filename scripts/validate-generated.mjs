@@ -150,6 +150,24 @@ for (const route of routes) {
   generatedPages.push(html)
 }
 
+await requireFile('404.html', 'generated 404 page')
+const errorPageSource = await readFile(join(root, 'app/error.vue'), 'utf8')
+const errorPageLabel = 'custom error page'
+
+requireTag(errorPageSource, 'main', { id: 'main' }, errorPageLabel)
+requireTag(errorPageSource, 'button', { type: 'button' }, errorPageLabel)
+
+if (tags(errorPageSource, 'h1').length !== 1) fail(`${errorPageLabel}: expected one <h1>`)
+if (!errorPageSource.includes("content: 'noindex, nofollow'")) {
+  fail(`${errorPageLabel}: missing no-index metadata`)
+}
+if (!errorPageSource.includes("clearError({ redirect: '/' })")) {
+  fail(`${errorPageLabel}: missing return-home recovery`)
+}
+if (!/<button\b[^>]*>[\s\S]*?Return home[\s\S]*?<\/button>/i.test(errorPageSource)) {
+  fail(`${errorPageLabel}: missing return-home action label`)
+}
+
 const homePerson = structuredData(generatedPages[0], 'route /').find(
   (schema) => schema['@context'] === 'https://schema.org' && schema['@type'] === 'Person'
 )
@@ -234,5 +252,5 @@ for (const html of generatedPages) {
 for (const assetPath of assetPaths) await requireFile(assetPath, `referenced asset /${assetPath}`)
 
 console.log(
-  `Validated ${routes.length} routes, accessibility, metadata, install icons, web manifest, Person structured data, sitemap discovery, and ${assetPaths.size} page assets.`
+  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, install icons, web manifest, Person structured data, sitemap discovery, and ${assetPaths.size} page assets.`
 )

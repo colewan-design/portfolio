@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-14T20:14:01Z",
-  "last_outcome": "added_web_app_manifest_and_icons",
+  "updated_at": "2026-10-14T21:18:34Z",
+  "last_outcome": "added_accessible_custom_error_page",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -14,16 +14,17 @@
     "Add GitHub Actions CI for clean installs, production builds, and static-site validation on pushes to main and pull requests",
     "Add validated Person JSON-LD to the generated home page using existing portfolio identity and location content",
     "Validate generated landmarks, heading hierarchy, image alternative text, skip navigation, and safe external links",
-    "Add a validated web app manifest, explicit favicon metadata, and correctly sized install icons from the existing portfolio logo"
+    "Add a validated web app manifest, explicit favicon metadata, and correctly sized install icons from the existing portfolio logo",
+    "Replace the generic Nuxt error screen with an accessible, no-index portfolio-styled page and return-home recovery action"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, web manifest, three install icons, and referenced assets)",
-    "manifest_checks": "passed (identity, URLs, display mode, colors, icon declarations, and PNG dimensions)",
-    "manifest_failure_check": "passed (incorrect install-icon dimensions were rejected)",
+    "npm run validate": "passed (2 routes, custom 404 recovery, and referenced assets)",
+    "error_page_checks": "passed (no-index metadata, single heading, generic safe copy, and return-home action)",
+    "runtime_404_response": "passed (HTTP 404, no-index metadata, heading, and return-home action)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
-  "next_task": "Add a custom accessible error page using the existing design system and a clear route back home"
+  "next_task": "Add generated asset-size budgets for JavaScript, CSS, and images to catch performance regressions in CI"
 }
