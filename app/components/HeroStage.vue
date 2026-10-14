@@ -50,6 +50,11 @@ const tape = [
     <img
       src="/images/portrait.webp"
       alt="Christian Colewan"
+      width="1086"
+      height="1448"
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
       class="mask-figure pointer-events-none absolute bottom-0 left-[72%] -z-20 max-h-[76svh] w-[min(84vw,400px)] max-w-none -translate-x-1/2 object-contain object-bottom grayscale sm:max-h-[84svh] sm:w-[min(52vw,480px)] lg:max-h-[92svh] lg:w-[min(54vw,720px)]"
     />
 
