@@ -102,6 +102,17 @@ async function requireFile(relativePath, label = relativePath) {
   }
 }
 
+async function requirePngDimensions(relativePath, width, height) {
+  await requireFile(relativePath)
+  const image = await readFile(join(outputDir, relativePath))
+  const signature = image.subarray(0, 8).toString('hex')
+
+  if (signature !== '89504e470d0a1a0a') fail(`${relativePath}: invalid PNG signature`)
+  if (image.readUInt32BE(16) !== width || image.readUInt32BE(20) !== height) {
+    fail(`${relativePath}: expected ${width}x${height} PNG`)
+  }
+}
+
 const generatedPages = []
 
 for (const route of routes) {
@@ -111,6 +122,14 @@ for (const route of routes) {
   const label = `route ${route.path}`
 
   requireTag(html, 'link', { rel: 'canonical', href: absoluteUrl }, label)
+  requireTag(html, 'link', { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }, label)
+  requireTag(
+    html,
+    'link',
+    { rel: 'apple-touch-icon', sizes: '180x180', href: '/icons/apple-touch-icon.png' },
+    label
+  )
+  requireTag(html, 'link', { rel: 'manifest', href: '/site.webmanifest' }, label)
   requireTag(html, 'meta', { property: 'og:url', content: absoluteUrl }, label)
 
   for (const key of [
@@ -156,6 +175,38 @@ if (structuredData(generatedPages[1], 'route /pricing').some((schema) => schema[
 
 await requireFile('sitemap.xml')
 await requireFile('robots.txt')
+await requireFile('site.webmanifest')
+
+const manifest = JSON.parse(await readFile(join(outputDir, 'site.webmanifest'), 'utf8'))
+const expectedManifest = {
+  name: 'Christian Colewan Portfolio',
+  short_name: 'Christian Colewan',
+  description:
+    'Christian Colewan — a Baguio-based developer building systems, desktop apps, web systems, mobile apps, and business sites.',
+  id: '/',
+  start_url: '/',
+  scope: '/',
+  display: 'standalone',
+  background_color: '#0a0a0a',
+  theme_color: '#0a0a0a'
+}
+
+for (const [key, value] of Object.entries(expectedManifest)) {
+  if (manifest[key] !== value) fail(`site.webmanifest: invalid ${key}`)
+}
+
+const expectedIcons = [
+  { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+  { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }
+]
+
+if (JSON.stringify(manifest.icons) !== JSON.stringify(expectedIcons)) {
+  fail('site.webmanifest: icons do not match the required install icons')
+}
+
+await requirePngDimensions('icons/apple-touch-icon.png', 180, 180)
+await requirePngDimensions('icons/icon-192.png', 192, 192)
+await requirePngDimensions('icons/icon-512.png', 512, 512)
 
 const sitemap = await readFile(join(outputDir, 'sitemap.xml'), 'utf8')
 const sitemapUrls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url)
@@ -183,5 +234,5 @@ for (const html of generatedPages) {
 for (const assetPath of assetPaths) await requireFile(assetPath, `referenced asset /${assetPath}`)
 
 console.log(
-  `Validated ${routes.length} routes, accessibility, metadata, Person structured data, sitemap discovery, and ${assetPaths.size} assets.`
+  `Validated ${routes.length} routes, accessibility, metadata, install icons, web manifest, Person structured data, sitemap discovery, and ${assetPaths.size} page assets.`
 )

@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-14T19:21:27Z",
-  "last_outcome": "expanded_generated_accessibility_validation",
+  "updated_at": "2026-10-14T20:14:01Z",
+  "last_outcome": "added_web_app_manifest_and_icons",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -13,16 +13,17 @@
     "Add a dependency-free static-site validator for routes, metadata, sitemap discovery, and referenced assets",
     "Add GitHub Actions CI for clean installs, production builds, and static-site validation on pushes to main and pull requests",
     "Add validated Person JSON-LD to the generated home page using existing portfolio identity and location content",
-    "Validate generated landmarks, heading hierarchy, image alternative text, skip navigation, and safe external links"
+    "Validate generated landmarks, heading hierarchy, image alternative text, skip navigation, and safe external links",
+    "Add a validated web app manifest, explicit favicon metadata, and correctly sized install icons from the existing portfolio logo"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, accessibility, Person JSON-LD, and 18 assets)",
-    "accessibility_checks": "passed (landmarks, skip link, headings, image alt attributes, and rel=noopener)",
-    "accessibility_failure_check": "passed (missing image alt attribute was rejected)",
+    "npm run validate": "passed (2 routes, web manifest, three install icons, and referenced assets)",
+    "manifest_checks": "passed (identity, URLs, display mode, colors, icon declarations, and PNG dimensions)",
+    "manifest_failure_check": "passed (incorrect install-icon dimensions were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
-  "next_task": "Add a web app manifest and explicit icon metadata using the existing portfolio branding"
+  "next_task": "Add a custom accessible error page using the existing design system and a clear route back home"
 }
