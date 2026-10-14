@@ -1,5 +1,5 @@
-import { access, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { access, readFile, readdir, stat } from 'node:fs/promises'
+import { extname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
@@ -9,9 +9,48 @@ const routes = [
   { path: '/', file: 'index.html' },
   { path: '/pricing', file: 'pricing/index.html' }
 ]
+const kibibyte = 1024
+const assetBudgets = [
+  {
+    label: 'JavaScript',
+    extensions: new Set(['.js']),
+    maxFileSize: 200 * kibibyte,
+    maxTotalSize: 250 * kibibyte
+  },
+  {
+    label: 'CSS',
+    extensions: new Set(['.css']),
+    maxFileSize: 70 * kibibyte,
+    maxTotalSize: 75 * kibibyte
+  },
+  {
+    label: 'images',
+    extensions: new Set(['.avif', '.gif', '.ico', '.jpeg', '.jpg', '.png', '.svg', '.webp']),
+    maxFileSize: 1536 * kibibyte,
+    maxTotalSize: 10 * 1024 * kibibyte
+  }
+]
 
 function fail(message) {
   throw new Error(message)
+}
+
+function formatBytes(bytes) {
+  return bytes >= 1024 * kibibyte
+    ? `${(bytes / (1024 * kibibyte)).toFixed(2)} MiB`
+    : `${(bytes / kibibyte).toFixed(1)} KiB`
+}
+
+async function listFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true })
+  const files = await Promise.all(
+    entries.map((entry) => {
+      const path = join(directory, entry.name)
+      return entry.isDirectory() ? listFiles(path) : [path]
+    })
+  )
+
+  return files.flat()
 }
 
 function parseAttributes(tag) {
@@ -251,6 +290,37 @@ for (const html of generatedPages) {
 
 for (const assetPath of assetPaths) await requireFile(assetPath, `referenced asset /${assetPath}`)
 
+const generatedFiles = await listFiles(outputDir)
+const budgetSummary = []
+
+for (const budget of assetBudgets) {
+  const files = generatedFiles.filter((path) => budget.extensions.has(extname(path).toLowerCase()))
+  if (files.length === 0) fail(`Asset budget: no generated ${budget.label} files found`)
+
+  let totalSize = 0
+  for (const path of files) {
+    const size = (await stat(path)).size
+    totalSize += size
+    if (size > budget.maxFileSize) {
+      fail(
+        `Asset budget: ${relative(outputDir, path)} is ${formatBytes(size)}; ` +
+          `${budget.label} files must not exceed ${formatBytes(budget.maxFileSize)}`
+      )
+    }
+  }
+
+  if (totalSize > budget.maxTotalSize) {
+    fail(
+      `Asset budget: generated ${budget.label} total ${formatBytes(totalSize)} exceeds ` +
+        `${formatBytes(budget.maxTotalSize)}`
+    )
+  }
+
+  budgetSummary.push(
+    `${budget.label} ${formatBytes(totalSize)}/${formatBytes(budget.maxTotalSize)}`
+  )
+}
+
 console.log(
-  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, install icons, web manifest, Person structured data, sitemap discovery, and ${assetPaths.size} page assets.`
+  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, install icons, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

@@ -42,7 +42,8 @@ npm run generate
 ```
 
 Run the full static-site validation to regenerate the site and check routes,
-metadata, sitemap discovery, and referenced assets:
+metadata, sitemap discovery, referenced assets, and JavaScript, CSS, and image
+size budgets:
 
 ```bash
 npm run validate
