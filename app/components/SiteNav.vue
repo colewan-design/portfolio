@@ -57,7 +57,7 @@ onMounted(() => {
               v-bind="item.to ? { to: item.to } : { href: sectionHref(item.id) }"
               class="micro transition-colors duration-200 hover:text-ink"
               :class="isActive(item) && 'text-ink'"
-              :aria-current="isActive(item) ? 'page' : undefined"
+              :aria-current="isActive(item) ? (item.to ? 'page' : 'location') : undefined"
             >
               {{ item.label }}
             </component>

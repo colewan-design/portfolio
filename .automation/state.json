@@ -1,15 +1,16 @@
 {
-  "updated_at": "2026-10-14T09:11:17.408Z",
-  "last_outcome": "validated_lockfile_repair",
+  "updated_at": "2026-10-14T09:18:12Z",
+  "last_outcome": "validated_navigation_accessibility_fix",
   "completed_tasks": [
-    "Repair incomplete package-lock.json so npm ci succeeds"
+    "Repair incomplete package-lock.json so npm ci succeeds",
+    "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "existing_package_versions": "unchanged",
+    "aria_current_static_checks": "passed",
     "skill_md": "unchanged"
   },
-  "resolved_blocker": "Repository added to GitHub app installation; write verification performed by this commit",
-  "next_task": "Fix SiteNav.vue aria-current to distinguish section locations from routed pages"
+  "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
+  "next_task": "Replace the generic Nuxt starter README with portfolio-specific setup and architecture documentation"
 }
