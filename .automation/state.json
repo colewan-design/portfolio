@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-14T22:18:37Z",
-  "last_outcome": "added_generated_asset_size_budgets",
+  "updated_at": "2026-10-14T23:13:30Z",
+  "last_outcome": "optimized_service_illustrations",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -16,16 +16,18 @@
     "Validate generated landmarks, heading hierarchy, image alternative text, skip navigation, and safe external links",
     "Add a validated web app manifest, explicit favicon metadata, and correctly sized install icons from the existing portfolio logo",
     "Replace the generic Nuxt error screen with an accessible, no-index portfolio-styled page and return-home recovery action",
-    "Add generated JavaScript, CSS, and image size budgets to catch performance regressions in CI"
+    "Add generated JavaScript, CSS, and image size budgets to catch performance regressions in CI",
+    "Convert six oversized service illustration PNGs to dimension-preserving WebP assets"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, 20 referenced assets, and generated asset budgets)",
-    "asset_budget_checks": "passed (207.5 KiB JavaScript, 58.7 KiB CSS, and 8.91 MiB images)",
-    "asset_budget_failure_check": "passed (an oversized generated image was rejected)",
+    "npm run validate": "passed (2 routes, 6 optimized service images, 20 referenced assets, and asset budgets)",
+    "service_image_checks": "passed (all six are 1254x1254 WebP files; legacy PNGs absent; SSIM 0.994-0.997)",
+    "service_image_failure_check": "passed (a restored legacy PNG was rejected)",
+    "image_payload": "reduced service illustrations from 6.84 MiB to 152.8 KiB (97.8% smaller); generated image total is 2.22 MiB",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
-  "next_task": "Convert the six oversized service illustration PNGs to WebP while preserving their dimensions and visual quality"
+  "next_task": "Optimize the oversized portfolio logo and favicon assets while preserving metadata compatibility and visual quality"
 }

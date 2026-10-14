@@ -9,6 +9,14 @@ const routes = [
   { path: '/', file: 'index.html' },
   { path: '/pricing', file: 'pricing/index.html' }
 ]
+const serviceImages = [
+  'business-websites',
+  'crm-websites',
+  'desktop-apps',
+  'mobile-apps',
+  'systems',
+  'web-systems'
+]
 const kibibyte = 1024
 const assetBudgets = [
   {
@@ -141,6 +149,15 @@ async function requireFile(relativePath, label = relativePath) {
   }
 }
 
+async function requireMissingFile(relativePath) {
+  try {
+    await access(join(outputDir, relativePath))
+    fail(`Unexpected legacy asset: .output/public/${relativePath}`)
+  } catch (error) {
+    if (error?.code !== 'ENOENT') throw error
+  }
+}
+
 async function requirePngDimensions(relativePath, width, height) {
   await requireFile(relativePath)
   const image = await readFile(join(outputDir, relativePath))
@@ -149,6 +166,27 @@ async function requirePngDimensions(relativePath, width, height) {
   if (signature !== '89504e470d0a1a0a') fail(`${relativePath}: invalid PNG signature`)
   if (image.readUInt32BE(16) !== width || image.readUInt32BE(20) !== height) {
     fail(`${relativePath}: expected ${width}x${height} PNG`)
+  }
+}
+
+async function requireWebpDimensions(relativePath, width, height) {
+  await requireFile(relativePath)
+  const image = await readFile(join(outputDir, relativePath))
+
+  if (image.subarray(0, 4).toString() !== 'RIFF' || image.subarray(8, 12).toString() !== 'WEBP') {
+    fail(`${relativePath}: invalid WebP signature`)
+  }
+  if (image.subarray(12, 16).toString() !== 'VP8 ') {
+    fail(`${relativePath}: expected a lossy VP8 WebP image`)
+  }
+  if (image.subarray(23, 26).toString('hex') !== '9d012a') {
+    fail(`${relativePath}: invalid VP8 frame header`)
+  }
+
+  const actualWidth = image.readUInt16LE(26) & 0x3fff
+  const actualHeight = image.readUInt16LE(28) & 0x3fff
+  if (actualWidth !== width || actualHeight !== height) {
+    fail(`${relativePath}: expected ${width}x${height} WebP`)
   }
 }
 
@@ -265,6 +303,11 @@ await requirePngDimensions('icons/apple-touch-icon.png', 180, 180)
 await requirePngDimensions('icons/icon-192.png', 192, 192)
 await requirePngDimensions('icons/icon-512.png', 512, 512)
 
+for (const name of serviceImages) {
+  await requireWebpDimensions(`images/services/${name}.webp`, 1254, 1254)
+  await requireMissingFile(`images/services/${name}.png`)
+}
+
 const sitemap = await readFile(join(outputDir, 'sitemap.xml'), 'utf8')
 const sitemapUrls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url)
 const expectedUrls = routes.map(({ path }) => new URL(path, siteUrl).toString())
@@ -322,5 +365,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, install icons, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
