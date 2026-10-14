@@ -16,6 +16,8 @@ import { projects } from '~/data/projects'
           <img
             :src="project.image"
             :alt="`Screenshot of ${project.name}`"
+            :width="project.imageWidth"
+            :height="project.imageHeight"
             loading="lazy"
             decoding="async"
             class="aspect-16/10 w-full object-cover grayscale transition duration-700 ease-settle group-hover:scale-[1.05] group-hover:grayscale-0"

@@ -48,6 +48,8 @@ const cards = computed(() =>
     return {
       key: `${project.name}-${i}`,
       image: project.image,
+      width: project.imageWidth,
+      height: project.imageHeight,
       /* Even spacing comes from offsetting each card into a single shared
          animation rather than giving each its own start angle. */
       delay: -(SPIN_SECONDS / SLOTS) * i
@@ -76,8 +78,24 @@ const cards = computed(() =>
              the reverse — which without a back face renders as a mirrored
              screenshot. The back copy is pre-flipped so it reads correctly
              whichever side is turned toward the camera. -->
-        <img class="face" :src="card.image" alt="" loading="lazy" decoding="async" />
-        <img class="face face-back" :src="card.image" alt="" loading="lazy" decoding="async" />
+        <img
+          class="face"
+          :src="card.image"
+          :width="card.width"
+          :height="card.height"
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+        <img
+          class="face face-back"
+          :src="card.image"
+          :width="card.width"
+          :height="card.height"
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
       </figure>
     </div>
   </div>
