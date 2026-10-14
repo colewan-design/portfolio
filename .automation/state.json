@@ -1,20 +1,21 @@
 {
-  "updated_at": "2026-10-14T12:15:20Z",
-  "last_outcome": "validated_hero_portrait_loading_update",
+  "updated_at": "2026-10-14T13:19:24Z",
+  "last_outcome": "validated_static_sitemap_update",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
     "Replace the generic Nuxt starter README with portfolio-specific setup and architecture documentation",
     "Add route-aware canonical, Open Graph, and Twitter metadata using existing portfolio content and assets",
-    "Add intrinsic dimensions, eager loading, async decoding, and high fetch priority to the above-the-fold portrait"
+    "Add intrinsic dimensions, eager loading, async decoding, and high fetch priority to the above-the-fold portrait",
+    "Add a static sitemap for the home and pricing routes and advertise it in robots.txt"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
     "npm run generate": "passed",
-    "generated_portrait_dimension_and_priority_check": "passed",
+    "generated_sitemap_and_robots_checks": "passed",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
-  "next_task": "Add a static sitemap for the home and pricing routes and reference it from robots.txt"
+  "next_task": "Convert oversized project thumbnail PNGs to WebP and update their references to reduce image payload"
 }

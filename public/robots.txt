@@ -1,2 +1,4 @@
 User-Agent: *
 Disallow:
+
+Sitemap: https://christiancolewan.tech/sitemap.xml
