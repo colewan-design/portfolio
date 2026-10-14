@@ -1,3 +1,28 @@
+<script setup lang="ts">
+const siteUrl = 'https://christiancolewan.tech'
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Christian Colewan',
+  url: siteUrl,
+  image: `${siteUrl}/images/portrait.webp`,
+  jobTitle: 'Developer',
+  description:
+    'Christian Colewan — a Baguio-based developer building systems, desktop apps, web systems, mobile apps, and business sites.',
+  address: 'Baguio, Philippines'
+}
+
+useHead({
+  script: [
+    {
+      key: 'person-jsonld',
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(personSchema)
+    }
+  ]
+})
+</script>
+
 <template>
   <div>
     <HeroStage />

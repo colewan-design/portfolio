@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-14T17:20:49Z",
-  "last_outcome": "added_github_actions_quality_ci",
+  "updated_at": "2026-10-14T18:14:36Z",
+  "last_outcome": "added_person_structured_data",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -11,16 +11,16 @@
     "Convert project thumbnail PNGs to dimension-preserving WebP assets, reducing their total size by 94.5%",
     "Carry project image dimensions through the data model and render them on every grid and ring thumbnail",
     "Add a dependency-free static-site validator for routes, metadata, sitemap discovery, and referenced assets",
-    "Add GitHub Actions CI for clean installs, production builds, and static-site validation on pushes to main and pull requests"
+    "Add GitHub Actions CI for clean installs, production builds, and static-site validation on pushes to main and pull requests",
+    "Add validated Person JSON-LD to the generated home page using existing portfolio identity and location content"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes and 18 assets)",
-    "workflow_yaml_parse": "passed",
-    "workflow_command_parity": "passed",
+    "npm run validate": "passed (2 routes, Person JSON-LD, and 18 assets)",
+    "structured_data_scope": "passed (Person schema appears only on the home page)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
-  "next_task": "Add Person structured data using existing portfolio metadata and verify it in the generated home page"
+  "next_task": "Extend generated-page validation to cover landmarks, heading structure, image alternative text, and safe external links"
 }

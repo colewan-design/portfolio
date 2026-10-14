@@ -44,6 +44,18 @@ function requireMeta(html, key, label) {
   if (!match?.attributes.content) fail(`${label}: missing non-empty ${key} metadata`)
 }
 
+function structuredData(html, label) {
+  return [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)].map(
+    ([, content], index) => {
+      try {
+        return JSON.parse(content)
+      } catch {
+        fail(`${label}: invalid JSON-LD in script ${index + 1}`)
+      }
+    }
+  )
+}
+
 async function requireFile(relativePath, label = relativePath) {
   try {
     await access(join(outputDir, relativePath))
@@ -80,6 +92,29 @@ for (const route of routes) {
   generatedPages.push(html)
 }
 
+const homePerson = structuredData(generatedPages[0], 'route /').find(
+  (schema) => schema['@context'] === 'https://schema.org' && schema['@type'] === 'Person'
+)
+
+const expectedPerson = {
+  name: 'Christian Colewan',
+  url: siteUrl,
+  image: `${siteUrl}/images/portrait.webp`,
+  jobTitle: 'Developer',
+  description:
+    'Christian Colewan — a Baguio-based developer building systems, desktop apps, web systems, mobile apps, and business sites.',
+  address: 'Baguio, Philippines'
+}
+
+if (!homePerson) fail('route /: missing Person JSON-LD')
+for (const [key, value] of Object.entries(expectedPerson)) {
+  if (homePerson[key] !== value) fail(`route /: Person JSON-LD has invalid ${key}`)
+}
+
+if (structuredData(generatedPages[1], 'route /pricing').some((schema) => schema['@type'] === 'Person')) {
+  fail('route /pricing: Person JSON-LD should only appear on the home page')
+}
+
 await requireFile('sitemap.xml')
 await requireFile('robots.txt')
 
@@ -109,5 +144,5 @@ for (const html of generatedPages) {
 for (const assetPath of assetPaths) await requireFile(assetPath, `referenced asset /${assetPath}`)
 
 console.log(
-  `Validated ${routes.length} routes, metadata, sitemap discovery, and ${assetPaths.size} assets.`
+  `Validated ${routes.length} routes, metadata, Person structured data, sitemap discovery, and ${assetPaths.size} assets.`
 )
