@@ -1,6 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite'
 
+const siteUrl = 'https://christiancolewan.tech'
+const siteTitle = 'Christian Colewan — Developer'
+const siteDescription =
+  'Christian Colewan — a Baguio-based developer building systems, desktop apps, web systems, mobile apps, and business sites.'
+const shareImage = `${siteUrl}/images/logo.png`
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -13,15 +19,28 @@ export default defineNuxtConfig({
       // The design is dark-only, so the ground is declared up front rather
       // than resolved by a bootstrap script.
       htmlAttrs: { lang: 'en', class: 'dark' },
-      title: 'Christian Colewan — Developer',
+      title: siteTitle,
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
-          content:
-            'Christian Colewan — a Baguio-based developer building systems, desktop apps, web systems, mobile apps, and business sites.'
+          content: siteDescription
         },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'Christian Colewan Portfolio' },
+        { property: 'og:title', content: siteTitle },
+        { property: 'og:description', content: siteDescription },
+        { property: 'og:image', content: shareImage },
+        { property: 'og:image:type', content: 'image/png' },
+        { property: 'og:image:width', content: '1254' },
+        { property: 'og:image:height', content: '1254' },
+        { property: 'og:image:alt', content: 'Christian Colewan portfolio logo' },
+        { name: 'twitter:card', content: 'summary' },
+        { name: 'twitter:title', content: siteTitle },
+        { name: 'twitter:description', content: siteDescription },
+        { name: 'twitter:image', content: shareImage },
+        { name: 'twitter:image:alt', content: 'Christian Colewan portfolio logo' },
         { name: 'color-scheme', content: 'dark' },
         { name: 'theme-color', content: '#0a0a0a' }
       ]

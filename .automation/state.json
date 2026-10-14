@@ -1,17 +1,19 @@
 {
-  "updated_at": "2026-10-14T10:19:03Z",
-  "last_outcome": "validated_repository_documentation_update",
+  "updated_at": "2026-10-14T11:21:43Z",
+  "last_outcome": "validated_social_metadata_update",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
-    "Replace the generic Nuxt starter README with portfolio-specific setup and architecture documentation"
+    "Replace the generic Nuxt starter README with portfolio-specific setup and architecture documentation",
+    "Add route-aware canonical, Open Graph, and Twitter metadata using existing portfolio content and assets"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "readme_path_and_script_checks": "passed",
+    "npm run generate": "passed",
+    "generated_metadata_checks_for_home_and_pricing": "passed",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
-  "next_task": "Add Open Graph and Twitter metadata using the existing portfolio title, description, and public image assets"
+  "next_task": "Add intrinsic dimensions and fetch priority to the above-the-fold portrait to reduce layout shift and improve LCP"
 }

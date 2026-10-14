@@ -2,6 +2,9 @@
 import { plans, custom, running, process, terms } from '~/data/pricing'
 
 const email = 'cts.colewan@gmail.com'
+const pageTitle = 'Pricing — Christian Colewan'
+const pageDescription =
+  'Website packages from ₱3,000, e-commerce from ₱18,000, and custom web systems from ₱30,000 — with scope, limits and running costs stated up front.'
 
 /* Each package links to a pre-addressed mail, so the first message already
    says which tier the enquiry is about. */
@@ -10,13 +13,13 @@ function enquiry(name: string) {
 }
 
 useHead({
-  title: 'Pricing — Christian Colewan',
+  title: pageTitle,
   meta: [
-    {
-      name: 'description',
-      content:
-        'Website packages from ₱3,000, e-commerce from ₱18,000, and custom web systems from ₱30,000 — with scope, limits and running costs stated up front.'
-    }
+    { name: 'description', content: pageDescription },
+    { property: 'og:title', content: pageTitle },
+    { property: 'og:description', content: pageDescription },
+    { name: 'twitter:title', content: pageTitle },
+    { name: 'twitter:description', content: pageDescription }
   ]
 })
 </script>
