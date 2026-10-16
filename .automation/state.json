@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T08:17:47Z",
-  "last_outcome": "validated_accessibility_id_references",
+  "updated_at": "2026-10-16T09:12:10Z",
+  "last_outcome": "validated_accessible_control_names",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -26,17 +26,18 @@
     "Explicitly allow public crawling in robots.txt and validate sitemap discovery",
     "Validate that generated internal links and fragment targets resolve",
     "Reject duplicate id attributes on every generated route",
-    "Validate that label and ARIA id references resolve"
+    "Validate that label and ARIA id references resolve",
+    "Validate that links and buttons have accessible names"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes with unique ids and resolved accessibility references, 29 internal links and fragments, and asset budgets)",
-    "accessibility_id_reference_checks": "passed (label for and ARIA controls, describedby, labelledby, and owns references resolve within each route)",
-    "accessibility_id_reference_failure_checks": "passed (missing label target, partially missing multi-id ARIA value, and empty ARIA reference were rejected)",
+    "npm run validate": "passed (2 routes, 61 links and buttons with accessible names, 29 internal links and fragments, and asset budgets)",
+    "accessible_control_name_checks": "passed (rendered text, ARIA labels and labelledby references, titles, and image alternatives are accepted name sources)",
+    "accessible_control_name_failure_checks": "passed (unnamed link and unnamed button were rejected; labelled icon-only button was accepted)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Validate that links and buttons have accessible names"
+  "next_task": "Validate that image alternative text is non-empty unless explicitly decorative"
 }

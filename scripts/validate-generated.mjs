@@ -96,6 +96,29 @@ function openingTags(html) {
   }))
 }
 
+function interactiveElements(html) {
+  return [...html.matchAll(/<(a|button)\b([^>]*)>([\s\S]*?)<\/\1>/gi)].map(
+    ([raw, name, attributes, content]) => ({
+      name: name.toLowerCase(),
+      raw,
+      attributes: parseAttributes(attributes),
+      content
+    })
+  )
+}
+
+function renderedText(html) {
+  return html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--([\s\S]*?)-->/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;|&#xa0;/gi, ' ')
+    .replace(/&(?:[a-z][a-z0-9]+|#\d+|#x[\da-f]+);/gi, 'x')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function elementIds(html) {
   return [...html.matchAll(/\bid="([^"]+)"/gi)].map(([, id]) => id)
 }
@@ -335,6 +358,23 @@ function validateAccessibility(html, label) {
       fail(`${label}: target=_blank link is missing rel=noopener: ${link.raw}`)
     }
   }
+
+  const controls = interactiveElements(html)
+  for (const control of controls) {
+    const hasAttributeName = ['aria-label', 'aria-labelledby', 'title'].some(
+      (attribute) => control.attributes[attribute]?.trim()
+    )
+    const hasTextName = renderedText(control.content).length > 0
+    const hasImageName = tags(control.content, 'img').some(
+      ({ attributes }) => attributes.alt?.trim()
+    )
+
+    if (!hasAttributeName && !hasTextName && !hasImageName) {
+      fail(`${label}: <${control.name}> has no accessible name: ${control.raw}`)
+    }
+  }
+
+  return controls.length
 }
 
 async function requireFile(relativePath, label = relativePath) {
@@ -421,6 +461,7 @@ async function requireIcoSizes(relativePath, expectedSizes) {
 }
 
 const generatedPages = []
+let accessibleControlCount = 0
 
 for (const route of routes) {
   await requireFile(route.file, `generated route ${route.path}`)
@@ -467,7 +508,7 @@ for (const route of routes) {
     requireMeta(html, key, label)
   }
 
-  validateAccessibility(html, label)
+  accessibleControlCount += validateAccessibility(html, label)
   generatedPages.push(html)
 }
 
@@ -630,5 +671,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
