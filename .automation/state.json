@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T13:14:23Z",
-  "last_outcome": "validated_rendered_image_dimensions",
+  "updated_at": "2026-10-16T14:26:03Z",
+  "last_outcome": "validated_self_hosted_runtime_assets",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -31,17 +31,18 @@
     "Validate that image alternative text is non-empty unless explicitly decorative",
     "Validate that generated links use safe protocols and HTTPS for external destinations",
     "Validate image loading priority and asynchronous decoding",
-    "Validate intrinsic dimensions on every rendered image"
+    "Validate intrinsic dimensions on every rendered image",
+    "Validate that generated pages do not depend on third-party runtime assets"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed on first retry after extending WebP dimension parsing to VP8L and VP8X (82 image declarations matched 10 generated assets)",
-    "intrinsic_image_dimension_checks": "passed (positive width and height declarations are consistent and match actual PNG, VP8, VP8L, or VP8X dimensions)",
-    "intrinsic_image_dimension_failure_checks": "passed (missing width and incorrect portrait width were rejected)",
+    "npm run validate": "passed (59 unique runtime asset URLs are self-hosted across generated HTML and CSS)",
+    "runtime_asset_checks": "passed (resource-loading HTML attributes, inline CSS, generated CSS url() references, and CSS @import references are restricted to the site origin or self-contained data/blob URLs)",
+    "runtime_asset_failure_checks": "passed (an external script and an external CSS image were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Validate that generated pages do not depend on third-party runtime assets"
+  "next_task": "Disable Nuxt DevTools outside development builds"
 }

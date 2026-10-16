@@ -301,6 +301,90 @@ function validateInternalLinks(pages) {
   }
 }
 
+function validateRuntimeUrl(value, label, reference, runtimeAssets) {
+  if (!value || value.startsWith('#')) return
+
+  let url
+  try {
+    url = new URL(value, siteUrl)
+  } catch {
+    fail(`${label}: invalid runtime asset URL ${JSON.stringify(value)} in ${reference}`)
+  }
+
+  if (url.protocol === 'data:' || url.protocol === 'blob:') return
+  if (url.origin !== new URL(siteUrl).origin) {
+    fail(`${label}: third-party runtime asset is not allowed in ${reference}: ${value}`)
+  }
+
+  runtimeAssets.add(url.href)
+}
+
+function validateCssRuntimeAssets(css, label, runtimeAssets) {
+  for (const match of css.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)) {
+    validateRuntimeUrl(match[2].trim(), label, 'CSS url()', runtimeAssets)
+  }
+
+  for (const match of css.matchAll(/@import\s+(['"])(.*?)\1/gi)) {
+    validateRuntimeUrl(match[2].trim(), label, 'CSS @import', runtimeAssets)
+  }
+}
+
+function validateRuntimeAssets(pages) {
+  const runtimeAssets = new Set()
+  const resourceAttributes = {
+    audio: ['src'],
+    embed: ['src'],
+    iframe: ['src'],
+    img: ['src', 'srcset'],
+    input: ['src'],
+    object: ['data'],
+    script: ['src'],
+    source: ['src', 'srcset'],
+    track: ['src'],
+    video: ['src', 'poster']
+  }
+  const resourceLinkRelations = new Set([
+    'apple-touch-icon',
+    'icon',
+    'manifest',
+    'modulepreload',
+    'preload',
+    'stylesheet'
+  ])
+
+  for (const [index, html] of pages.entries()) {
+    const label = `route ${routes[index].path}`
+
+    for (const element of openingTags(html)) {
+      let attributes = resourceAttributes[element.name] || []
+      if (element.name === 'link') {
+        const relationships = new Set((element.attributes.rel || '').toLowerCase().split(/\s+/))
+        attributes = [...relationships].some((relationship) => resourceLinkRelations.has(relationship))
+          ? ['href']
+          : []
+      }
+
+      for (const attribute of attributes) {
+        const value = element.attributes[attribute]
+        if (!value) continue
+        const values = attribute === 'srcset'
+          ? value.split(',').map((candidate) => candidate.trim().split(/\s+/, 1)[0])
+          : [value]
+
+        for (const asset of values) {
+          validateRuntimeUrl(asset, label, `<${element.name}> ${attribute}`, runtimeAssets)
+        }
+      }
+    }
+
+    for (const [, css] of html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
+      validateCssRuntimeAssets(css, `${label} inline CSS`, runtimeAssets)
+    }
+  }
+
+  return runtimeAssets
+}
+
 function structuredData(html, label) {
   return [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)].map(
     ([, content], index) => {
@@ -639,6 +723,7 @@ const {
   externalHttpsLinkCount,
   contactLinkCount
 } = validateInternalLinks(generatedPages)
+const runtimeAssets = validateRuntimeAssets(generatedPages)
 
 await requireFile('404.html', 'generated 404 page')
 const errorPageSource = await readFile(join(root, 'app/error.vue'), 'utf8')
@@ -766,6 +851,13 @@ for (const html of generatedPages) {
 for (const assetPath of assetPaths) await requireFile(assetPath, `referenced asset /${assetPath}`)
 
 const generatedFiles = await listFiles(outputDir)
+for (const path of generatedFiles.filter((file) => extname(file).toLowerCase() === '.css')) {
+  validateCssRuntimeAssets(
+    await readFile(path, 'utf8'),
+    `generated CSS ${relative(outputDir, path)}`,
+    runtimeAssets
+  )
+}
 const budgetSummary = []
 
 for (const budget of assetBudgets) {
@@ -797,5 +889,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
