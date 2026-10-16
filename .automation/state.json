@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T00:16:56Z",
-  "last_outcome": "optimized_favicon",
+  "updated_at": "2026-10-16T01:16:45Z",
+  "last_outcome": "validated_social_share_image",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -18,19 +18,18 @@
     "Replace the generic Nuxt error screen with an accessible, no-index portfolio-styled page and return-home recovery action",
     "Add generated JavaScript, CSS, and image size budgets to catch performance regressions in CI",
     "Convert six oversized service illustration PNGs to dimension-preserving WebP assets",
-    "Losslessly optimize the nine-size favicon while preserving its format and pixels"
+    "Losslessly optimize the nine-size favicon while preserving its format and pixels",
+    "Validate generated Open Graph and Twitter share-image metadata against the real PNG asset"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, optimized favicon and service assets, 20 referenced assets, and asset budgets)",
-    "favicon_checks": "passed (nine favicon sizes, ICO format, and 100 KiB size ceiling)",
-    "favicon_failure_check": "passed (an oversized generated favicon was rejected)",
-    "favicon_pixels": "passed (all nine favicon sizes are pixel-identical to their originals)",
-    "favicon_payload": "reduced favicon from 213.0 KiB to 94.9 KiB (55.4% smaller)",
+    "npm run validate": "passed (2 routes, social metadata, 20 referenced assets, and asset budgets)",
+    "social_share_image_checks": "passed (Open Graph and Twitter URL, MIME type, 1254x1254 dimensions, alternative text, and PNG signature)",
+    "social_share_image_failure_check": "passed (an incorrect generated Open Graph width was rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Optimize the oversized portfolio logo once a reliable larger-binary upload path is available"
+  "next_task": "Add a generated-page check for a single descriptive title and description per route"
 }

@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const outputDir = join(root, '.output/public')
 const siteUrl = 'https://christiancolewan.tech'
+const shareImageUrl = `${siteUrl}/images/logo.png`
+const shareImagePath = 'images/logo.png'
 const routes = [
   { path: '/', file: 'index.html' },
   { path: '/pricing', file: 'pricing/index.html' }
@@ -242,6 +244,23 @@ for (const route of routes) {
   )
   requireTag(html, 'link', { rel: 'manifest', href: '/site.webmanifest' }, label)
   requireTag(html, 'meta', { property: 'og:url', content: absoluteUrl }, label)
+  requireTag(html, 'meta', { property: 'og:image', content: shareImageUrl }, label)
+  requireTag(html, 'meta', { property: 'og:image:type', content: 'image/png' }, label)
+  requireTag(html, 'meta', { property: 'og:image:width', content: '1254' }, label)
+  requireTag(html, 'meta', { property: 'og:image:height', content: '1254' }, label)
+  requireTag(
+    html,
+    'meta',
+    { property: 'og:image:alt', content: 'Christian Colewan portfolio logo' },
+    label
+  )
+  requireTag(html, 'meta', { name: 'twitter:image', content: shareImageUrl }, label)
+  requireTag(
+    html,
+    'meta',
+    { name: 'twitter:image:alt', content: 'Christian Colewan portfolio logo' },
+    label
+  )
 
   for (const key of [
     'description',
@@ -336,6 +355,7 @@ if (JSON.stringify(manifest.icons) !== JSON.stringify(expectedIcons)) {
 await requirePngDimensions('icons/apple-touch-icon.png', 180, 180)
 await requirePngDimensions('icons/icon-192.png', 192, 192)
 await requirePngDimensions('icons/icon-512.png', 512, 512)
+await requirePngDimensions(shareImagePath, 1254, 1254)
 await requireIcoSizes('favicon.ico', [16, 24, 32, 48, 64, 72, 96, 128, 256])
 await requireMaxFileSize('favicon.ico', 100 * kibibyte)
 
@@ -401,5 +421,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
