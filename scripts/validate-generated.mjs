@@ -88,6 +88,14 @@ function tags(html, name) {
   }))
 }
 
+function openingTags(html) {
+  return [...html.matchAll(/<([a-z][\w:-]*)\b[^>]*>/gi)].map((match) => ({
+    name: match[1].toLowerCase(),
+    raw: match[0],
+    attributes: parseAttributes(match[0])
+  }))
+}
+
 function elementIds(html) {
   return [...html.matchAll(/\bid="([^"]+)"/gi)].map(([, id]) => id)
 }
@@ -269,6 +277,27 @@ function validateAccessibility(html, label) {
   for (const id of elementIds(html)) {
     if (seenIds.has(id)) fail(`${label}: duplicate id attribute ${JSON.stringify(id)}`)
     seenIds.add(id)
+  }
+
+  const idReferenceAttributes = ['aria-controls', 'aria-describedby', 'aria-labelledby', 'aria-owns']
+  for (const element of openingTags(html)) {
+    const referenceAttributes =
+      element.name === 'label' ? ['for', ...idReferenceAttributes] : idReferenceAttributes
+
+    for (const attribute of referenceAttributes) {
+      if (!Object.hasOwn(element.attributes, attribute)) continue
+
+      const references = element.attributes[attribute].split(/\s+/).filter(Boolean)
+      if (references.length === 0) {
+        fail(`${label}: ${attribute} must reference at least one id: ${element.raw}`)
+      }
+
+      for (const reference of references) {
+        if (!seenIds.has(reference)) {
+          fail(`${label}: ${attribute} references missing id ${JSON.stringify(reference)}`)
+        }
+      }
+    }
   }
 
   for (const landmark of ['nav', 'main', 'footer']) {
@@ -601,5 +630,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

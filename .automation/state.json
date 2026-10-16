@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T07:16:53Z",
-  "last_outcome": "validated_unique_ids",
+  "updated_at": "2026-10-16T08:17:47Z",
+  "last_outcome": "validated_accessibility_id_references",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -25,17 +25,18 @@
     "Prevent public generated routes from inheriting noindex or nofollow crawler directives",
     "Explicitly allow public crawling in robots.txt and validate sitemap discovery",
     "Validate that generated internal links and fragment targets resolve",
-    "Reject duplicate id attributes on every generated route"
+    "Reject duplicate id attributes on every generated route",
+    "Validate that label and ARIA id references resolve"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes with unique ids, 29 internal links and fragments, 20 referenced assets, and asset budgets)",
-    "unique_id_checks": "passed (every id attribute is unique within its generated route)",
-    "unique_id_failure_check": "passed (an injected duplicate main id was rejected)",
+    "npm run validate": "passed (2 routes with unique ids and resolved accessibility references, 29 internal links and fragments, and asset budgets)",
+    "accessibility_id_reference_checks": "passed (label for and ARIA controls, describedby, labelledby, and owns references resolve within each route)",
+    "accessibility_id_reference_failure_checks": "passed (missing label target, partially missing multi-id ARIA value, and empty ARIA reference were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Validate that label and ARIA id references resolve"
+  "next_task": "Validate that links and buttons have accessible names"
 }
