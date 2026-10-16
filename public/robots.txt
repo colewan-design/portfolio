@@ -1,4 +1,4 @@
 User-Agent: *
-Disallow:
+Allow: /
 
 Sitemap: https://christiancolewan.tech/sitemap.xml

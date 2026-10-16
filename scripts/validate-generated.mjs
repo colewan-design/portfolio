@@ -88,6 +88,22 @@ function tags(html, name) {
   }))
 }
 
+function robotsDirectives(content) {
+  return content
+    .split(/\r?\n/)
+    .map((line) => line.replace(/#.*/, '').trim())
+    .filter(Boolean)
+    .map((line) => {
+      const separator = line.indexOf(':')
+      if (separator === -1) fail(`robots.txt: invalid directive ${JSON.stringify(line)}`)
+
+      return {
+        name: line.slice(0, separator).trim().toLowerCase(),
+        value: line.slice(separator + 1).trim()
+      }
+    })
+}
+
 function requireTag(html, name, expected, label) {
   const match = tags(html, name).find(({ attributes }) =>
     Object.entries(expected).every(([key, value]) => attributes[key] === value)
@@ -459,8 +475,24 @@ if (JSON.stringify(sitemapUrls) !== JSON.stringify(expectedUrls)) {
 
 const robots = await readFile(join(outputDir, 'robots.txt'), 'utf8')
 const sitemapUrl = `${siteUrl}/sitemap.xml`
-if (!robots.split(/\r?\n/).includes(`Sitemap: ${sitemapUrl}`)) {
-  fail(`robots.txt does not advertise ${sitemapUrl}`)
+const crawlerDirectives = robotsDirectives(robots)
+const userAgents = crawlerDirectives.filter(({ name }) => name === 'user-agent')
+if (userAgents.length !== 1 || userAgents[0].value !== '*') {
+  fail('robots.txt: expected one wildcard user-agent group')
+}
+
+if (!crawlerDirectives.some(({ name, value }) => name === 'allow' && value === '/')) {
+  fail('robots.txt: wildcard crawlers must be explicitly allowed from /')
+}
+
+const blockingRule = crawlerDirectives.find(({ name, value }) => name === 'disallow' && value)
+if (blockingRule) {
+  fail(`robots.txt: public routes must not be blocked by Disallow: ${blockingRule.value}`)
+}
+
+const advertisedSitemaps = crawlerDirectives.filter(({ name }) => name === 'sitemap')
+if (advertisedSitemaps.length !== 1 || advertisedSitemaps[0].value !== sitemapUrl) {
+  fail(`robots.txt: expected one Sitemap directive for ${sitemapUrl}`)
 }
 
 const assetPaths = new Set()
@@ -506,5 +538,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
