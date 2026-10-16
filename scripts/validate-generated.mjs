@@ -394,6 +394,31 @@ function validateReducedMotion(css) {
   }
 }
 
+function validateFocusStyles(css) {
+  const compact = css.replace(/\s+/g, '')
+  const focusRules = [...compact.matchAll(/([^{}]*:focus-visible[^{}]*)\{([^{}]*)\}/g)]
+  if (focusRules.length === 0) fail('Generated CSS: missing :focus-visible styles')
+
+  const globalFocusRule = focusRules.find(([, selector]) => selector === ':focus-visible')
+  if (!globalFocusRule) fail('Generated CSS: missing global :focus-visible style')
+
+  const declarations = globalFocusRule[2]
+  if (!declarations.includes('outline:2pxsolidrgb(var(--ink))')) {
+    fail('Generated CSS: global focus indicator must use a visible 2px solid outline')
+  }
+  if (!declarations.includes('outline-offset:3px')) {
+    fail('Generated CSS: global focus indicator must be offset from the focused control')
+  }
+
+  for (const [, selector, body] of focusRules) {
+    if (/(?:^|;)outline:(?:0|none)(?:;|$)/.test(body)) {
+      fail(`Generated CSS: ${selector} must not suppress the focus outline`)
+    }
+  }
+
+  return { focusRuleCount: focusRules.length }
+}
+
 function validateRuntimeAssets(pages) {
   const runtimeAssets = new Set()
   const resourceAttributes = {
@@ -927,7 +952,9 @@ for (const path of generatedCssFiles) {
     runtimeAssets
   )
 }
-const reducedMotion = validateReducedMotion(generatedCss.join('\n'))
+const combinedGeneratedCss = generatedCss.join('\n')
+const reducedMotion = validateReducedMotion(combinedGeneratedCss)
+const focusStyles = validateFocusStyles(combinedGeneratedCss)
 const budgetSummary = []
 
 for (const budget of assetBudgets) {
@@ -959,5 +986,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

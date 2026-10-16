@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T16:13:21Z",
-  "last_outcome": "validated_reduced_motion_fallbacks",
+  "updated_at": "2026-10-16T17:12:58Z",
+  "last_outcome": "validated_visible_keyboard_focus",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -34,17 +34,18 @@
     "Validate intrinsic dimensions on every rendered image",
     "Validate that generated pages do not depend on third-party runtime assets",
     "Disable Nuxt DevTools outside development builds",
-    "Validate reduced-motion fallbacks for animated interface elements"
+    "Validate reduced-motion fallbacks for animated interface elements",
+    "Validate visible keyboard focus styles for interactive controls"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (8 animation definitions are covered by 3 generated reduced-motion fallbacks)",
-    "reduced_motion_checks": "passed (global durations collapse, smooth scrolling is disabled, the marquee stops, the decorative orbit is hidden, and scroll-driven motion requires no preference)",
-    "reduced_motion_failure_checks": "passed (a missing global animation override and a moving reduced-motion marquee were rejected)",
+    "npm run validate": "passed (61 links and buttons inherit a visible generated focus style)",
+    "keyboard_focus_checks": "passed (global :focus-visible uses a 2px solid ink outline with a 3px offset, and focus-specific rules may not suppress outlines)",
+    "keyboard_focus_failure_checks": "passed (a missing global focus style and a button-specific outline suppression were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Validate visible keyboard focus styles for interactive controls"
+  "next_task": "Make primary navigation usable at narrow mobile widths"
 }
