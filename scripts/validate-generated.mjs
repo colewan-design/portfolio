@@ -190,6 +190,40 @@ async function requireWebpDimensions(relativePath, width, height) {
   }
 }
 
+async function requireMaxFileSize(relativePath, maxBytes) {
+  await requireFile(relativePath)
+  const size = (await stat(join(outputDir, relativePath))).size
+  if (size > maxBytes) {
+    fail(`${relativePath}: ${formatBytes(size)} exceeds ${formatBytes(maxBytes)}`)
+  }
+}
+
+async function requireIcoSizes(relativePath, expectedSizes) {
+  await requireFile(relativePath)
+  const icon = await readFile(join(outputDir, relativePath))
+
+  if (icon.readUInt16LE(0) !== 0 || icon.readUInt16LE(2) !== 1) {
+    fail(`${relativePath}: invalid ICO header`)
+  }
+
+  const count = icon.readUInt16LE(4)
+  if (icon.length < 6 + count * 16) fail(`${relativePath}: truncated ICO directory`)
+
+  const sizes = []
+  for (let index = 0; index < count; index += 1) {
+    const offset = 6 + index * 16
+    const width = icon[offset] || 256
+    const height = icon[offset + 1] || 256
+    if (width !== height) fail(`${relativePath}: non-square ${width}x${height} icon entry`)
+    sizes.push(width)
+  }
+
+  sizes.sort((a, b) => a - b)
+  if (JSON.stringify(sizes) !== JSON.stringify(expectedSizes)) {
+    fail(`${relativePath}: expected icon sizes ${expectedSizes.join(', ')}, found ${sizes.join(', ')}`)
+  }
+}
+
 const generatedPages = []
 
 for (const route of routes) {
@@ -302,6 +336,8 @@ if (JSON.stringify(manifest.icons) !== JSON.stringify(expectedIcons)) {
 await requirePngDimensions('icons/apple-touch-icon.png', 180, 180)
 await requirePngDimensions('icons/icon-192.png', 192, 192)
 await requirePngDimensions('icons/icon-512.png', 512, 512)
+await requireIcoSizes('favicon.ico', [16, 24, 32, 48, 64, 72, 96, 128, 256])
+await requireMaxFileSize('favicon.ico', 100 * kibibyte)
 
 for (const name of serviceImages) {
   await requireWebpDimensions(`images/services/${name}.webp`, 1254, 1254)
@@ -365,5 +401,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
