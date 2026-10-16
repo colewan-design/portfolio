@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T18:19:17Z",
-  "last_outcome": "improved_narrow_mobile_navigation",
+  "updated_at": "2026-10-16T19:17:44Z",
+  "last_outcome": "fixed_prerendered_primary_navigation_link",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -36,17 +36,18 @@
     "Disable Nuxt DevTools outside development builds",
     "Validate reduced-motion fallbacks for animated interface elements",
     "Validate visible keyboard focus styles for interactive controls",
-    "Make primary navigation usable at narrow mobile widths"
+    "Make primary navigation usable at narrow mobile widths",
+    "Render the pricing navigation item as a real prerendered link instead of an unresolved custom element"
   ],
   "validation": {
-    "npm ci": "passed on the first retry after a transient network approval interruption",
+    "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, 61 accessible links and buttons, all asset and performance checks)",
-    "responsive_navigation_checks": "passed (six primary links render in a three-column grid below 400px and retain the existing single-row layout at 400px and above)",
-    "anchor_clearance_checks": "passed (narrow viewports use 6rem scroll padding; wider viewports retain 4rem)",
+    "npm run validate": "passed (12 prerendered primary navigation links and 63 accessible links and buttons across 2 routes)",
+    "primary_navigation_checks": "passed (six real anchors per route, including exactly one /pricing destination)",
+    "primary_navigation_failure_checks": "passed (an unresolved NuxtLink element and a missing /pricing anchor were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Render the pricing navigation item as a real prerendered link instead of an unresolved custom element"
+  "next_task": "Render the footer pricing item as a real prerendered link and reject unresolved router elements site-wide"
 }

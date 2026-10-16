@@ -57,17 +57,27 @@ onMounted(() => {
               aria-hidden="true"
               class="hidden size-[3px] bg-gray-500 min-[400px]:block"
             />
-            <!-- Section links stay plain anchors so the CSS smooth scroll keeps
-                 owning the motion; only a real route goes through the router. -->
-            <component
-              :is="item.to ? 'NuxtLink' : 'a'"
-              v-bind="item.to ? { to: item.to } : { href: sectionHref(item.id) }"
+            <!-- Use an explicit router link for routed pages so Nuxt resolves it
+                 to an anchor during prerendering. Section links stay plain
+                 anchors so the CSS smooth scroll keeps owning the motion. -->
+            <NuxtLink
+              v-if="item.to"
+              :to="item.to"
               class="micro transition-colors duration-200 hover:text-ink"
               :class="isActive(item) && 'text-ink'"
-              :aria-current="isActive(item) ? (item.to ? 'page' : 'location') : undefined"
+              :aria-current="isActive(item) ? 'page' : undefined"
             >
               {{ item.label }}
-            </component>
+            </NuxtLink>
+            <a
+              v-else
+              :href="sectionHref(item.id)"
+              class="micro transition-colors duration-200 hover:text-ink"
+              :class="isActive(item) && 'text-ink'"
+              :aria-current="isActive(item) ? 'location' : undefined"
+            >
+              {{ item.label }}
+            </a>
           </li>
         </ul>
       </nav>
