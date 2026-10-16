@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T10:16:38Z",
-  "last_outcome": "validated_image_alternatives",
+  "updated_at": "2026-10-16T11:15:57Z",
+  "last_outcome": "validated_safe_link_protocols",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -28,17 +28,18 @@
     "Reject duplicate id attributes on every generated route",
     "Validate that label and ARIA id references resolve",
     "Validate that links and buttons have accessible names",
-    "Validate that image alternative text is non-empty unless explicitly decorative"
+    "Validate that image alternative text is non-empty unless explicitly decorative",
+    "Validate that generated links use safe protocols and HTTPS for external destinations"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, 10 informative images, 72 explicitly decorative images, and asset budgets)",
-    "image_alternative_checks": "passed (informative images have non-empty alt text; decorative ring images have empty alt text and aria-hidden=true)",
-    "image_alternative_failure_checks": "passed (ambiguous empty alt text and decorative images with spoken alt text were rejected)",
+    "npm run validate": "passed (2 routes, 29 internal links and fragments, 21 HTTPS external links, 11 contact links, and asset budgets)",
+    "safe_link_protocol_checks": "passed (web destinations use HTTPS; mailto and tel contact protocols are allowed)",
+    "safe_link_protocol_failure_checks": "passed (javascript and insecure external HTTP links were rejected; tel was accepted)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Validate that generated links use safe protocols and HTTPS for external destinations"
+  "next_task": "Validate image loading priority and asynchronous decoding"
 }

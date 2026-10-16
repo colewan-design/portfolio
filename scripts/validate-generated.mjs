@@ -244,6 +244,8 @@ function validateInternalLinks(pages) {
     ])
   )
   let internalLinkCount = 0
+  let externalHttpsLinkCount = 0
+  let contactLinkCount = 0
 
   for (const [index, route] of routes.entries()) {
     const label = `route ${route.path}`
@@ -259,7 +261,19 @@ function validateInternalLinks(pages) {
         fail(`${label}: invalid link URL ${JSON.stringify(attributes.href)}`)
       }
 
-      if (target.origin !== pageUrl.origin) continue
+      if (target.protocol === 'mailto:' || target.protocol === 'tel:') {
+        contactLinkCount += 1
+        continue
+      }
+      if (target.protocol !== 'https:') {
+        fail(
+          `${label}: link must use HTTPS or an allowed contact protocol: ${attributes.href}`
+        )
+      }
+      if (target.origin !== pageUrl.origin) {
+        externalHttpsLinkCount += 1
+        continue
+      }
       internalLinkCount += 1
 
       let targetPath
@@ -280,7 +294,11 @@ function validateInternalLinks(pages) {
     }
   }
 
-  return internalLinkCount
+  return {
+    internalLinkCount,
+    externalHttpsLinkCount,
+    contactLinkCount
+  }
 }
 
 function structuredData(html, label) {
@@ -538,7 +556,11 @@ for (const route of routes) {
   generatedPages.push(html)
 }
 
-const internalLinkCount = validateInternalLinks(generatedPages)
+const {
+  internalLinkCount,
+  externalHttpsLinkCount,
+  contactLinkCount
+} = validateInternalLinks(generatedPages)
 
 await requireFile('404.html', 'generated 404 page')
 const errorPageSource = await readFile(join(root, 'app/error.vue'), 'utf8')
@@ -697,5 +719,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
