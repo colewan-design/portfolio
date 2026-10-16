@@ -608,6 +608,7 @@ function validateAccessibility(html, label) {
   let decorativeImageCount = 0
   let eagerImageCount = 0
   let lazyImageCount = 0
+  let newTabLinkCount = 0
   const imageDimensions = []
   for (const image of tags(html, 'img')) {
     if (!Object.hasOwn(image.attributes, 'alt')) {
@@ -683,6 +684,13 @@ function validateAccessibility(html, label) {
     if (!hasAttributeName && !hasTextName && !hasImageName) {
       fail(`${label}: <${control.name}> has no accessible name: ${control.raw}`)
     }
+
+    if (control.name === 'a' && control.attributes.target === '_blank') {
+      if (!/opens in a new tab/i.test(renderedText(control.content))) {
+        fail(`${label}: target=_blank link must announce that it opens in a new tab: ${control.raw}`)
+      }
+      newTabLinkCount += 1
+    }
   }
 
   return {
@@ -691,6 +699,7 @@ function validateAccessibility(html, label) {
     decorativeImageCount,
     eagerImageCount,
     lazyImageCount,
+    newTabLinkCount,
     imageDimensions
   }
 }
@@ -798,6 +807,7 @@ let informativeImageCount = 0
 let decorativeImageCount = 0
 let eagerImageCount = 0
 let lazyImageCount = 0
+let newTabLinkCount = 0
 const renderedImageDimensions = new Map()
 
 for (const route of routes) {
@@ -853,6 +863,7 @@ for (const route of routes) {
   decorativeImageCount += accessibility.decorativeImageCount
   eagerImageCount += accessibility.eagerImageCount
   lazyImageCount += accessibility.lazyImageCount
+  newTabLinkCount += accessibility.newTabLinkCount
   for (const image of accessibility.imageDimensions) {
     const previous = renderedImageDimensions.get(image.src)
     if (previous && (previous.width !== image.width || previous.height !== image.height)) {
@@ -1057,5 +1068,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${newTabLinkCount} new-tab announcements and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

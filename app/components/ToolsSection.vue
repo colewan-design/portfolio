@@ -42,6 +42,7 @@ import { tools } from '~/data/tools'
             <!-- Pushed to the foot so the notes line up across cards whose
                  blurbs run to different lengths. -->
             <p class="micro mt-auto pt-6 normal-case">{{ tool.note }}</p>
+            <span class="sr-only">(opens in a new tab)</span>
           </a>
         </li>
       </ul>

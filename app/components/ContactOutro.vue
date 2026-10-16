@@ -55,6 +55,9 @@ const sectionHref = useSectionHref()
                 class="bracket"
               >
                 {{ link.label }}
+                <span v-if="link.href.startsWith('http')" class="sr-only">
+                  (opens in a new tab)
+                </span>
               </a>
             </li>
           </ul>

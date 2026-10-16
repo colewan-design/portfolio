@@ -52,6 +52,8 @@ function discipline(tags: string[]) {
           >
             {{ project.url ? '↗' : '—' }}
           </span>
+
+          <span v-if="project.url" class="sr-only">(opens in a new tab)</span>
         </component>
 
         <!-- Closes the table: rows only draw a top hairline. -->

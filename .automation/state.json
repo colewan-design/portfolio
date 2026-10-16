@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T22:16:20Z",
-  "last_outcome": "validated_mobile_navigation_tap_targets",
+  "updated_at": "2026-10-16T23:17:37Z",
+  "last_outcome": "announced_external_new_tab_links",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -40,17 +40,18 @@
     "Render the pricing navigation item as a real prerendered link instead of an unresolved custom element",
     "Render the footer pricing item as a real prerendered link and reject unresolved router elements site-wide",
     "Increase mobile primary-navigation tap targets while preserving the micro-label styling",
-    "Add generated-site regression validation for minimum mobile navigation tap-target sizing"
+    "Add generated-site regression validation for minimum mobile navigation tap-target sizing",
+    "Add accessible new-tab context to external project, tool, and social links"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (12 prerendered primary navigation links backed by one generated mobile target rule)",
-    "mobile_navigation_checks": "passed (all primary links require the nav-target class; generated CSS requires inline-flex with 44px minimum width and height below 40rem)",
-    "mobile_navigation_failure_checks": "passed (rejected a 43px target and a primary link missing the nav-target class)",
+    "npm run validate": "passed (65 accessible controls including 21 announced new-tab links across 2 routes)",
+    "new_tab_link_checks": "passed (every target=_blank link retains rel=noopener and announces that it opens in a new tab)",
+    "new_tab_link_failure_checks": "passed (rejected a target=_blank link after removing its announcement)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Add accessible new-tab context to external project, tool, and social links"
+  "next_task": "Hide decorative external-link arrows from assistive technology while retaining the new-tab announcements"
 }

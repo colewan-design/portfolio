@@ -34,6 +34,8 @@ import { projects } from '~/data/projects'
               {{ project.url ? 'See details' : 'In dev' }}
             </span>
           </div>
+
+          <span v-if="project.url" class="sr-only">(opens in a new tab)</span>
         </component>
       </li>
     </ul>
