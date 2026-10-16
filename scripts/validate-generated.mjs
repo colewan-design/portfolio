@@ -367,6 +367,7 @@ function validateAccessibility(html, label) {
   let decorativeImageCount = 0
   let eagerImageCount = 0
   let lazyImageCount = 0
+  const imageDimensions = []
   for (const image of tags(html, 'img')) {
     if (!Object.hasOwn(image.attributes, 'alt')) {
       fail(`${label}: image is missing an alt attribute: ${image.raw}`)
@@ -383,6 +384,18 @@ function validateAccessibility(html, label) {
     if (alternative && isDecorative) {
       fail(`${label}: decorative image must have empty alt text: ${image.raw}`)
     }
+
+    const width = image.attributes.width
+    const height = image.attributes.height
+    if (!/^[1-9]\d*$/.test(width || '') || !/^[1-9]\d*$/.test(height || '')) {
+      fail(`${label}: image must declare positive integer dimensions: ${image.raw}`)
+    }
+    if (!image.attributes.src) fail(`${label}: image is missing a src attribute: ${image.raw}`)
+    imageDimensions.push({
+      src: image.attributes.src,
+      width: Number(width),
+      height: Number(height)
+    })
 
     if (image.attributes.decoding !== 'async') {
       fail(`${label}: image must use asynchronous decoding: ${image.raw}`)
@@ -436,7 +449,8 @@ function validateAccessibility(html, label) {
     informativeImageCount,
     decorativeImageCount,
     eagerImageCount,
-    lazyImageCount
+    lazyImageCount,
+    imageDimensions
   }
 }
 
@@ -475,15 +489,28 @@ async function requireWebpDimensions(relativePath, width, height) {
   if (image.subarray(0, 4).toString() !== 'RIFF' || image.subarray(8, 12).toString() !== 'WEBP') {
     fail(`${relativePath}: invalid WebP signature`)
   }
-  if (image.subarray(12, 16).toString() !== 'VP8 ') {
-    fail(`${relativePath}: expected a lossy VP8 WebP image`)
-  }
-  if (image.subarray(23, 26).toString('hex') !== '9d012a') {
-    fail(`${relativePath}: invalid VP8 frame header`)
+  const format = image.subarray(12, 16).toString()
+  let actualWidth
+  let actualHeight
+
+  if (format === 'VP8 ') {
+    if (image.subarray(23, 26).toString('hex') !== '9d012a') {
+      fail(`${relativePath}: invalid VP8 frame header`)
+    }
+    actualWidth = image.readUInt16LE(26) & 0x3fff
+    actualHeight = image.readUInt16LE(28) & 0x3fff
+  } else if (format === 'VP8L') {
+    if (image[20] !== 0x2f) fail(`${relativePath}: invalid VP8L signature`)
+    const dimensions = image.readUInt32LE(21)
+    actualWidth = (dimensions & 0x3fff) + 1
+    actualHeight = ((dimensions >>> 14) & 0x3fff) + 1
+  } else if (format === 'VP8X') {
+    actualWidth = image.readUIntLE(24, 3) + 1
+    actualHeight = image.readUIntLE(27, 3) + 1
+  } else {
+    fail(`${relativePath}: unsupported WebP format ${JSON.stringify(format)}`)
   }
 
-  const actualWidth = image.readUInt16LE(26) & 0x3fff
-  const actualHeight = image.readUInt16LE(28) & 0x3fff
   if (actualWidth !== width || actualHeight !== height) {
     fail(`${relativePath}: expected ${width}x${height} WebP`)
   }
@@ -529,6 +556,7 @@ let informativeImageCount = 0
 let decorativeImageCount = 0
 let eagerImageCount = 0
 let lazyImageCount = 0
+const renderedImageDimensions = new Map()
 
 for (const route of routes) {
   await requireFile(route.file, `generated route ${route.path}`)
@@ -581,7 +609,29 @@ for (const route of routes) {
   decorativeImageCount += accessibility.decorativeImageCount
   eagerImageCount += accessibility.eagerImageCount
   lazyImageCount += accessibility.lazyImageCount
+  for (const image of accessibility.imageDimensions) {
+    const previous = renderedImageDimensions.get(image.src)
+    if (previous && (previous.width !== image.width || previous.height !== image.height)) {
+      fail(`${label}: inconsistent dimensions for image ${image.src}`)
+    }
+    renderedImageDimensions.set(image.src, image)
+  }
   generatedPages.push(html)
+}
+
+for (const [src, dimensions] of renderedImageDimensions) {
+  const url = new URL(src, siteUrl)
+  if (url.origin !== siteUrl) continue
+
+  const relativePath = decodeURIComponent(url.pathname).replace(/^\//, '')
+  const extension = extname(relativePath).toLowerCase()
+  if (extension === '.png') {
+    await requirePngDimensions(relativePath, dimensions.width, dimensions.height)
+  } else if (extension === '.webp') {
+    await requireWebpDimensions(relativePath, dimensions.width, dimensions.height)
+  } else {
+    fail(`Unsupported rendered image format for dimension validation: ${src}`)
+  }
 }
 
 const {
@@ -747,5 +797,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
