@@ -151,7 +151,7 @@
     scroll-padding-top: 6rem;
   }
 
-  @media (min-width: 400px) {
+  @media (min-width: 40rem) {
     html {
       scroll-padding-top: 4rem;
     }
@@ -210,6 +210,18 @@
    Components
 --------------------------------------------------------------------------- */
 @layer components {
+  /* The two-row mobile navigation keeps every compact label comfortably
+     tappable without changing the micro type treatment. */
+  @media (max-width: 39.999rem) {
+    .nav-target {
+      display: inline-flex;
+      min-width: 44px;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
   /* The register that labels everything: 9px mono, tracked wide, uppercase. */
   .micro {
     @apply font-mono text-micro uppercase text-gray-600;

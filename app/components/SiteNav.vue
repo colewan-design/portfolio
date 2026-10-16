@@ -41,21 +41,21 @@ onMounted(() => {
         christian colewan
       </a>
 
-      <nav aria-label="Sections" class="w-full min-[400px]:w-auto">
+      <nav aria-label="Sections" class="w-full sm:w-auto">
         <ul
-          class="grid grid-cols-3 items-center gap-x-4 gap-y-2.5 min-[400px]:flex min-[400px]:gap-3 sm:gap-4"
+          class="grid grid-cols-3 items-center gap-x-4 gap-y-2.5 sm:flex sm:gap-4"
         >
           <li
             v-for="(item, i) in navItems.slice(1)"
             :key="item.id"
-            class="flex items-center justify-center min-[400px]:gap-3 sm:gap-4"
+            class="flex items-center justify-center sm:gap-4"
           >
             <!-- Nodes separate the single-row treatment. The compact grid omits
                  them so every link keeps an even tap and focus area. -->
             <span
               v-if="i > 0"
               aria-hidden="true"
-              class="hidden size-[3px] bg-gray-500 min-[400px]:block"
+              class="hidden size-[3px] bg-gray-500 sm:block"
             />
             <!-- Use an explicit router link for routed pages so Nuxt resolves it
                  to an anchor during prerendering. Section links stay plain
@@ -63,7 +63,7 @@ onMounted(() => {
             <NuxtLink
               v-if="item.to"
               :to="item.to"
-              class="micro transition-colors duration-200 hover:text-ink"
+              class="nav-target micro transition-colors duration-200 hover:text-ink"
               :class="isActive(item) && 'text-ink'"
               :aria-current="isActive(item) ? 'page' : undefined"
             >
@@ -72,7 +72,7 @@ onMounted(() => {
             <a
               v-else
               :href="sectionHref(item.id)"
-              class="micro transition-colors duration-200 hover:text-ink"
+              class="nav-target micro transition-colors duration-200 hover:text-ink"
               :class="isActive(item) && 'text-ink'"
               :aria-current="isActive(item) ? 'location' : undefined"
             >
