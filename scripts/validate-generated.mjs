@@ -105,6 +105,34 @@ function requireMeta(html, key, label) {
   if (!match?.attributes.content) fail(`${label}: missing non-empty ${key} metadata`)
 }
 
+function requireSingleMeta(html, attribute, value, content, label) {
+  const matches = tags(html, 'meta').filter(({ attributes }) => attributes[attribute] === value)
+  if (matches.length !== 1) {
+    fail(`${label}: expected one ${value} meta tag, found ${matches.length}`)
+  }
+  if (matches[0].attributes.content !== content) {
+    fail(`${label}: ${value} metadata must be ${JSON.stringify(content)}`)
+  }
+}
+
+function validateDocumentSetup(html, label) {
+  const documentTags = tags(html, 'html')
+  if (documentTags.length !== 1) fail(`${label}: expected one <html> element`)
+  if (documentTags[0].attributes.lang !== 'en') fail(`${label}: document language must be en`)
+
+  const charsets = tags(html, 'meta').filter(({ attributes }) => attributes.charset !== undefined)
+  if (charsets.length !== 1) {
+    fail(`${label}: expected one charset declaration, found ${charsets.length}`)
+  }
+  if (charsets[0].attributes.charset.toLowerCase() !== 'utf-8') {
+    fail(`${label}: charset must be utf-8`)
+  }
+
+  requireSingleMeta(html, 'name', 'viewport', 'width=device-width, initial-scale=1', label)
+  requireSingleMeta(html, 'name', 'color-scheme', 'dark', label)
+  requireSingleMeta(html, 'name', 'theme-color', '#0a0a0a', label)
+}
+
 function validateDocumentMetadata(html, route, label) {
   const titles = [...html.matchAll(/<title>([^<]*)<\/title>/gi)].map(([, content]) => content.trim())
   if (titles.length !== 1) fail(`${label}: expected one <title>, found ${titles.length}`)
@@ -300,6 +328,7 @@ for (const route of routes) {
     { name: 'twitter:image:alt', content: 'Christian Colewan portfolio logo' },
     label
   )
+  validateDocumentSetup(html, label)
   validateDocumentMetadata(html, route, label)
 
   for (const key of [
@@ -455,5 +484,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} routes, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} routes, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
