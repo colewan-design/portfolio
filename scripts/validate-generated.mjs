@@ -8,8 +8,20 @@ const siteUrl = 'https://christiancolewan.tech'
 const shareImageUrl = `${siteUrl}/images/logo.png`
 const shareImagePath = 'images/logo.png'
 const routes = [
-  { path: '/', file: 'index.html' },
-  { path: '/pricing', file: 'pricing/index.html' }
+  {
+    path: '/',
+    file: 'index.html',
+    title: 'Christian Colewan — Developer',
+    description:
+      'Christian Colewan — a Baguio-based developer building systems, desktop apps, web systems, mobile apps, and business sites.'
+  },
+  {
+    path: '/pricing',
+    file: 'pricing/index.html',
+    title: 'Pricing — Christian Colewan',
+    description:
+      'Website packages from ₱3,000, e-commerce from ₱18,000, and custom web systems from ₱30,000 — with scope, limits and running costs stated up front.'
+  }
 ]
 const serviceImages = [
   'business-websites',
@@ -91,6 +103,33 @@ function requireMeta(html, key, label) {
   )
 
   if (!match?.attributes.content) fail(`${label}: missing non-empty ${key} metadata`)
+}
+
+function validateDocumentMetadata(html, route, label) {
+  const titles = [...html.matchAll(/<title>([^<]*)<\/title>/gi)].map(([, content]) => content.trim())
+  if (titles.length !== 1) fail(`${label}: expected one <title>, found ${titles.length}`)
+  if (titles[0] !== route.title) fail(`${label}: title does not match the route title`)
+  if (titles[0].length < 10 || titles[0].length > 60) {
+    fail(`${label}: title must be between 10 and 60 characters`)
+  }
+
+  const descriptions = tags(html, 'meta').filter(
+    ({ attributes }) => attributes.name === 'description'
+  )
+  if (descriptions.length !== 1) {
+    fail(`${label}: expected one meta description, found ${descriptions.length}`)
+  }
+
+  const description = descriptions[0].attributes.content?.trim()
+  if (description !== route.description) fail(`${label}: description does not match the route`)
+  if (description.length < 50 || description.length > 160) {
+    fail(`${label}: description must be between 50 and 160 characters`)
+  }
+
+  requireTag(html, 'meta', { property: 'og:title', content: route.title }, label)
+  requireTag(html, 'meta', { property: 'og:description', content: description }, label)
+  requireTag(html, 'meta', { name: 'twitter:title', content: route.title }, label)
+  requireTag(html, 'meta', { name: 'twitter:description', content: description }, label)
 }
 
 function structuredData(html, label) {
@@ -261,21 +300,16 @@ for (const route of routes) {
     { name: 'twitter:image:alt', content: 'Christian Colewan portfolio logo' },
     label
   )
+  validateDocumentMetadata(html, route, label)
 
   for (const key of [
-    'description',
-    'og:title',
-    'og:description',
     'og:image',
     'twitter:card',
-    'twitter:title',
-    'twitter:description',
     'twitter:image'
   ]) {
     requireMeta(html, key, label)
   }
 
-  if (!/<title>[^<]+<\/title>/i.test(html)) fail(`${label}: missing non-empty title`)
   validateAccessibility(html, label)
   generatedPages.push(html)
 }
@@ -421,5 +455,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} routes, custom 404 recovery, accessibility, metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} routes, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

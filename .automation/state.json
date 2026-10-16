@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T01:16:45Z",
-  "last_outcome": "validated_social_share_image",
+  "updated_at": "2026-10-16T02:10:14Z",
+  "last_outcome": "validated_unique_route_metadata",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -19,17 +19,18 @@
     "Add generated JavaScript, CSS, and image size budgets to catch performance regressions in CI",
     "Convert six oversized service illustration PNGs to dimension-preserving WebP assets",
     "Losslessly optimize the nine-size favicon while preserving its format and pixels",
-    "Validate generated Open Graph and Twitter share-image metadata against the real PNG asset"
+    "Validate generated Open Graph and Twitter share-image metadata against the real PNG asset",
+    "Enforce one descriptive, route-specific title and description with matching social metadata"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, social metadata, 20 referenced assets, and asset budgets)",
-    "social_share_image_checks": "passed (Open Graph and Twitter URL, MIME type, 1254x1254 dimensions, alternative text, and PNG signature)",
-    "social_share_image_failure_check": "passed (an incorrect generated Open Graph width was rejected)",
+    "npm run validate": "passed (2 routes, unique route metadata, social metadata, 20 referenced assets, and asset budgets)",
+    "route_metadata_checks": "passed (one route-specific title and description, sensible lengths, and matching Open Graph and Twitter values)",
+    "route_metadata_failure_checks": "passed (duplicate descriptions and an incorrect route title were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Add a generated-page check for a single descriptive title and description per route"
+  "next_task": "Validate document language, charset, viewport, theme color, and color-scheme metadata on every route"
 }
