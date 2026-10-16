@@ -329,6 +329,71 @@ function validateCssRuntimeAssets(css, label, runtimeAssets) {
   }
 }
 
+function cssAtRuleBodies(css, rule) {
+  const compact = css.replace(/\s+/g, '')
+  const bodies = []
+  let offset = 0
+
+  while ((offset = compact.indexOf(rule, offset)) !== -1) {
+    const openingBrace = compact.indexOf('{', offset + rule.length)
+    if (openingBrace === -1) fail(`Generated CSS: ${rule} is missing an opening brace`)
+
+    let depth = 1
+    let cursor = openingBrace + 1
+    while (cursor < compact.length && depth > 0) {
+      if (compact[cursor] === '{') depth += 1
+      if (compact[cursor] === '}') depth -= 1
+      cursor += 1
+    }
+    if (depth !== 0) fail(`Generated CSS: ${rule} has an unclosed block`)
+
+    bodies.push(compact.slice(openingBrace + 1, cursor - 1))
+    offset = cursor
+  }
+
+  return bodies
+}
+
+function validateReducedMotion(css) {
+  const reduceRule = '@media(prefers-reduced-motion:reduce)'
+  const reduceBodies = cssAtRuleBodies(css, reduceRule)
+  if (reduceBodies.length === 0) fail('Generated CSS: missing reduced-motion fallback')
+
+  const reducedCss = reduceBodies.join('')
+  const requiredGlobalOverrides = [
+    'animation-duration:.01ms!important',
+    'animation-delay:0s!important',
+    'animation-iteration-count:1!important',
+    'transition-duration:.01ms!important',
+    'scroll-behavior:auto!important'
+  ]
+
+  for (const declaration of requiredGlobalOverrides) {
+    if (!reducedCss.includes(declaration)) {
+      fail(`Generated CSS: reduced-motion fallback is missing ${declaration}`)
+    }
+  }
+  if (!/\.tape-track(?:\[[^\]]+\])?\{animation:none\}/.test(reducedCss)) {
+    fail('Generated CSS: reduced-motion fallback must stop the marquee')
+  }
+  if (!/\.ring-stage(?:\[[^\]]+\])?\{display:none\}/.test(reducedCss)) {
+    fail('Generated CSS: reduced-motion fallback must hide the decorative orbit')
+  }
+
+  const noPreferenceCss = cssAtRuleBodies(
+    css,
+    '@media(prefers-reduced-motion:no-preference)'
+  ).join('')
+  if (!noPreferenceCss.includes('animation-timeline:view()')) {
+    fail('Generated CSS: scroll-driven motion must require no motion preference')
+  }
+
+  return {
+    reducedMotionBlockCount: reduceBodies.length,
+    keyframeCount: [...css.matchAll(/@keyframes\s+[\w-]+/g)].length
+  }
+}
+
 function validateRuntimeAssets(pages) {
   const runtimeAssets = new Set()
   const resourceAttributes = {
@@ -851,13 +916,18 @@ for (const html of generatedPages) {
 for (const assetPath of assetPaths) await requireFile(assetPath, `referenced asset /${assetPath}`)
 
 const generatedFiles = await listFiles(outputDir)
-for (const path of generatedFiles.filter((file) => extname(file).toLowerCase() === '.css')) {
+const generatedCssFiles = generatedFiles.filter((file) => extname(file).toLowerCase() === '.css')
+const generatedCss = []
+for (const path of generatedCssFiles) {
+  const css = await readFile(path, 'utf8')
+  generatedCss.push(css)
   validateCssRuntimeAssets(
-    await readFile(path, 'utf8'),
+    css,
     `generated CSS ${relative(outputDir, path)}`,
     runtimeAssets
   )
 }
+const reducedMotion = validateReducedMotion(generatedCss.join('\n'))
 const budgetSummary = []
 
 for (const budget of assetBudgets) {
@@ -889,5 +959,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
