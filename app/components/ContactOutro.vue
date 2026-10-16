@@ -34,13 +34,12 @@ const sectionHref = useSectionHref()
           <p class="micro mb-4 text-gray-500">Index</p>
           <ul class="space-y-2.5">
             <li v-for="item in navItems" :key="item.id">
-              <component
-                :is="item.to ? 'NuxtLink' : 'a'"
-                v-bind="item.to ? { to: item.to } : { href: sectionHref(item.id) }"
-                class="bracket"
-              >
+              <NuxtLink v-if="item.to" :to="item.to" class="bracket">
                 {{ item.label }}
-              </component>
+              </NuxtLink>
+              <a v-else :href="sectionHref(item.id)" class="bracket">
+                {{ item.label }}
+              </a>
             </li>
           </ul>
         </div>

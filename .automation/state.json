@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T19:17:44Z",
-  "last_outcome": "fixed_prerendered_primary_navigation_link",
+  "updated_at": "2026-10-16T20:19:54Z",
+  "last_outcome": "fixed_prerendered_footer_link_and_router_validation",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -37,17 +37,18 @@
     "Validate reduced-motion fallbacks for animated interface elements",
     "Validate visible keyboard focus styles for interactive controls",
     "Make primary navigation usable at narrow mobile widths",
-    "Render the pricing navigation item as a real prerendered link instead of an unresolved custom element"
+    "Render the pricing navigation item as a real prerendered link instead of an unresolved custom element",
+    "Render the footer pricing item as a real prerendered link and reject unresolved router elements site-wide"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (12 prerendered primary navigation links and 63 accessible links and buttons across 2 routes)",
-    "primary_navigation_checks": "passed (six real anchors per route, including exactly one /pricing destination)",
-    "primary_navigation_failure_checks": "passed (an unresolved NuxtLink element and a missing /pricing anchor were rejected)",
+    "npm run validate": "passed (all router elements resolved, 12 prerendered primary navigation links, and 65 accessible links and buttons across 2 routes)",
+    "footer_navigation_checks": "passed (the footer pricing item is a real /pricing anchor on both routes)",
+    "router_element_failure_checks": "passed (unresolved NuxtLink and RouterLink elements were rejected site-wide)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Render the footer pricing item as a real prerendered link and reject unresolved router elements site-wide"
+  "next_task": "Increase mobile primary-navigation tap targets while preserving the micro-label styling"
 }

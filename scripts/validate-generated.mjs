@@ -232,12 +232,16 @@ function validatePublicIndexability(html, label) {
   }
 }
 
+function validateResolvedRouterElements(html, label) {
+  const unresolved = html.match(/<(?:nuxtlink|routerlink)\b/i)?.[0]
+  if (unresolved) {
+    fail(`${label}: generated HTML contains unresolved router element ${unresolved}`)
+  }
+}
+
 function validatePrimaryNavigation(html, label) {
   const navigation = html.match(/<nav\b[^>]*aria-label="Sections"[^>]*>[\s\S]*?<\/nav>/i)?.[0]
   if (!navigation) fail(`${label}: missing primary Sections navigation`)
-  if (/<nuxtlink\b/i.test(navigation)) {
-    fail(`${label}: primary navigation contains an unresolved NuxtLink element`)
-  }
 
   const links = tags(navigation, 'a')
   if (links.length !== 6) {
@@ -789,6 +793,7 @@ for (const route of routes) {
   validateDocumentSetup(html, label)
   validateDocumentMetadata(html, route, label)
   validatePublicIndexability(html, label)
+  validateResolvedRouterElements(html, label)
   primaryNavigationLinkCount += validatePrimaryNavigation(html, label)
 
   for (const key of [
@@ -1008,5 +1013,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with ${primaryNavigationLinkCount} prerendered primary navigation links, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
