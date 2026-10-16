@@ -6,10 +6,11 @@ const siteTitle = 'Christian Colewan — Developer'
 const siteDescription =
   'Christian Colewan — a Baguio-based developer building systems, desktop apps, web systems, mobile apps, and business sites.'
 const shareImage = `${siteUrl}/images/logo.png`
+const isDevelopment = process.env.NODE_ENV === 'development'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: isDevelopment },
   modules: ['@nuxt/fonts'],
   css: ['~/assets/css/main.css'],
   // Tailwind v4 ships as a Vite plugin; there is no Nuxt module for it.

@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T14:26:03Z",
-  "last_outcome": "validated_self_hosted_runtime_assets",
+  "updated_at": "2026-10-16T15:19:11Z",
+  "last_outcome": "disabled_production_nuxt_devtools",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -32,17 +32,18 @@
     "Validate that generated links use safe protocols and HTTPS for external destinations",
     "Validate image loading priority and asynchronous decoding",
     "Validate intrinsic dimensions on every rendered image",
-    "Validate that generated pages do not depend on third-party runtime assets"
+    "Validate that generated pages do not depend on third-party runtime assets",
+    "Disable Nuxt DevTools outside development builds"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (59 unique runtime asset URLs are self-hosted across generated HTML and CSS)",
-    "runtime_asset_checks": "passed (resource-loading HTML attributes, inline CSS, generated CSS url() references, and CSS @import references are restricted to the site origin or self-contained data/blob URLs)",
-    "runtime_asset_failure_checks": "passed (an external script and an external CSS image were rejected)",
+    "npm run validate": "passed (2 routes and all existing accessibility, SEO, asset, and performance checks)",
+    "production_devtools_check": "passed (NODE_ENV=production resolves devtools.enabled to false)",
+    "development_devtools_check": "passed (NODE_ENV=development resolves devtools.enabled to true)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Disable Nuxt DevTools outside development builds"
+  "next_task": "Validate reduced-motion fallbacks for animated interface elements"
 }
