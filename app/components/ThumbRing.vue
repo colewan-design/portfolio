@@ -84,6 +84,7 @@ const cards = computed(() =>
           :width="card.width"
           :height="card.height"
           alt=""
+          aria-hidden="true"
           loading="lazy"
           decoding="async"
         />
@@ -93,6 +94,7 @@ const cards = computed(() =>
           :width="card.width"
           :height="card.height"
           alt=""
+          aria-hidden="true"
           loading="lazy"
           decoding="async"
         />

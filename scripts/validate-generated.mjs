@@ -345,10 +345,27 @@ function validateAccessibility(html, label) {
     }
   }
 
+  let informativeImageCount = 0
+  let decorativeImageCount = 0
   for (const image of tags(html, 'img')) {
     if (!Object.hasOwn(image.attributes, 'alt')) {
       fail(`${label}: image is missing an alt attribute: ${image.raw}`)
     }
+
+    const alternative = image.attributes.alt.trim()
+    const role = image.attributes.role?.toLowerCase()
+    const isDecorative =
+      image.attributes['aria-hidden'] === 'true' || role === 'none' || role === 'presentation'
+
+    if (!alternative && !isDecorative) {
+      fail(`${label}: empty image alt text must be explicitly decorative: ${image.raw}`)
+    }
+    if (alternative && isDecorative) {
+      fail(`${label}: decorative image must have empty alt text: ${image.raw}`)
+    }
+
+    if (isDecorative) decorativeImageCount += 1
+    else informativeImageCount += 1
   }
 
   for (const link of tags(html, 'a')) {
@@ -374,7 +391,11 @@ function validateAccessibility(html, label) {
     }
   }
 
-  return controls.length
+  return {
+    controlCount: controls.length,
+    informativeImageCount,
+    decorativeImageCount
+  }
 }
 
 async function requireFile(relativePath, label = relativePath) {
@@ -462,6 +483,8 @@ async function requireIcoSizes(relativePath, expectedSizes) {
 
 const generatedPages = []
 let accessibleControlCount = 0
+let informativeImageCount = 0
+let decorativeImageCount = 0
 
 for (const route of routes) {
   await requireFile(route.file, `generated route ${route.path}`)
@@ -508,7 +531,10 @@ for (const route of routes) {
     requireMeta(html, key, label)
   }
 
-  accessibleControlCount += validateAccessibility(html, label)
+  const accessibility = validateAccessibility(html, label)
+  accessibleControlCount += accessibility.controlCount
+  informativeImageCount += accessibility.informativeImageCount
+  decorativeImageCount += accessibility.decorativeImageCount
   generatedPages.push(html)
 }
 
@@ -671,5 +697,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

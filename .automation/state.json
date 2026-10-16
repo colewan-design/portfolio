@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T09:12:10Z",
-  "last_outcome": "validated_accessible_control_names",
+  "updated_at": "2026-10-16T10:16:38Z",
+  "last_outcome": "validated_image_alternatives",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -27,17 +27,18 @@
     "Validate that generated internal links and fragment targets resolve",
     "Reject duplicate id attributes on every generated route",
     "Validate that label and ARIA id references resolve",
-    "Validate that links and buttons have accessible names"
+    "Validate that links and buttons have accessible names",
+    "Validate that image alternative text is non-empty unless explicitly decorative"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, 61 links and buttons with accessible names, 29 internal links and fragments, and asset budgets)",
-    "accessible_control_name_checks": "passed (rendered text, ARIA labels and labelledby references, titles, and image alternatives are accepted name sources)",
-    "accessible_control_name_failure_checks": "passed (unnamed link and unnamed button were rejected; labelled icon-only button was accepted)",
+    "npm run validate": "passed (2 routes, 10 informative images, 72 explicitly decorative images, and asset budgets)",
+    "image_alternative_checks": "passed (informative images have non-empty alt text; decorative ring images have empty alt text and aria-hidden=true)",
+    "image_alternative_failure_checks": "passed (ambiguous empty alt text and decorative images with spoken alt text were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Validate that image alternative text is non-empty unless explicitly decorative"
+  "next_task": "Validate that generated links use safe protocols and HTTPS for external destinations"
 }
