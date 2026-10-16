@@ -365,6 +365,8 @@ function validateAccessibility(html, label) {
 
   let informativeImageCount = 0
   let decorativeImageCount = 0
+  let eagerImageCount = 0
+  let lazyImageCount = 0
   for (const image of tags(html, 'img')) {
     if (!Object.hasOwn(image.attributes, 'alt')) {
       fail(`${label}: image is missing an alt attribute: ${image.raw}`)
@@ -380,6 +382,26 @@ function validateAccessibility(html, label) {
     }
     if (alternative && isDecorative) {
       fail(`${label}: decorative image must have empty alt text: ${image.raw}`)
+    }
+
+    if (image.attributes.decoding !== 'async') {
+      fail(`${label}: image must use asynchronous decoding: ${image.raw}`)
+    }
+
+    const isHeroPortrait = image.attributes.src === '/images/portrait.webp'
+    if (isHeroPortrait) {
+      if (image.attributes.loading !== 'eager' || image.attributes.fetchpriority !== 'high') {
+        fail(`${label}: hero portrait must load eagerly with high priority: ${image.raw}`)
+      }
+      eagerImageCount += 1
+    } else {
+      if (image.attributes.loading !== 'lazy') {
+        fail(`${label}: non-hero image must lazy-load: ${image.raw}`)
+      }
+      if (image.attributes.fetchpriority === 'high') {
+        fail(`${label}: non-hero image must not use high fetch priority: ${image.raw}`)
+      }
+      lazyImageCount += 1
     }
 
     if (isDecorative) decorativeImageCount += 1
@@ -412,7 +434,9 @@ function validateAccessibility(html, label) {
   return {
     controlCount: controls.length,
     informativeImageCount,
-    decorativeImageCount
+    decorativeImageCount,
+    eagerImageCount,
+    lazyImageCount
   }
 }
 
@@ -503,6 +527,8 @@ const generatedPages = []
 let accessibleControlCount = 0
 let informativeImageCount = 0
 let decorativeImageCount = 0
+let eagerImageCount = 0
+let lazyImageCount = 0
 
 for (const route of routes) {
   await requireFile(route.file, `generated route ${route.path}`)
@@ -553,6 +579,8 @@ for (const route of routes) {
   accessibleControlCount += accessibility.controlCount
   informativeImageCount += accessibility.informativeImageCount
   decorativeImageCount += accessibility.decorativeImageCount
+  eagerImageCount += accessibility.eagerImageCount
+  lazyImageCount += accessibility.lazyImageCount
   generatedPages.push(html)
 }
 
@@ -719,5 +747,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

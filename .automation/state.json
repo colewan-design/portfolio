@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T11:15:57Z",
-  "last_outcome": "validated_safe_link_protocols",
+  "updated_at": "2026-10-16T12:11:46Z",
+  "last_outcome": "validated_image_loading_strategy",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -29,17 +29,18 @@
     "Validate that label and ARIA id references resolve",
     "Validate that links and buttons have accessible names",
     "Validate that image alternative text is non-empty unless explicitly decorative",
-    "Validate that generated links use safe protocols and HTTPS for external destinations"
+    "Validate that generated links use safe protocols and HTTPS for external destinations",
+    "Validate image loading priority and asynchronous decoding"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, 29 internal links and fragments, 21 HTTPS external links, 11 contact links, and asset budgets)",
-    "safe_link_protocol_checks": "passed (web destinations use HTTPS; mailto and tel contact protocols are allowed)",
-    "safe_link_protocol_failure_checks": "passed (javascript and insecure external HTTP links were rejected; tel was accepted)",
+    "npm run validate": "passed (2 routes, 1 eager high-priority image, 81 lazy images, asynchronous decoding, and asset budgets)",
+    "image_loading_checks": "passed (hero portrait is eager and high priority; all other images are lazy; every image decodes asynchronously)",
+    "image_loading_failure_checks": "passed (lazy hero, synchronous decoding, and eager non-hero image were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Validate image loading priority and asynchronous decoding"
+  "next_task": "Validate intrinsic dimensions on every rendered image"
 }
