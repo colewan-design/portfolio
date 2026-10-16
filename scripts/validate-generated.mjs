@@ -197,6 +197,57 @@ function validatePublicIndexability(html, label) {
   }
 }
 
+function validateInternalLinks(pages) {
+  const normalizedPath = (path) => (path === '/' ? path : path.replace(/\/$/, ''))
+  const pagesByPath = new Map(
+    routes.map((route, index) => [normalizedPath(route.path), pages[index]])
+  )
+  const idsByPath = new Map(
+    [...pagesByPath].map(([path, html]) => [
+      path,
+      new Set([...html.matchAll(/\bid="([^"]+)"/gi)].map(([, id]) => id))
+    ])
+  )
+  let internalLinkCount = 0
+
+  for (const [index, route] of routes.entries()) {
+    const label = `route ${route.path}`
+    const pageUrl = new URL(route.path, siteUrl)
+
+    for (const { attributes } of tags(pages[index], 'a')) {
+      if (!attributes.href) continue
+
+      let target
+      try {
+        target = new URL(attributes.href, pageUrl)
+      } catch {
+        fail(`${label}: invalid link URL ${JSON.stringify(attributes.href)}`)
+      }
+
+      if (target.origin !== pageUrl.origin) continue
+      internalLinkCount += 1
+
+      let targetPath
+      let fragment
+      try {
+        targetPath = normalizedPath(decodeURIComponent(target.pathname))
+        fragment = decodeURIComponent(target.hash.slice(1))
+      } catch {
+        fail(`${label}: link contains invalid percent-encoding: ${attributes.href}`)
+      }
+
+      if (!pagesByPath.has(targetPath)) {
+        fail(`${label}: internal link does not resolve to a generated route: ${attributes.href}`)
+      }
+      if (fragment && !idsByPath.get(targetPath).has(fragment)) {
+        fail(`${label}: fragment target does not exist: ${attributes.href}`)
+      }
+    }
+  }
+
+  return internalLinkCount
+}
+
 function structuredData(html, label) {
   return [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)].map(
     ([, content], index) => {
@@ -381,6 +432,8 @@ for (const route of routes) {
   generatedPages.push(html)
 }
 
+const internalLinkCount = validateInternalLinks(generatedPages)
+
 await requireFile('404.html', 'generated 404 page')
 const errorPageSource = await readFile(join(root, 'app/error.vue'), 'utf8')
 const errorPageLabel = 'custom error page'
@@ -538,5 +591,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
