@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T03:17:42Z",
-  "last_outcome": "validated_document_setup_metadata",
+  "updated_at": "2026-10-16T04:13:54Z",
+  "last_outcome": "validated_public_route_indexability",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -21,17 +21,19 @@
     "Losslessly optimize the nine-size favicon while preserving its format and pixels",
     "Validate generated Open Graph and Twitter share-image metadata against the real PNG asset",
     "Enforce one descriptive, route-specific title and description with matching social metadata",
-    "Validate language, UTF-8 charset, responsive viewport, theme color, and color scheme on every generated route"
+    "Validate language, UTF-8 charset, responsive viewport, theme color, and color scheme on every generated route",
+    "Prevent public generated routes from inheriting noindex or nofollow crawler directives"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 routes, document setup, route and social metadata, 20 referenced assets, and asset budgets)",
-    "document_setup_checks": "passed (one English language declaration, UTF-8 charset, responsive viewport, dark color scheme, and #0a0a0a theme color per route)",
-    "document_setup_failure_checks": "passed (duplicate viewport metadata and an incorrect language were rejected)",
+    "npm run validate": "passed (2 indexable routes, document setup, route and social metadata, 20 referenced assets, and asset budgets)",
+    "clean_regeneration_retry": "passed (Nuxt cleanup removed stale duplicate bundles before the final 207.5 KiB JavaScript budget check)",
+    "public_route_indexability_checks": "passed (robots, googlebot, and bingbot directives are checked case-insensitively on every public route)",
+    "public_route_indexability_failure_check": "passed (injected robots noindex and mixed-case Googlebot nofollow directives were rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Ensure public generated routes never inherit noindex or nofollow directives"
+  "next_task": "Validate robots.txt explicitly allows public routes while preserving sitemap discovery"
 }

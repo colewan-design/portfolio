@@ -160,6 +160,27 @@ function validateDocumentMetadata(html, route, label) {
   requireTag(html, 'meta', { name: 'twitter:description', content: description }, label)
 }
 
+function validatePublicIndexability(html, label) {
+  const crawlerNames = new Set(['robots', 'googlebot', 'bingbot'])
+
+  for (const { attributes } of tags(html, 'meta')) {
+    if (!crawlerNames.has(attributes.name?.toLowerCase())) continue
+
+    const directives = new Set(
+      (attributes.content || '')
+        .toLowerCase()
+        .split(/[,\s]+/)
+        .filter(Boolean)
+    )
+
+    for (const directive of ['noindex', 'nofollow']) {
+      if (directives.has(directive)) {
+        fail(`${label}: public route must not declare ${directive}`)
+      }
+    }
+  }
+}
+
 function structuredData(html, label) {
   return [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)].map(
     ([, content], index) => {
@@ -330,6 +351,7 @@ for (const route of routes) {
   )
   validateDocumentSetup(html, label)
   validateDocumentMetadata(html, route, label)
+  validatePublicIndexability(html, label)
 
   for (const key of [
     'og:image',
@@ -484,5 +506,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} routes, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
