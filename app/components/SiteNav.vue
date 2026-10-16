@@ -41,15 +41,22 @@ onMounted(() => {
         christian colewan
       </a>
 
-      <nav aria-label="Sections">
-        <ul class="flex items-center gap-3 sm:gap-4">
+      <nav aria-label="Sections" class="w-full min-[400px]:w-auto">
+        <ul
+          class="grid grid-cols-3 items-center gap-x-4 gap-y-2.5 min-[400px]:flex min-[400px]:gap-3 sm:gap-4"
+        >
           <li
             v-for="(item, i) in navItems.slice(1)"
             :key="item.id"
-            class="flex items-center gap-3 sm:gap-4"
+            class="flex items-center justify-center min-[400px]:gap-3 sm:gap-4"
           >
-            <!-- Square node between items, never before the first. -->
-            <span v-if="i > 0" aria-hidden="true" class="block size-[3px] bg-gray-500" />
+            <!-- Nodes separate the single-row treatment. The compact grid omits
+                 them so every link keeps an even tap and focus area. -->
+            <span
+              v-if="i > 0"
+              aria-hidden="true"
+              class="hidden size-[3px] bg-gray-500 min-[400px]:block"
+            />
             <!-- Section links stay plain anchors so the CSS smooth scroll keeps
                  owning the motion; only a real route goes through the router. -->
             <component

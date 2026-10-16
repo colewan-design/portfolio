@@ -146,7 +146,15 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    scroll-padding-top: 4rem;
+    /* The narrow navigation uses two rows, so section targets need enough
+       clearance to remain visible below the fixed header. */
+    scroll-padding-top: 6rem;
+  }
+
+  @media (min-width: 400px) {
+    html {
+      scroll-padding-top: 4rem;
+    }
   }
 
   body {

@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T17:12:58Z",
-  "last_outcome": "validated_visible_keyboard_focus",
+  "updated_at": "2026-10-16T18:19:17Z",
+  "last_outcome": "improved_narrow_mobile_navigation",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -35,17 +35,18 @@
     "Validate that generated pages do not depend on third-party runtime assets",
     "Disable Nuxt DevTools outside development builds",
     "Validate reduced-motion fallbacks for animated interface elements",
-    "Validate visible keyboard focus styles for interactive controls"
+    "Validate visible keyboard focus styles for interactive controls",
+    "Make primary navigation usable at narrow mobile widths"
   ],
   "validation": {
-    "npm ci": "passed",
+    "npm ci": "passed on the first retry after a transient network approval interruption",
     "npm run build": "passed",
-    "npm run validate": "passed (61 links and buttons inherit a visible generated focus style)",
-    "keyboard_focus_checks": "passed (global :focus-visible uses a 2px solid ink outline with a 3px offset, and focus-specific rules may not suppress outlines)",
-    "keyboard_focus_failure_checks": "passed (a missing global focus style and a button-specific outline suppression were rejected)",
+    "npm run validate": "passed (2 routes, 61 accessible links and buttons, all asset and performance checks)",
+    "responsive_navigation_checks": "passed (six primary links render in a three-column grid below 400px and retain the existing single-row layout at 400px and above)",
+    "anchor_clearance_checks": "passed (narrow viewports use 6rem scroll padding; wider viewports retain 4rem)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Make primary navigation usable at narrow mobile widths"
+  "next_task": "Render the pricing navigation item as a real prerendered link instead of an unresolved custom element"
 }
