@@ -253,6 +253,13 @@ function validatePrimaryNavigation(html, label) {
     fail(`${label}: expected one prerendered primary navigation link to /pricing`)
   }
 
+  for (const link of links) {
+    const classes = new Set((link.attributes.class || '').split(/\s+/).filter(Boolean))
+    if (!classes.has('nav-target')) {
+      fail(`${label}: primary navigation link is missing the nav-target class: ${link.raw}`)
+    }
+  }
+
   return links.length
 }
 
@@ -441,6 +448,42 @@ function validateFocusStyles(css) {
   }
 
   return { focusRuleCount: focusRules.length }
+}
+
+function validateMobileNavigationTargets(css) {
+  const mobileRule = '@media(max-width:39.999rem)'
+  const mobileBodies = cssAtRuleBodies(css, mobileRule)
+  if (mobileBodies.length === 0) {
+    fail('Generated CSS: missing the mobile navigation target breakpoint')
+  }
+
+  const targetRules = mobileBodies.flatMap((body) =>
+    [...body.matchAll(/\.nav-target\{([^{}]*)\}/g)].map((match) => match[1])
+  )
+  if (targetRules.length === 0) {
+    fail('Generated CSS: mobile breakpoint is missing the .nav-target rule')
+  }
+
+  const hasAccessibleTarget = targetRules.some((declarations) => {
+    const properties = new Map(
+      declarations
+        .split(';')
+        .filter(Boolean)
+        .map((declaration) => declaration.split(/:(.*)/s, 2))
+    )
+
+    return (
+      properties.get('display') === 'inline-flex' &&
+      properties.get('min-width') === '44px' &&
+      properties.get('min-height') === '44px'
+    )
+  })
+
+  if (!hasAccessibleTarget) {
+    fail('Generated CSS: mobile .nav-target must be inline-flex with a 44px minimum width and height')
+  }
+
+  return { mobileTargetRuleCount: targetRules.length }
 }
 
 function validateRuntimeAssets(pages) {
@@ -982,6 +1025,7 @@ for (const path of generatedCssFiles) {
 const combinedGeneratedCss = generatedCss.join('\n')
 const reducedMotion = validateReducedMotion(combinedGeneratedCss)
 const focusStyles = validateFocusStyles(combinedGeneratedCss)
+const mobileNavigation = validateMobileNavigationTargets(combinedGeneratedCss)
 const budgetSummary = []
 
 for (const budget of assetBudgets) {
@@ -1013,5 +1057,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

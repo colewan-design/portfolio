@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T21:17:44Z",
-  "last_outcome": "increased_mobile_navigation_tap_targets",
+  "updated_at": "2026-10-16T22:16:20Z",
+  "last_outcome": "validated_mobile_navigation_tap_targets",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -39,16 +39,18 @@
     "Make primary navigation usable at narrow mobile widths",
     "Render the pricing navigation item as a real prerendered link instead of an unresolved custom element",
     "Render the footer pricing item as a real prerendered link and reject unresolved router elements site-wide",
-    "Increase mobile primary-navigation tap targets while preserving the micro-label styling"
+    "Increase mobile primary-navigation tap targets while preserving the micro-label styling",
+    "Add generated-site regression validation for minimum mobile navigation tap-target sizing"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (12 prerendered primary navigation links and 65 accessible links and buttons across 2 routes)",
-    "mobile_navigation_checks": "passed (6 target-class links per generated route; compiled CSS enforces 44px minimum width and height below 40rem)",
+    "npm run validate": "passed (12 prerendered primary navigation links backed by one generated mobile target rule)",
+    "mobile_navigation_checks": "passed (all primary links require the nav-target class; generated CSS requires inline-flex with 44px minimum width and height below 40rem)",
+    "mobile_navigation_failure_checks": "passed (rejected a 43px target and a primary link missing the nav-target class)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Add generated-site regression validation for minimum mobile navigation tap-target sizing"
+  "next_task": "Add accessible new-tab context to external project, tool, and social links"
 }
