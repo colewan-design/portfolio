@@ -88,6 +88,10 @@ function tags(html, name) {
   }))
 }
 
+function elementIds(html) {
+  return [...html.matchAll(/\bid="([^"]+)"/gi)].map(([, id]) => id)
+}
+
 function robotsDirectives(content) {
   return content
     .split(/\r?\n/)
@@ -205,7 +209,7 @@ function validateInternalLinks(pages) {
   const idsByPath = new Map(
     [...pagesByPath].map(([path, html]) => [
       path,
-      new Set([...html.matchAll(/\bid="([^"]+)"/gi)].map(([, id]) => id))
+      new Set(elementIds(html))
     ])
   )
   let internalLinkCount = 0
@@ -261,6 +265,12 @@ function structuredData(html, label) {
 }
 
 function validateAccessibility(html, label) {
+  const seenIds = new Set()
+  for (const id of elementIds(html)) {
+    if (seenIds.has(id)) fail(`${label}: duplicate id attribute ${JSON.stringify(id)}`)
+    seenIds.add(id)
+  }
+
   for (const landmark of ['nav', 'main', 'footer']) {
     const count = tags(html, landmark).length
     if (count !== 1) fail(`${label}: expected one <${landmark}> landmark, found ${count}`)
@@ -591,5 +601,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with unique ids, ${internalLinkCount} internal links and fragments, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

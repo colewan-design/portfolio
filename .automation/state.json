@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-16T06:13:03Z",
-  "last_outcome": "validated_internal_links",
+  "updated_at": "2026-10-16T07:16:53Z",
+  "last_outcome": "validated_unique_ids",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -24,17 +24,18 @@
     "Validate language, UTF-8 charset, responsive viewport, theme color, and color scheme on every generated route",
     "Prevent public generated routes from inheriting noindex or nofollow crawler directives",
     "Explicitly allow public crawling in robots.txt and validate sitemap discovery",
-    "Validate that generated internal links and fragment targets resolve"
+    "Validate that generated internal links and fragment targets resolve",
+    "Reject duplicate id attributes on every generated route"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 indexable routes, 29 rendered internal links and fragments, 20 referenced assets, and asset budgets)",
-    "internal_link_checks": "passed (same-origin links resolve to generated routes and decoded fragments match destination ids)",
-    "internal_link_failure_checks": "passed (a nonexistent route and a missing cross-page fragment target were rejected)",
+    "npm run validate": "passed (2 routes with unique ids, 29 internal links and fragments, 20 referenced assets, and asset budgets)",
+    "unique_id_checks": "passed (every id attribute is unique within its generated route)",
+    "unique_id_failure_check": "passed (an injected duplicate main id was rejected)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": "The connected GitHub binary upload path stalled on the 722 KiB optimized logo; the independently reviewable favicon optimization was completed instead",
-  "next_task": "Reject duplicate id attributes on every generated route"
+  "next_task": "Validate that label and ARIA id references resolve"
 }
