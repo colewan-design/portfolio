@@ -145,7 +145,12 @@ useHead({
           </ul>
 
           <div class="mt-auto pt-9">
-            <a :href="enquiry(plan.name)" :data-enquiry-name="plan.name" class="bracket">
+            <a
+              :href="enquiry(plan.name)"
+              :aria-label="`Enquire about the ${plan.name} package`"
+              :data-enquiry-name="plan.name"
+              class="bracket"
+            >
               Enquire
             </a>
           </div>
@@ -231,7 +236,12 @@ useHead({
           </ul>
 
           <div class="pt-9">
-            <a :href="enquiry(item.name)" :data-enquiry-name="item.name" class="bracket">
+            <a
+              :href="enquiry(item.name)"
+              :aria-label="`Enquire about the ${item.name} package`"
+              :data-enquiry-name="item.name"
+              class="bracket"
+            >
               Request a quote
             </a>
           </div>
