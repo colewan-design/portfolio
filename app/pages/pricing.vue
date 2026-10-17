@@ -342,16 +342,28 @@ useHead({
     <section class="mx-auto max-w-page px-5 pt-section">
       <div class="rise flex items-baseline justify-between gap-6 border-b pb-4">
         <h2 class="display text-h3">How it works</h2>
-        <p class="micro hidden sm:block">01 — 05</p>
+        <p data-process-range="01 — 05" class="micro hidden sm:block">01 — 05</p>
       </div>
 
       <ol class="rise -mt-px grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-        <li v-for="step in process" :key="step.index" class="border-t px-1 py-7 lg:px-4 lg:first:pl-1">
-          <span class="micro">{{ step.index }}</span>
-          <h3 class="font-display mt-3 text-h3 uppercase leading-none tracking-tight text-ink">
+        <li
+          v-for="step in process"
+          :key="step.index"
+          :data-process-index="step.index"
+          :data-process-name="step.name"
+          :data-process-body="step.body"
+          class="border-t px-1 py-7 lg:px-4 lg:first:pl-1"
+        >
+          <span :data-process-index-for="step.index" class="micro">{{ step.index }}</span>
+          <h3
+            :data-process-name-for="step.index"
+            class="font-display mt-3 text-h3 uppercase leading-none tracking-tight text-ink"
+          >
             {{ step.name }}
           </h3>
-          <p class="mt-3.5 text-sm text-gray-600">{{ step.body }}</p>
+          <p :data-process-body-for="step.index" class="mt-3.5 text-sm text-gray-600">
+            {{ step.body }}
+          </p>
         </li>
       </ol>
       <div class="border-t" />

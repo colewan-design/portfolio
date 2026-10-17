@@ -861,6 +861,82 @@ function validateRunningCosts(html) {
   return { runningCostRowCount: expectedById.size, runningCostVisibleFieldCount: visibleFieldCount }
 }
 
+function validatePricingProcess(html) {
+  const expectedSteps = []
+  const seenIndexes = new Set()
+  for (const { attributes, raw } of openingTags(html).filter(
+    ({ attributes }) => attributes['data-process-index']
+  )) {
+    const index = attributes['data-process-index']?.trim()
+    const name = renderedText(attributes['data-process-name'] || '')
+    const body = renderedText(attributes['data-process-body'] || '')
+    if (!index || !name || !body) {
+      fail(`Pricing process: step must have a complete index, name and description: ${raw}`)
+    }
+    if (seenIndexes.has(index)) {
+      fail(`Pricing process: duplicate step index ${JSON.stringify(index)}`)
+    }
+    seenIndexes.add(index)
+    expectedSteps.push({ index, name, body })
+  }
+
+  if (expectedSteps.length !== 5) {
+    fail(`Pricing process: expected five steps, found ${expectedSteps.length}`)
+  }
+  const expectedIndexes = expectedSteps.map((_, index) => String(index + 1).padStart(2, '0'))
+  const actualIndexes = expectedSteps.map(({ index }) => index)
+  if (actualIndexes.join('|') !== expectedIndexes.join('|')) {
+    fail(
+      `Pricing process: expected sequential indexes ${expectedIndexes.join(', ')}; ` +
+        `found ${actualIndexes.join(', ')}`
+    )
+  }
+
+  const collect = (attribute, field) => {
+    const values = new Map()
+    for (const { attributes, content, raw } of elementsWithContentAttribute(html, attribute)) {
+      const index = attributes[attribute]?.trim()
+      const text = renderedText(content)
+      if (!index || !text) {
+        fail(`Pricing process: visible ${field} must identify its step and have text: ${raw}`)
+      }
+      if (!seenIndexes.has(index)) {
+        fail(`Pricing process: visible ${field} references unknown step ${JSON.stringify(index)}`)
+      }
+      if (values.has(index)) {
+        fail(`Pricing process: duplicate visible ${field} for ${JSON.stringify(index)}`)
+      }
+      values.set(index, text)
+    }
+    return values
+  }
+
+  const visibleIndexes = collect('data-process-index-for', 'index')
+  const visibleNames = collect('data-process-name-for', 'name')
+  const visibleBodies = collect('data-process-body-for', 'description')
+  for (const expected of expectedSteps) {
+    if (
+      visibleIndexes.get(expected.index) !== expected.index ||
+      visibleNames.get(expected.index) !== expected.name ||
+      visibleBodies.get(expected.index) !== expected.body
+    ) {
+      fail(`Pricing process: step ${JSON.stringify(expected.index)} must match its canonical content`)
+    }
+  }
+
+  const ranges = elementsWithContentAttribute(html, 'data-process-range')
+  const expectedRange = `${expectedIndexes[0]} — ${expectedIndexes.at(-1)}`
+  if (
+    ranges.length !== 1 ||
+    ranges[0].attributes['data-process-range'] !== expectedRange ||
+    renderedText(ranges[0].content) !== expectedRange
+  ) {
+    fail(`Pricing process: range must be ${JSON.stringify(expectedRange)}`)
+  }
+
+  return { pricingProcessStepCount: expectedSteps.length, pricingProcessFieldCount: 15 }
+}
+
 function validateCommercialTerms(html) {
   const collect = (attribute) => {
     const values = new Map()
@@ -1740,6 +1816,9 @@ const {
   pricingLimitCount
 } = validatePricingScopeLists(generatedPages[1])
 const { runningCostRowCount, runningCostVisibleFieldCount } = validateRunningCosts(generatedPages[1])
+const { pricingProcessStepCount, pricingProcessFieldCount } = validatePricingProcess(
+  generatedPages[1]
+)
 const { synchronizedCommercialTermCount } = validateCommercialTerms(generatedPages[1])
 const runtimeAssets = validateRuntimeAssets(generatedPages)
 
@@ -1916,5 +1995,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects with ${pricingEnquiryAccessibleNameCount} package-specific accessible names, ${consistentPricingPackageCount} pricing packages with matching names, prices, taglines and audiences and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${descriptivePricingPackageCount} synchronized package descriptions, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels, ${pricingMetadataPriceCount} synchronized metadata prices, ${validatedPricingTimelineCount} well-formed visible package timelines, ${validatedPricingScopePackageCount} packages with ${pricingInclusionCount} included features and ${pricingLimitCount} written limits, ${runningCostRowCount} recurring-cost rows with ${runningCostVisibleFieldCount} synchronized responsive field renderings, and ${synchronizedCommercialTermCount} synchronized commercial terms, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects with ${pricingEnquiryAccessibleNameCount} package-specific accessible names, ${consistentPricingPackageCount} pricing packages with matching names, prices, taglines and audiences and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${descriptivePricingPackageCount} synchronized package descriptions, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels, ${pricingMetadataPriceCount} synchronized metadata prices, ${validatedPricingTimelineCount} well-formed visible package timelines, ${validatedPricingScopePackageCount} packages with ${pricingInclusionCount} included features and ${pricingLimitCount} written limits, ${runningCostRowCount} recurring-cost rows with ${runningCostVisibleFieldCount} synchronized responsive field renderings, ${pricingProcessStepCount} sequential process steps with ${pricingProcessFieldCount} synchronized visible fields, and ${synchronizedCommercialTermCount} synchronized commercial terms, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
