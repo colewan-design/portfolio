@@ -264,6 +264,43 @@ function validatePrimaryNavigation(html, label) {
   return links.length
 }
 
+function validateContactLink(target, attributes, content, label) {
+  const accessibleLabel = renderedText(content)
+  if (!/[a-z0-9]/i.test(accessibleLabel) || /^(?:click here|learn more|link)$/i.test(accessibleLabel)) {
+    fail(`${label}: contact link must have a readable, descriptive label: ${attributes.href}`)
+  }
+
+  if (target.hash) fail(`${label}: contact link must not contain a fragment: ${attributes.href}`)
+
+  let destination
+  try {
+    destination = decodeURIComponent(target.pathname)
+  } catch {
+    fail(`${label}: contact link contains invalid percent-encoding: ${attributes.href}`)
+  }
+
+  if (target.protocol === 'mailto:') {
+    const emailPattern = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i
+    if (!emailPattern.test(destination)) {
+      fail(`${label}: malformed email contact destination: ${attributes.href}`)
+    }
+
+    if (accessibleLabel.includes('@') && accessibleLabel.toLowerCase() !== destination.toLowerCase()) {
+      fail(`${label}: visible email label must match its mailto destination: ${attributes.href}`)
+    }
+  } else {
+    if (!/^\+?[\d(). -]+$/.test(destination)) {
+      fail(`${label}: malformed telephone contact destination: ${attributes.href}`)
+    }
+    const digits = destination.replace(/\D/g, '')
+    if (digits.length < 7 || digits.length > 15) {
+      fail(`${label}: telephone contact must contain 7 to 15 digits: ${attributes.href}`)
+    }
+  }
+
+  return `${target.protocol}${destination.toLowerCase()}`
+}
+
 function validateInternalLinks(pages) {
   const normalizedPath = (path) => (path === '/' ? path : path.replace(/\/$/, ''))
   const pagesByPath = new Map(
@@ -278,12 +315,15 @@ function validateInternalLinks(pages) {
   let internalLinkCount = 0
   let externalHttpsLinkCount = 0
   let contactLinkCount = 0
+  const contactDestinations = new Set()
 
   for (const [index, route] of routes.entries()) {
     const label = `route ${route.path}`
     const pageUrl = new URL(route.path, siteUrl)
 
-    for (const { attributes } of tags(pages[index], 'a')) {
+    for (const { attributes, content } of interactiveElements(pages[index]).filter(
+      ({ name }) => name === 'a'
+    )) {
       if (!attributes.href) continue
 
       let target
@@ -294,6 +334,7 @@ function validateInternalLinks(pages) {
       }
 
       if (target.protocol === 'mailto:' || target.protocol === 'tel:') {
+        contactDestinations.add(validateContactLink(target, attributes, content, label))
         contactLinkCount += 1
         continue
       }
@@ -329,7 +370,8 @@ function validateInternalLinks(pages) {
   return {
     internalLinkCount,
     externalHttpsLinkCount,
-    contactLinkCount
+    contactLinkCount,
+    contactDestinationCount: contactDestinations.size
   }
 }
 
@@ -1131,7 +1173,8 @@ for (const [src, dimensions] of renderedImageDimensions) {
 const {
   internalLinkCount,
   externalHttpsLinkCount,
-  contactLinkCount
+  contactLinkCount,
+  contactDestinationCount
 } = validateInternalLinks(generatedPages)
 const runtimeAssets = validateRuntimeAssets(generatedPages)
 
@@ -1308,5 +1351,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

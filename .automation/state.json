@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T05:14:14Z",
-  "last_outcome": "validated_project_screenshot_identity",
+  "updated_at": "2026-10-17T06:22:23Z",
+  "last_outcome": "validated_contact_link_destinations_and_labels",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -47,17 +47,18 @@
     "Ensure external project links keep descriptive accessible names in addition to new-tab context",
     "Validate that each linked project renders consistently in both the project index and work grid",
     "Validate that unlinked projects remain non-interactive and render consistently in both project layouts",
-    "Validate that project screenshot alternative text matches project names and image sources remain unique"
+    "Validate that project screenshot alternative text matches project names and image sources remain unique",
+    "Validate that contact links use well-formed destinations and retain readable labels"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (9 project screenshots have project-specific alternative text and unique sources)",
-    "project_screenshot_checks": "passed (every rendered project has one matching screenshot identity)",
-    "project_screenshot_failure_checks": "passed (rejected mismatched alt text and a reused image source)",
+    "npm run validate": "passed (11 readable contact links use 1 well-formed destination)",
+    "contact_link_checks": "passed (mailto and tel syntax, readable labels, and visible email consistency)",
+    "contact_link_failure_checks": "passed (rejected a malformed email destination and a generic Click here label)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that contact links use well-formed destinations and retain readable labels"
+  "next_task": "Centralize the portfolio contact email so all mailto links share one source of truth"
 }
