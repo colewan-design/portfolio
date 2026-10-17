@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T11:16:25Z",
-  "last_outcome": "synchronized_pricing_metadata",
+  "updated_at": "2026-10-17T12:19:00Z",
+  "last_outcome": "validated_pricing_package_order",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -53,17 +53,18 @@
     "Require generated contact links to use the canonical contact email while allowing package subject parameters",
     "Validate that pricing enquiry links retain package-specific subject lines",
     "Validate that pricing package names and prices remain consistent between the landing page and full pricing page",
-    "Validate that pricing page metadata stays synchronized with published package prices"
+    "Validate that pricing page metadata stays synchronized with published package prices",
+    "Validate that pricing package order remains consistent between the landing and full pricing views"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (3 pricing metadata figures match the rendered package prices)",
-    "pricing_metadata_checks": "passed (description, Open Graph and Twitter metadata derive from canonical pricing data)",
-    "pricing_metadata_failure_check": "passed (rejected a consistently stale Starter price across all description variants)",
+    "npm run validate": "passed (5 packages retain matching order across 2 rendered views)",
+    "pricing_order_checks": "passed (landing summary and full pricing detail share the same five-package ID sequence)",
+    "pricing_order_failure_check": "passed (rejected swapped Starter and Business summary identities)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that pricing package order remains consistent between the landing and full pricing views"
+  "next_task": "Validate that pricing package numbering remains unique and sequential across both views"
 }

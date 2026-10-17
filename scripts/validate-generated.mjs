@@ -430,6 +430,10 @@ function validatePricingPackageConsistency(pages) {
     ['summary', new Map()],
     ['detail', new Map()]
   ])
+  const packageOrderByView = new Map([
+    ['summary', []],
+    ['detail', []]
+  ])
 
   for (const [index, html] of pages.entries()) {
     const label = `route ${routes[index].path}`
@@ -453,6 +457,7 @@ function validatePricingPackageConsistency(pages) {
       }
 
       viewPackages.set(id, { name, price })
+      packageOrderByView.get(view).push(id)
     }
   }
 
@@ -476,9 +481,19 @@ function validatePricingPackageConsistency(pages) {
     }
   }
 
+  const summaryOrder = packageOrderByView.get('summary')
+  const detailOrder = packageOrderByView.get('detail')
+  if (JSON.stringify(summaryOrder) !== JSON.stringify(detailOrder)) {
+    fail(
+      `Pricing packages: order differs between views ` +
+        `(${summaryOrder.join(', ')} vs ${detailOrder.join(', ')})`
+    )
+  }
+
   return {
     consistentPricingPackageCount: summaryPackages.size,
-    pricingViewCount: packagesByView.size
+    pricingViewCount: packagesByView.size,
+    orderedPricingPackageCount: summaryOrder.length
   }
 }
 
@@ -1323,7 +1338,7 @@ const {
   extractCanonicalContactEmail(await readFile(join(root, 'app/data/nav.ts'), 'utf8'))
 )
 const { pricingEnquiryCount } = validatePricingEnquiries(generatedPages[1], 'route /pricing')
-const { consistentPricingPackageCount, pricingViewCount } =
+const { consistentPricingPackageCount, pricingViewCount, orderedPricingPackageCount } =
   validatePricingPackageConsistency(generatedPages)
 const { pricingMetadataPriceCount } = validatePricingMetadata(generatedPages[1])
 const runtimeAssets = validateRuntimeAssets(generatedPages)
@@ -1501,5 +1516,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects, ${consistentPricingPackageCount} pricing packages with matching names and prices across ${pricingViewCount} views and ${pricingMetadataPriceCount} synchronized metadata prices, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects, ${consistentPricingPackageCount} pricing packages with matching names, prices and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views and ${pricingMetadataPriceCount} synchronized metadata prices, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
