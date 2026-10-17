@@ -35,6 +35,7 @@ function discipline(tags: string[]) {
           :href="project.url || undefined"
           :target="project.url ? '_blank' : undefined"
           :rel="project.url ? 'noopener' : undefined"
+          :aria-label="project.url ? `View ${project.name} project (opens in a new tab)` : undefined"
           class="row group grid-cols-[2.5rem_1fr_auto] sm:grid-cols-[3rem_1fr_10rem_2rem]"
         >
           <span class="micro">{{ String(i + 1).padStart(2, '0') }}</span>

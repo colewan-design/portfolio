@@ -648,6 +648,7 @@ function validateAccessibility(html, label) {
   let eagerImageCount = 0
   let lazyImageCount = 0
   let newTabLinkCount = 0
+  let descriptiveProjectLinkCount = 0
   const hiddenExternalArrowCount = [
     ...html.matchAll(/<span\b[^>]*aria-hidden="true"[^>]*>\s*↗\s*<\/span>/gi)
   ].length
@@ -736,6 +737,18 @@ function validateAccessibility(html, label) {
         fail(`${label}: target=_blank link must announce that it opens in a new tab: ${control.raw}`)
       }
       newTabLinkCount += 1
+
+      const classes = new Set((control.attributes.class || '').split(/\s+/).filter(Boolean))
+      const isProjectLink = classes.has('row') || classes.has('tile')
+      if (isProjectLink) {
+        const accessibleName = control.attributes['aria-label'] || ''
+        if (!/^View .+ project \(opens in a new tab\)$/i.test(accessibleName)) {
+          fail(
+            `${label}: project link must have a descriptive project-specific aria-label with new-tab context: ${control.raw}`
+          )
+        }
+        descriptiveProjectLinkCount += 1
+      }
     }
   }
 
@@ -746,6 +759,7 @@ function validateAccessibility(html, label) {
     eagerImageCount,
     lazyImageCount,
     newTabLinkCount,
+    descriptiveProjectLinkCount,
     hiddenExternalArrowCount,
     imageDimensions
   }
@@ -855,6 +869,7 @@ let decorativeImageCount = 0
 let eagerImageCount = 0
 let lazyImageCount = 0
 let newTabLinkCount = 0
+let descriptiveProjectLinkCount = 0
 let hiddenExternalArrowCount = 0
 const renderedImageDimensions = new Map()
 
@@ -912,6 +927,7 @@ for (const route of routes) {
   eagerImageCount += accessibility.eagerImageCount
   lazyImageCount += accessibility.lazyImageCount
   newTabLinkCount += accessibility.newTabLinkCount
+  descriptiveProjectLinkCount += accessibility.descriptiveProjectLinkCount
   hiddenExternalArrowCount += accessibility.hiddenExternalArrowCount
   for (const image of accessibility.imageDimensions) {
     const previous = renderedImageDimensions.get(image.src)
@@ -1118,5 +1134,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

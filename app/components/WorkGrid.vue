@@ -11,6 +11,7 @@ import { projects } from '~/data/projects'
           :href="project.url || undefined"
           :target="project.url ? '_blank' : undefined"
           :rel="project.url ? 'noopener' : undefined"
+          :aria-label="project.url ? `View ${project.name} project (opens in a new tab)` : undefined"
           class="tile group block"
         >
           <img
