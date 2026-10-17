@@ -302,17 +302,36 @@ useHead({
 
           <div
             v-for="cost in running"
-            :key="cost.item"
+            :key="cost.id"
+            :data-running-cost-id="cost.id"
+            :data-running-cost-item="cost.item"
+            :data-running-cost-price="cost.price"
+            :data-running-cost-note="cost.note"
             class="row grid-cols-[1fr_auto] sm:grid-cols-[1fr_16rem_11rem]"
           >
-            <span class="font-display text-lg uppercase leading-tight tracking-tight text-gray-800">
+            <span
+              :data-running-cost-item-for="cost.id"
+              class="font-display text-lg uppercase leading-tight tracking-tight text-gray-800"
+            >
               {{ cost.item }}
             </span>
-            <span class="micro hidden normal-case sm:block">{{ cost.note }}</span>
-            <span class="font-mono text-xs text-right text-gray-800">{{ cost.price }}</span>
+            <span :data-running-cost-note-for="cost.id" class="micro hidden normal-case sm:block">
+              {{ cost.note }}
+            </span>
+            <span
+              :data-running-cost-price-for="cost.id"
+              class="font-mono text-xs text-right text-gray-800"
+            >
+              {{ cost.price }}
+            </span>
             <!-- Below sm the note has no column of its own, so it wraps under
                  the row rather than being dropped. -->
-            <span class="micro col-span-2 normal-case sm:hidden">{{ cost.note }}</span>
+            <span
+              :data-running-cost-note-for="cost.id"
+              class="micro col-span-2 normal-case sm:hidden"
+            >
+              {{ cost.note }}
+            </span>
           </div>
           <div class="border-t" />
         </div>

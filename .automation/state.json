@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T20:19:46Z",
-  "last_outcome": "validated_pricing_scope_lists",
+  "updated_at": "2026-10-17T21:19:16Z",
+  "last_outcome": "validated_recurring_pricing_costs",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -62,17 +62,18 @@
     "Validate pricing package taglines and audiences remain consistent across both views",
     "Centralize pricing payment split and quote-valid duration across summary and terms",
     "Validate pricing package timelines remain present and well-formed on the full pricing page",
-    "Validate every pricing package retains non-empty included features and written limits"
+    "Validate every pricing package retains non-empty included features and written limits",
+    "Validate recurring-cost rows retain complete item, price and responsive ownership notes"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (5 packages retain 30 included features and 15 written limits)",
-    "pricing_scope_checks": "passed (declared counts match unique, non-empty rendered scope items)",
-    "pricing_scope_failure_checks": "passed (rejected zero declared count and empty included-feature mutations)",
+    "npm run validate": "passed after one HTML entity-normalization retry (7 recurring-cost rows, 28 responsive field renderings)",
+    "recurring_cost_checks": "passed (stable unique IDs bind complete canonical item, price and note values to visible desktop and mobile renderings)",
+    "recurring_cost_failure_checks": "passed (rejected empty canonical note and stale visible price mutations)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate recurring-cost rows retain complete item, price and ownership notes"
+  "next_task": "Validate the five-step pricing process retains unique sequential numbering and complete visible descriptions"
 }

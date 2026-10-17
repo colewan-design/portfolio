@@ -149,6 +149,7 @@ export const custom: Plan[] = [
 ]
 
 export interface RunningCost {
+  id: string
   item: string
   price: string
   note: string
@@ -157,36 +158,43 @@ export interface RunningCost {
 /* The renewals. Kept out of every package deliberately. */
 export const running: RunningCost[] = [
   {
+    id: 'domain-name',
     item: 'Domain name',
     price: '₱700–₱1,200 / yr',
     note: 'Registered in your name, on your own account'
   },
   {
+    id: 'hosting',
     item: 'Hosting',
     price: 'from ₱1,500 / yr',
     note: 'Shared hosting; VPS from ₱600 / mo for heavier builds'
   },
   {
+    id: 'business-email',
     item: 'Business email',
     price: 'from ₱250 / mailbox / mo',
     note: 'you@yourcompany.com, billed by the provider'
   },
   {
+    id: 'maintenance-support',
     item: 'Maintenance & support',
     price: 'from ₱750 / mo',
     note: 'Updates, backups, uptime checks, small content edits'
   },
   {
+    id: 'third-party-costs',
     item: 'Paid plugins, themes & APIs',
     price: 'at cost',
     note: 'SMS, maps past the free tier, gateway fees, licences'
   },
   {
+    id: 'content-creation',
     item: 'Content creation',
     price: 'quoted',
     note: 'Copywriting, photography, logo and brand work'
   },
   {
+    id: 'extra-revision-cycle',
     item: 'Extra revision cycle',
     price: 'from ₱750',
     note: 'Beyond the rounds included in your package'
