@@ -31,6 +31,8 @@ import { plans, custom } from '~/data/pricing'
             :data-pricing-name="plan.name"
             :data-pricing-price="plan.price"
             :data-pricing-from="String(plan.from === true)"
+            :data-pricing-tagline="plan.tagline"
+            :data-pricing-audience="plan.bestFor"
             data-pricing-view="summary"
             class="group flex flex-col border-t px-1 py-7 transition-colors duration-300 hover:bg-gray-100 md:px-5"
           >
@@ -68,6 +70,8 @@ import { plans, custom } from '~/data/pricing'
             :data-pricing-name="item.name"
             :data-pricing-price="item.price"
             :data-pricing-from="String(item.from === true)"
+            :data-pricing-tagline="item.tagline"
+            :data-pricing-audience="item.bestFor"
             data-pricing-view="summary"
             class="row grid-cols-[1fr_auto] gap-x-6 py-5"
           >

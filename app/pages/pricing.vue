@@ -86,6 +86,8 @@ useHead({
           :data-pricing-name="plan.name"
           :data-pricing-price="plan.price"
           :data-pricing-from="String(plan.from === true)"
+          :data-pricing-tagline="plan.tagline"
+          :data-pricing-audience="plan.bestFor"
           data-pricing-view="detail"
           class="flex flex-col border-b px-1 py-8 md:border-l md:px-6 md:first:border-l-0 md:first:pl-1 md:last:pr-1"
         >
@@ -179,6 +181,8 @@ useHead({
           :data-pricing-name="item.name"
           :data-pricing-price="item.price"
           :data-pricing-from="String(item.from === true)"
+          :data-pricing-tagline="item.tagline"
+          :data-pricing-audience="item.bestFor"
           data-pricing-view="detail"
           class="border-t pt-8"
         >
