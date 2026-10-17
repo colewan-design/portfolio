@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T08:13:37Z",
-  "last_outcome": "validated_canonical_contact_email",
+  "updated_at": "2026-10-17T09:20:19Z",
+  "last_outcome": "validated_pricing_enquiry_subjects",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -50,17 +50,18 @@
     "Validate that project screenshot alternative text matches project names and image sources remain unique",
     "Validate that contact links use well-formed destinations and retain readable labels",
     "Centralize the portfolio contact email so all mailto links share one source of truth",
-    "Require generated contact links to use the canonical contact email while allowing package subject parameters"
+    "Require generated contact links to use the canonical contact email while allowing package subject parameters",
+    "Validate that pricing enquiry links retain package-specific subject lines"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (11 readable contact links use the exported canonical email)",
-    "canonical_contact_checks": "passed (package subject parameters remain valid)",
-    "canonical_contact_failure_check": "passed (rejected a different syntactically valid email recipient)",
+    "npm run validate": "passed (5 package-specific enquiry subjects validated)",
+    "pricing_enquiry_checks": "passed (five unique packages retain their exact decoded subject lines and no extra mail parameters)",
+    "pricing_enquiry_failure_check": "passed (rejected a deliberately mismatched Starter package subject)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that pricing enquiry links retain package-specific subject lines"
+  "next_task": "Validate that pricing package names and prices remain consistent between the landing page and full pricing page"
 }

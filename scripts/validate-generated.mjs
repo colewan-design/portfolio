@@ -389,6 +389,42 @@ function validateInternalLinks(pages, canonicalContactEmail) {
   }
 }
 
+function validatePricingEnquiries(html, label) {
+  const enquiries = interactiveElements(html).filter(
+    ({ name, attributes }) => name === 'a' && attributes['data-enquiry-name']
+  )
+  if (enquiries.length !== 5) {
+    fail(`${label}: expected five package enquiry links, found ${enquiries.length}`)
+  }
+
+  const packageNames = new Set()
+  for (const { attributes, raw } of enquiries) {
+    const packageName = attributes['data-enquiry-name'].trim()
+    if (!packageName) fail(`${label}: package enquiry link has an empty identity: ${raw}`)
+    if (packageNames.has(packageName)) {
+      fail(`${label}: duplicate package enquiry link for ${packageName}`)
+    }
+
+    const target = new URL(attributes.href, siteUrl)
+    if (target.protocol !== 'mailto:') {
+      fail(`${label}: package enquiry must use mailto: ${raw}`)
+    }
+
+    const subjects = target.searchParams.getAll('subject')
+    const expectedSubject = `${packageName} package enquiry`
+    if (subjects.length !== 1 || subjects[0] !== expectedSubject) {
+      fail(`${label}: ${packageName} enquiry subject must be ${JSON.stringify(expectedSubject)}`)
+    }
+    if ([...target.searchParams.keys()].some((key) => key !== 'subject')) {
+      fail(`${label}: ${packageName} enquiry link contains an unexpected mail parameter`)
+    }
+
+    packageNames.add(packageName)
+  }
+
+  return { pricingEnquiryCount: enquiries.length }
+}
+
 function validateRuntimeUrl(value, label, reference, runtimeAssets) {
   if (!value || value.startsWith('#')) return
 
@@ -1193,6 +1229,7 @@ const {
   generatedPages,
   extractCanonicalContactEmail(await readFile(join(root, 'app/data/nav.ts'), 'utf8'))
 )
+const { pricingEnquiryCount } = validatePricingEnquiries(generatedPages[1], 'route /pricing')
 const runtimeAssets = validateRuntimeAssets(generatedPages)
 
 await requireFile('404.html', 'generated 404 page')
@@ -1368,5 +1405,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
