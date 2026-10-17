@@ -264,7 +264,16 @@ function validatePrimaryNavigation(html, label) {
   return links.length
 }
 
-function validateContactLink(target, attributes, content, label) {
+function extractCanonicalContactEmail(source) {
+  const matches = [...source.matchAll(/export const contactEmail = '([^']+)'/g)]
+  if (matches.length !== 1) {
+    fail(`Contact data: expected one exported contactEmail, found ${matches.length}`)
+  }
+
+  return matches[0][1].toLowerCase()
+}
+
+function validateContactLink(target, attributes, content, label, canonicalContactEmail) {
   const accessibleLabel = renderedText(content)
   if (!/[a-z0-9]/i.test(accessibleLabel) || /^(?:click here|learn more|link)$/i.test(accessibleLabel)) {
     fail(`${label}: contact link must have a readable, descriptive label: ${attributes.href}`)
@@ -284,6 +293,9 @@ function validateContactLink(target, attributes, content, label) {
     if (!emailPattern.test(destination)) {
       fail(`${label}: malformed email contact destination: ${attributes.href}`)
     }
+    if (destination.toLowerCase() !== canonicalContactEmail) {
+      fail(`${label}: mailto link must use the canonical contact email: ${attributes.href}`)
+    }
 
     if (accessibleLabel.includes('@') && accessibleLabel.toLowerCase() !== destination.toLowerCase()) {
       fail(`${label}: visible email label must match its mailto destination: ${attributes.href}`)
@@ -301,7 +313,7 @@ function validateContactLink(target, attributes, content, label) {
   return `${target.protocol}${destination.toLowerCase()}`
 }
 
-function validateInternalLinks(pages) {
+function validateInternalLinks(pages, canonicalContactEmail) {
   const normalizedPath = (path) => (path === '/' ? path : path.replace(/\/$/, ''))
   const pagesByPath = new Map(
     routes.map((route, index) => [normalizedPath(route.path), pages[index]])
@@ -334,7 +346,9 @@ function validateInternalLinks(pages) {
       }
 
       if (target.protocol === 'mailto:' || target.protocol === 'tel:') {
-        contactDestinations.add(validateContactLink(target, attributes, content, label))
+        contactDestinations.add(
+          validateContactLink(target, attributes, content, label, canonicalContactEmail)
+        )
         contactLinkCount += 1
         continue
       }
@@ -1175,7 +1189,10 @@ const {
   externalHttpsLinkCount,
   contactLinkCount,
   contactDestinationCount
-} = validateInternalLinks(generatedPages)
+} = validateInternalLinks(
+  generatedPages,
+  extractCanonicalContactEmail(await readFile(join(root, 'app/data/nav.ts'), 'utf8'))
+)
 const runtimeAssets = validateRuntimeAssets(generatedPages)
 
 await requireFile('404.html', 'generated 404 page')
