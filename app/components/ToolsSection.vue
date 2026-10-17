@@ -28,7 +28,12 @@ import { tools } from '~/data/tools'
           >
             <div class="flex items-center justify-between gap-3">
               <span class="micro">{{ String(i + 1).padStart(2, '0') }}</span>
-              <span class="micro transition-colors duration-200 group-hover:text-ink">↗</span>
+              <span
+                aria-hidden="true"
+                class="micro transition-colors duration-200 group-hover:text-ink"
+              >
+                ↗
+              </span>
             </div>
 
             <h3

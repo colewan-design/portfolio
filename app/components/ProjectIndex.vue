@@ -25,7 +25,7 @@ function discipline(tags: string[]) {
           <span>No.</span>
           <span>Project</span>
           <span class="hidden sm:block">Discipline</span>
-          <span class="text-right sm:text-center">↗</span>
+          <span aria-hidden="true" class="text-right sm:text-center">↗</span>
         </div>
 
         <component
@@ -48,6 +48,7 @@ function discipline(tags: string[]) {
           <span class="micro hidden sm:block">{{ discipline(project.tags) }}</span>
 
           <span
+            aria-hidden="true"
             class="micro text-right transition-colors duration-200 group-hover:text-ink sm:text-center"
           >
             {{ project.url ? '↗' : '—' }}

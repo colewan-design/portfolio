@@ -112,6 +112,7 @@ function renderedText(html) {
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
     .replace(/<!--([\s\S]*?)-->/g, ' ')
+    .replace(/<([a-z][\w:-]*)\b[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/\1>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;|&#160;|&#xa0;/gi, ' ')
     .replace(/&(?:[a-z][a-z0-9]+|#\d+|#x[\da-f]+);/gi, 'x')
@@ -609,6 +610,13 @@ function validateAccessibility(html, label) {
   let eagerImageCount = 0
   let lazyImageCount = 0
   let newTabLinkCount = 0
+  const hiddenExternalArrowCount = [
+    ...html.matchAll(/<span\b[^>]*aria-hidden="true"[^>]*>\s*↗\s*<\/span>/gi)
+  ].length
+
+  if (renderedText(html).includes('↗')) {
+    fail(`${label}: decorative external-link arrows must be hidden from assistive technology`)
+  }
   const imageDimensions = []
   for (const image of tags(html, 'img')) {
     if (!Object.hasOwn(image.attributes, 'alt')) {
@@ -700,6 +708,7 @@ function validateAccessibility(html, label) {
     eagerImageCount,
     lazyImageCount,
     newTabLinkCount,
+    hiddenExternalArrowCount,
     imageDimensions
   }
 }
@@ -808,6 +817,7 @@ let decorativeImageCount = 0
 let eagerImageCount = 0
 let lazyImageCount = 0
 let newTabLinkCount = 0
+let hiddenExternalArrowCount = 0
 const renderedImageDimensions = new Map()
 
 for (const route of routes) {
@@ -864,6 +874,7 @@ for (const route of routes) {
   eagerImageCount += accessibility.eagerImageCount
   lazyImageCount += accessibility.lazyImageCount
   newTabLinkCount += accessibility.newTabLinkCount
+  hiddenExternalArrowCount += accessibility.hiddenExternalArrowCount
   for (const image of accessibility.imageDimensions) {
     const previous = renderedImageDimensions.get(image.src)
     if (previous && (previous.width !== image.width || previous.height !== image.height)) {
@@ -1068,5 +1079,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${newTabLinkCount} new-tab announcements and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${newTabLinkCount} new-tab announcements, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
