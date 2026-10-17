@@ -98,6 +98,7 @@ useHead({
           :data-pricing-from="String(plan.from === true)"
           :data-pricing-tagline="plan.tagline"
           :data-pricing-audience="plan.bestFor"
+          :data-pricing-timeline="plan.timeline"
           data-pricing-view="detail"
           class="flex flex-col border-b px-1 py-8 md:border-l md:px-6 md:first:border-l-0 md:first:pl-1 md:last:pr-1"
         >
@@ -125,7 +126,9 @@ useHead({
             </div>
             <div class="flex items-baseline justify-between gap-4">
               <dt class="micro">Timeline</dt>
-              <dd class="font-mono text-2xs text-gray-800">{{ plan.timeline }}</dd>
+              <dd :data-pricing-timeline-for="plan.id" class="font-mono text-2xs text-gray-800">
+                {{ plan.timeline }}
+              </dd>
             </div>
           </dl>
 
@@ -193,6 +196,7 @@ useHead({
           :data-pricing-from="String(item.from === true)"
           :data-pricing-tagline="item.tagline"
           :data-pricing-audience="item.bestFor"
+          :data-pricing-timeline="item.timeline"
           data-pricing-view="detail"
           class="border-t pt-8"
         >
@@ -221,7 +225,9 @@ useHead({
             </div>
             <div class="flex items-baseline justify-between gap-4 sm:max-w-[26rem]">
               <dt class="micro">Timeline</dt>
-              <dd class="font-mono text-2xs text-gray-800">{{ item.timeline }}</dd>
+              <dd :data-pricing-timeline-for="item.id" class="font-mono text-2xs text-gray-800">
+                {{ item.timeline }}
+              </dd>
             </div>
           </dl>
 
