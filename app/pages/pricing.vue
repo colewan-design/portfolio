@@ -85,12 +85,16 @@ useHead({
           :data-pricing-index="plan.index"
           :data-pricing-name="plan.name"
           :data-pricing-price="plan.price"
+          :data-pricing-from="String(plan.from === true)"
           data-pricing-view="detail"
           class="flex flex-col border-b px-1 py-8 md:border-l md:px-6 md:first:border-l-0 md:first:pl-1 md:last:pr-1"
         >
           <span class="micro">{{ plan.index }}</span>
 
-          <p class="font-display mt-5 text-h2 uppercase leading-none tracking-tight text-ink">
+          <p
+            :data-pricing-label-for="plan.id"
+            class="font-display mt-5 text-h2 uppercase leading-none tracking-tight text-ink"
+          >
             {{ plan.price }}
           </p>
 
@@ -169,12 +173,16 @@ useHead({
           :data-pricing-index="item.index"
           :data-pricing-name="item.name"
           :data-pricing-price="item.price"
+          :data-pricing-from="String(item.from === true)"
           data-pricing-view="detail"
           class="border-t pt-8"
         >
           <span class="micro">{{ item.index }}</span>
 
-          <div class="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <div
+            :data-pricing-label-for="item.id"
+            class="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1"
+          >
             <span class="micro text-gray-500">from</span>
             <p class="font-display text-h2 uppercase leading-none tracking-tight text-ink">
               {{ item.price }}

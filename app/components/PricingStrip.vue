@@ -30,12 +30,14 @@ import { plans, custom } from '~/data/pricing'
             :data-pricing-index="plan.index"
             :data-pricing-name="plan.name"
             :data-pricing-price="plan.price"
+            :data-pricing-from="String(plan.from === true)"
             data-pricing-view="summary"
             class="group flex flex-col border-t px-1 py-7 transition-colors duration-300 hover:bg-gray-100 md:px-5"
           >
             <span class="micro">{{ plan.index }}</span>
 
             <p
+              :data-pricing-label-for="plan.id"
               class="font-display mt-4 text-h2 uppercase leading-none tracking-tight text-ink"
             >
               {{ plan.price }}
@@ -65,6 +67,7 @@ import { plans, custom } from '~/data/pricing'
             :data-pricing-index="item.index"
             :data-pricing-name="item.name"
             :data-pricing-price="item.price"
+            :data-pricing-from="String(item.from === true)"
             data-pricing-view="summary"
             class="row grid-cols-[1fr_auto] gap-x-6 py-5"
           >
@@ -76,7 +79,7 @@ import { plans, custom } from '~/data/pricing'
               </h3>
               <p class="micro mt-2">{{ item.bestFor }}</p>
             </div>
-            <p class="font-mono text-xs text-gray-800">
+            <p :data-pricing-label-for="item.id" class="font-mono text-xs text-gray-800">
               <span class="text-gray-500">from</span> {{ item.price }}
             </p>
           </li>
