@@ -20,12 +20,15 @@ export const navItems: NavItem[] = [
 
 export const navIds = navItems.map((item) => item.id)
 
+export const contactEmail = 'cts.colewan@gmail.com'
+export const contactHref = `mailto:${contactEmail}`
+
 export interface ElsewhereLink {
   label: string
   href: string
 }
 
 export const elsewhere: ElsewhereLink[] = [
-  { label: 'email', href: 'mailto:cts.colewan@gmail.com' },
+  { label: 'email', href: contactHref },
   { label: 'salidumay.com', href: 'https://salidumay.com/' }
 ]

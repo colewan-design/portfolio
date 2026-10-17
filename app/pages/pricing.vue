@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { contactEmail } from '~/data/nav'
 import { plans, custom, running, process, terms } from '~/data/pricing'
 
-const email = 'cts.colewan@gmail.com'
 const pageTitle = 'Pricing — Christian Colewan'
 const pageDescription =
   'Website packages from ₱3,000, e-commerce from ₱18,000, and custom web systems from ₱30,000 — with scope, limits and running costs stated up front.'
@@ -9,7 +9,7 @@ const pageDescription =
 /* Each package links to a pre-addressed mail, so the first message already
    says which tier the enquiry is about. */
 function enquiry(name: string) {
-  return `mailto:${email}?subject=${encodeURIComponent(`${name} package enquiry`)}`
+  return `mailto:${contactEmail}?subject=${encodeURIComponent(`${name} package enquiry`)}`
 }
 
 useHead({

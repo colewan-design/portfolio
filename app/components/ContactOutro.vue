@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { navItems, elsewhere } from '~/data/nav'
-
-const email = 'cts.colewan@gmail.com'
+import { contactEmail, contactHref, navItems, elsewhere } from '~/data/nav'
 
 /* The outro is rendered on the pricing page too, so its index column can no
    longer assume the sections are on the current page. */
@@ -23,8 +21,8 @@ const sectionHref = useSectionHref()
         </p>
 
         <div class="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
-          <a :href="`mailto:${email}`" class="bracket-solid">Start a project</a>
-          <a :href="`mailto:${email}`" class="bracket">{{ email }}</a>
+          <a :href="contactHref" class="bracket-solid">Start a project</a>
+          <a :href="contactHref" class="bracket">{{ contactEmail }}</a>
         </div>
       </div>
 

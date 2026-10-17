@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T06:22:23Z",
-  "last_outcome": "validated_contact_link_destinations_and_labels",
+  "updated_at": "2026-10-17T07:16:12Z",
+  "last_outcome": "centralized_contact_email",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -48,17 +48,17 @@
     "Validate that each linked project renders consistently in both the project index and work grid",
     "Validate that unlinked projects remain non-interactive and render consistently in both project layouts",
     "Validate that project screenshot alternative text matches project names and image sources remain unique",
-    "Validate that contact links use well-formed destinations and retain readable labels"
+    "Validate that contact links use well-formed destinations and retain readable labels",
+    "Centralize the portfolio contact email so all mailto links share one source of truth"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (11 readable contact links use 1 well-formed destination)",
-    "contact_link_checks": "passed (mailto and tel syntax, readable labels, and visible email consistency)",
-    "contact_link_failure_checks": "passed (rejected a malformed email destination and a generic Click here label)",
+    "npm run validate": "passed (11 readable contact links still use 1 well-formed destination)",
+    "contact_email_source": "passed (one source literal supplies direct, footer, and pricing enquiry mailto links)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Centralize the portfolio contact email so all mailto links share one source of truth"
+  "next_task": "Require generated contact links to use the canonical contact email while allowing package subject parameters"
 }
