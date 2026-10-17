@@ -525,6 +525,45 @@ function validateScreenReaderOnlyStyles(css) {
   return { screenReaderOnlyRuleCount: ruleBodies.length }
 }
 
+function validateProjectLinkConsistency(projectLinks) {
+  const layoutNames = new Map([
+    ['row', 'project index'],
+    ['tile', 'work grid']
+  ])
+  const linksByLayout = new Map([...layoutNames].map(([layout]) => [layout, new Map()]))
+
+  for (const link of projectLinks) {
+    const layoutLinks = linksByLayout.get(link.layout)
+    if (layoutLinks.has(link.name)) {
+      fail(`Generated projects: duplicate ${layoutNames.get(link.layout)} link for ${link.name}`)
+    }
+    layoutLinks.set(link.name, link.href)
+  }
+
+  const [indexLinks, gridLinks] = [...linksByLayout.values()]
+  if (indexLinks.size === 0 || gridLinks.size === 0) {
+    fail('Generated projects: both the project index and work grid must contain linked projects')
+  }
+
+  const projectNames = new Set([...indexLinks.keys(), ...gridLinks.keys()])
+  for (const name of projectNames) {
+    if (!indexLinks.has(name)) {
+      fail(`Generated projects: work grid project ${name} is missing from the project index`)
+    }
+    if (!gridLinks.has(name)) {
+      fail(`Generated projects: project index project ${name} is missing from the work grid`)
+    }
+    if (indexLinks.get(name) !== gridLinks.get(name)) {
+      fail(`Generated projects: ${name} uses inconsistent URLs across project layouts`)
+    }
+  }
+
+  return {
+    linkedProjectCount: projectNames.size,
+    projectLayoutCount: linksByLayout.size
+  }
+}
+
 function validateRuntimeAssets(pages) {
   const runtimeAssets = new Set()
   const resourceAttributes = {
@@ -657,6 +696,7 @@ function validateAccessibility(html, label) {
     fail(`${label}: decorative external-link arrows must be hidden from assistive technology`)
   }
   const imageDimensions = []
+  const projectLinks = []
   for (const image of tags(html, 'img')) {
     if (!Object.hasOwn(image.attributes, 'alt')) {
       fail(`${label}: image is missing an alt attribute: ${image.raw}`)
@@ -742,11 +782,19 @@ function validateAccessibility(html, label) {
       const isProjectLink = classes.has('row') || classes.has('tile')
       if (isProjectLink) {
         const accessibleName = control.attributes['aria-label'] || ''
-        if (!/^View .+ project \(opens in a new tab\)$/i.test(accessibleName)) {
+        const projectName = accessibleName.match(
+          /^View (.+) project \(opens in a new tab\)$/i
+        )?.[1]
+        if (!projectName) {
           fail(
             `${label}: project link must have a descriptive project-specific aria-label with new-tab context: ${control.raw}`
           )
         }
+        projectLinks.push({
+          name: projectName,
+          href: control.attributes.href,
+          layout: classes.has('row') ? 'row' : 'tile'
+        })
         descriptiveProjectLinkCount += 1
       }
     }
@@ -761,7 +809,8 @@ function validateAccessibility(html, label) {
     newTabLinkCount,
     descriptiveProjectLinkCount,
     hiddenExternalArrowCount,
-    imageDimensions
+    imageDimensions,
+    projectLinks
   }
 }
 
@@ -872,6 +921,7 @@ let newTabLinkCount = 0
 let descriptiveProjectLinkCount = 0
 let hiddenExternalArrowCount = 0
 const renderedImageDimensions = new Map()
+const renderedProjectLinks = []
 
 for (const route of routes) {
   await requireFile(route.file, `generated route ${route.path}`)
@@ -929,6 +979,7 @@ for (const route of routes) {
   newTabLinkCount += accessibility.newTabLinkCount
   descriptiveProjectLinkCount += accessibility.descriptiveProjectLinkCount
   hiddenExternalArrowCount += accessibility.hiddenExternalArrowCount
+  renderedProjectLinks.push(...accessibility.projectLinks)
   for (const image of accessibility.imageDimensions) {
     const previous = renderedImageDimensions.get(image.src)
     if (previous && (previous.width !== image.width || previous.height !== image.height)) {
@@ -938,6 +989,8 @@ for (const route of routes) {
   }
   generatedPages.push(html)
 }
+
+const projectConsistency = validateProjectLinkConsistency(renderedProjectLinks)
 
 for (const [src, dimensions] of renderedImageDimensions) {
   const url = new URL(src, siteUrl)
@@ -1134,5 +1187,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
