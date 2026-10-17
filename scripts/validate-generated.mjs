@@ -487,6 +487,44 @@ function validateMobileNavigationTargets(css) {
   return { mobileTargetRuleCount: targetRules.length }
 }
 
+function validateScreenReaderOnlyStyles(css) {
+  const compact = css.replace(/\s+/g, '')
+  const ruleBodies = [...compact.matchAll(/\.sr-only\{([^{}]*)\}/g)].map((match) => match[1])
+  if (ruleBodies.length === 0) fail('Generated CSS: missing .sr-only styles')
+
+  const properties = new Map(
+    ruleBodies.flatMap((body) =>
+      body
+        .split(';')
+        .filter(Boolean)
+        .map((declaration) => declaration.split(/:(.*)/s, 2))
+    )
+  )
+  const requiredProperties = new Map([
+    ['position', 'absolute'],
+    ['white-space', 'nowrap'],
+    ['border-width', '0'],
+    ['width', '1px'],
+    ['height', '1px'],
+    ['margin', '-1px'],
+    ['padding', '0'],
+    ['overflow', 'hidden']
+  ])
+
+  for (const [property, value] of requiredProperties) {
+    if (properties.get(property) !== value) {
+      fail(`Generated CSS: .sr-only must set ${property}:${value}`)
+    }
+  }
+
+  const hasClipping =
+    properties.get('clip-path') === 'inset(50%)' ||
+    properties.get('clip') === 'rect(0,0,0,0)'
+  if (!hasClipping) fail('Generated CSS: .sr-only must clip content outside the visible canvas')
+
+  return { screenReaderOnlyRuleCount: ruleBodies.length }
+}
+
 function validateRuntimeAssets(pages) {
   const runtimeAssets = new Set()
   const resourceAttributes = {
@@ -1048,6 +1086,7 @@ const combinedGeneratedCss = generatedCss.join('\n')
 const reducedMotion = validateReducedMotion(combinedGeneratedCss)
 const focusStyles = validateFocusStyles(combinedGeneratedCss)
 const mobileNavigation = validateMobileNavigationTargets(combinedGeneratedCss)
+const screenReaderOnly = validateScreenReaderOnlyStyles(combinedGeneratedCss)
 const budgetSummary = []
 
 for (const budget of assetBudgets) {
@@ -1079,5 +1118,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${newTabLinkCount} new-tab announcements, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} contact links, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

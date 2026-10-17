@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T00:22:13Z",
-  "last_outcome": "hid_decorative_external_link_arrows",
+  "updated_at": "2026-10-17T01:21:55Z",
+  "last_outcome": "validated_visually_hidden_new_tab_context",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -42,17 +42,18 @@
     "Increase mobile primary-navigation tap targets while preserving the micro-label styling",
     "Add generated-site regression validation for minimum mobile navigation tap-target sizing",
     "Add accessible new-tab context to external project, tool, and social links",
-    "Hide decorative external-link arrows from assistive technology while retaining the new-tab announcements"
+    "Hide decorative external-link arrows from assistive technology while retaining the new-tab announcements",
+    "Validate that the generated sr-only utility keeps new-tab announcements visually hidden"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (21 announced new-tab links and 12 aria-hidden decorative external-link arrows across 2 routes)",
-    "external_arrow_checks": "passed (visible arrow glyphs are excluded from rendered accessibility text)",
-    "external_arrow_failure_checks": "passed (rejected an exposed decorative external-link arrow)",
+    "npm run validate": "passed (21 announced new-tab links backed by 2 visually-hidden CSS rules across 2 routes)",
+    "sr_only_css_checks": "passed (position, clipping, 1px dimensions, negative margin, zero padding and border, nowrap, and hidden overflow)",
+    "sr_only_failure_checks": "passed (rejected weakened width and visible overflow mutations)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that the generated sr-only utility keeps new-tab announcements visually hidden"
+  "next_task": "Ensure external project links keep descriptive accessible names in addition to new-tab context"
 }
