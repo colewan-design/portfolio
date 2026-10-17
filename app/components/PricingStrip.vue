@@ -26,6 +26,10 @@ import { plans, custom } from '~/data/pricing'
           <li
             v-for="plan in plans"
             :key="plan.id"
+            :data-pricing-id="plan.id"
+            :data-pricing-name="plan.name"
+            :data-pricing-price="plan.price"
+            data-pricing-view="summary"
             class="group flex flex-col border-t px-1 py-7 transition-colors duration-300 hover:bg-gray-100 md:px-5"
           >
             <span class="micro">{{ plan.index }}</span>
@@ -56,6 +60,10 @@ import { plans, custom } from '~/data/pricing'
           <li
             v-for="item in custom"
             :key="item.id"
+            :data-pricing-id="item.id"
+            :data-pricing-name="item.name"
+            :data-pricing-price="item.price"
+            data-pricing-view="summary"
             class="row grid-cols-[1fr_auto] gap-x-6 py-5"
           >
             <div>

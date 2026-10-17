@@ -425,6 +425,63 @@ function validatePricingEnquiries(html, label) {
   return { pricingEnquiryCount: enquiries.length }
 }
 
+function validatePricingPackageConsistency(pages) {
+  const packagesByView = new Map([
+    ['summary', new Map()],
+    ['detail', new Map()]
+  ])
+
+  for (const [index, html] of pages.entries()) {
+    const label = `route ${routes[index].path}`
+    const packages = openingTags(html).filter(
+      ({ attributes }) => attributes['data-pricing-view']
+    )
+
+    for (const { attributes, raw } of packages) {
+      const view = attributes['data-pricing-view']
+      const viewPackages = packagesByView.get(view)
+      if (!viewPackages) fail(`${label}: unknown pricing view ${JSON.stringify(view)}: ${raw}`)
+
+      const id = attributes['data-pricing-id']?.trim()
+      const name = attributes['data-pricing-name']?.trim()
+      const price = attributes['data-pricing-price']?.trim()
+      if (!id || !name || !price) {
+        fail(`${label}: pricing package identity must include id, name and price: ${raw}`)
+      }
+      if (viewPackages.has(id)) {
+        fail(`${label}: duplicate ${view} pricing package ${JSON.stringify(id)}`)
+      }
+
+      viewPackages.set(id, { name, price })
+    }
+  }
+
+  const summaryPackages = packagesByView.get('summary')
+  const detailPackages = packagesByView.get('detail')
+  if (summaryPackages.size !== 5 || detailPackages.size !== 5) {
+    fail(
+      `Pricing packages: expected five summary and five detail entries, found ` +
+        `${summaryPackages.size} and ${detailPackages.size}`
+    )
+  }
+
+  for (const [id, summary] of summaryPackages) {
+    const detail = detailPackages.get(id)
+    if (!detail) fail(`Pricing packages: ${JSON.stringify(id)} is missing from the detail view`)
+    if (summary.name !== detail.name || summary.price !== detail.price) {
+      fail(
+        `Pricing packages: ${JSON.stringify(id)} differs between views ` +
+          `(${summary.name} ${summary.price} vs ${detail.name} ${detail.price})`
+      )
+    }
+  }
+
+  return {
+    consistentPricingPackageCount: summaryPackages.size,
+    pricingViewCount: packagesByView.size
+  }
+}
+
 function validateRuntimeUrl(value, label, reference, runtimeAssets) {
   if (!value || value.startsWith('#')) return
 
@@ -1230,6 +1287,8 @@ const {
   extractCanonicalContactEmail(await readFile(join(root, 'app/data/nav.ts'), 'utf8'))
 )
 const { pricingEnquiryCount } = validatePricingEnquiries(generatedPages[1], 'route /pricing')
+const { consistentPricingPackageCount, pricingViewCount } =
+  validatePricingPackageConsistency(generatedPages)
 const runtimeAssets = validateRuntimeAssets(generatedPages)
 
 await requireFile('404.html', 'generated 404 page')
@@ -1405,5 +1464,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects, ${consistentPricingPackageCount} pricing packages with matching names and prices across ${pricingViewCount} views, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

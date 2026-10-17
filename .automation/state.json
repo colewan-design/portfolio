@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T09:20:19Z",
-  "last_outcome": "validated_pricing_enquiry_subjects",
+  "updated_at": "2026-10-17T10:21:26Z",
+  "last_outcome": "validated_pricing_view_consistency",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -51,17 +51,18 @@
     "Validate that contact links use well-formed destinations and retain readable labels",
     "Centralize the portfolio contact email so all mailto links share one source of truth",
     "Require generated contact links to use the canonical contact email while allowing package subject parameters",
-    "Validate that pricing enquiry links retain package-specific subject lines"
+    "Validate that pricing enquiry links retain package-specific subject lines",
+    "Validate that pricing package names and prices remain consistent between the landing page and full pricing page"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (5 package-specific enquiry subjects validated)",
-    "pricing_enquiry_checks": "passed (five unique packages retain their exact decoded subject lines and no extra mail parameters)",
-    "pricing_enquiry_failure_check": "passed (rejected a deliberately mismatched Starter package subject)",
+    "npm run validate": "passed (5 packages have matching names and prices across 2 rendered views)",
+    "pricing_consistency_checks": "passed (five unique package IDs match between the landing summary and full pricing detail)",
+    "pricing_consistency_failure_check": "passed (rejected a deliberately stale Starter summary price)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that pricing package names and prices remain consistent between the landing page and full pricing page"
+  "next_task": "Validate that pricing page metadata stays synchronized with published package prices"
 }

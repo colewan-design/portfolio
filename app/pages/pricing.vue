@@ -71,6 +71,10 @@ useHead({
         <li
           v-for="plan in plans"
           :key="plan.id"
+          :data-pricing-id="plan.id"
+          :data-pricing-name="plan.name"
+          :data-pricing-price="plan.price"
+          data-pricing-view="detail"
           class="flex flex-col border-b px-1 py-8 md:border-l md:px-6 md:first:border-l-0 md:first:pl-1 md:last:pr-1"
         >
           <span class="micro">{{ plan.index }}</span>
@@ -147,7 +151,15 @@ useHead({
       </p>
 
       <div class="rise mt-12 grid gap-12 lg:grid-cols-2 lg:gap-16">
-        <article v-for="item in custom" :key="item.id" class="border-t pt-8">
+        <article
+          v-for="item in custom"
+          :key="item.id"
+          :data-pricing-id="item.id"
+          :data-pricing-name="item.name"
+          :data-pricing-price="item.price"
+          data-pricing-view="detail"
+          class="border-t pt-8"
+        >
           <span class="micro">{{ item.index }}</span>
 
           <div class="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
