@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T14:19:30Z",
-  "last_outcome": "validated_pricing_price_semantics",
+  "updated_at": "2026-10-17T15:19:50Z",
+  "last_outcome": "validated_pricing_section_ranges",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -56,17 +56,18 @@
     "Validate that pricing page metadata stays synchronized with published package prices",
     "Validate that pricing package order remains consistent between the landing and full pricing views",
     "Validate that pricing package numbering remains unique and sequential across both views",
-    "Validate that fixed-price and from-price labels match package pricing semantics across both views"
+    "Validate that fixed-price and from-price labels match package pricing semantics across both views",
+    "Validate that pricing section range labels remain synchronized with package numbering"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (10 visible price labels match 5 package pricing semantics across 2 rendered views)",
-    "pricing_semantics_checks": "passed (three fixed prices omit from; two scope-dependent prices include from in both views)",
-    "pricing_semantics_failure_checks": "passed (rejected a missing from label for E-commerce and an incorrect from label for Starter)",
+    "npm run validate": "passed (2 pricing section ranges match their rendered package groups)",
+    "pricing_range_checks": "passed (fixed packages display 01 — 03 and from-price packages display 04 — 05)",
+    "pricing_range_failure_check": "passed (rejected stale fixed-package range 01 — 04)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that pricing section range labels remain synchronized with package numbering"
+  "next_task": "Give pricing enquiry links package-specific accessible names and validate them"
 }

@@ -553,12 +553,52 @@ function validatePricingPackageConsistency(pages) {
     )
   }
 
+  const rangeLabels = elementsWithContentAttribute(pages[1], 'data-pricing-range-for')
+  const rangeLabelsByGroup = new Map()
+  for (const { attributes, content, raw } of rangeLabels) {
+    const group = attributes['data-pricing-range-for']?.trim()
+    if (!group) fail(`route /pricing: pricing range label must identify its group: ${raw}`)
+    if (rangeLabelsByGroup.has(group)) {
+      fail(`route /pricing: duplicate pricing range label for ${JSON.stringify(group)}`)
+    }
+    rangeLabelsByGroup.set(group, renderedText(content))
+  }
+
+  const expectedRangeGroups = new Map([
+    [
+      'fixed',
+      [...detailPackages.values()].filter((item) => !item.from).map((item) => item.index)
+    ],
+    [
+      'from',
+      [...detailPackages.values()].filter((item) => item.from).map((item) => item.index)
+    ]
+  ])
+  if (rangeLabelsByGroup.size !== expectedRangeGroups.size) {
+    fail(
+      `route /pricing: expected ${expectedRangeGroups.size} package range labels, ` +
+        `found ${rangeLabelsByGroup.size}`
+    )
+  }
+  for (const [group, numbers] of expectedRangeGroups) {
+    if (numbers.length === 0) fail(`Pricing packages: ${group} range has no packages`)
+    const expectedRange = `${numbers[0]} — ${numbers.at(-1)}`
+    const actualRange = rangeLabelsByGroup.get(group)
+    if (actualRange !== expectedRange) {
+      fail(
+        `route /pricing: ${group} package range must be ${JSON.stringify(expectedRange)}; ` +
+          `found ${JSON.stringify(actualRange)}`
+      )
+    }
+  }
+
   return {
     consistentPricingPackageCount: summaryPackages.size,
     pricingViewCount: packagesByView.size,
     orderedPricingPackageCount: summaryOrder.length,
     numberedPricingPackageCount: packageNumbers.length,
-    semanticPricingLabelCount
+    semanticPricingLabelCount,
+    pricingRangeLabelCount: rangeLabelsByGroup.size
   }
 }
 
@@ -1408,7 +1448,8 @@ const {
   pricingViewCount,
   orderedPricingPackageCount,
   numberedPricingPackageCount,
-  semanticPricingLabelCount
+  semanticPricingLabelCount,
+  pricingRangeLabelCount
 } = validatePricingPackageConsistency(generatedPages)
 const { pricingMetadataPriceCount } = validatePricingMetadata(generatedPages[1])
 const runtimeAssets = validateRuntimeAssets(generatedPages)
@@ -1586,5 +1627,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects, ${consistentPricingPackageCount} pricing packages with matching names, prices and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics and ${pricingMetadataPriceCount} synchronized metadata prices, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects, ${consistentPricingPackageCount} pricing packages with matching names, prices and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels and ${pricingMetadataPriceCount} synchronized metadata prices, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

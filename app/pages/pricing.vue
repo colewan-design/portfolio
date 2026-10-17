@@ -74,7 +74,7 @@ useHead({
     <section class="mx-auto max-w-page px-5 pt-section">
       <div class="rise flex items-baseline justify-between gap-6 border-b pb-4">
         <h2 class="display text-h3">Website packages</h2>
-        <p class="micro hidden sm:block">01 — 03</p>
+        <p data-pricing-range-for="fixed" class="micro hidden sm:block">01 — 03</p>
       </div>
 
       <ul class="rise grid grid-cols-1 md:grid-cols-3">
@@ -157,7 +157,7 @@ useHead({
     <section class="mx-auto max-w-page px-5 pt-section">
       <div class="rise flex items-baseline justify-between gap-6 border-b pb-4">
         <h2 class="display text-h3">Beyond a website</h2>
-        <p class="micro hidden sm:block">04 — 05</p>
+        <p data-pricing-range-for="from" class="micro hidden sm:block">04 — 05</p>
       </div>
 
       <p class="rise micro mt-6 max-w-[62ch] leading-[1.9] text-gray-600">
