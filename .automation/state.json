@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T19:18:38Z",
-  "last_outcome": "validated_pricing_timelines",
+  "updated_at": "2026-10-17T20:19:46Z",
+  "last_outcome": "validated_pricing_scope_lists",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -61,17 +61,18 @@
     "Give pricing enquiry links package-specific accessible names and validate them",
     "Validate pricing package taglines and audiences remain consistent across both views",
     "Centralize pricing payment split and quote-valid duration across summary and terms",
-    "Validate pricing package timelines remain present and well-formed on the full pricing page"
+    "Validate pricing package timelines remain present and well-formed on the full pricing page",
+    "Validate every pricing package retains non-empty included features and written limits"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (5 package timelines are visible, synchronized and well-formed)",
-    "pricing_timeline_checks": "passed (numeric ranges increase and scoped builds retain their explicit label)",
-    "pricing_timeline_failure_checks": "passed (rejected reversed duration range and stale visible timeline mutations)",
+    "npm run validate": "passed (5 packages retain 30 included features and 15 written limits)",
+    "pricing_scope_checks": "passed (declared counts match unique, non-empty rendered scope items)",
+    "pricing_scope_failure_checks": "passed (rejected zero declared count and empty included-feature mutations)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate every pricing package retains non-empty included features and written limits"
+  "next_task": "Validate recurring-cost rows retain complete item, price and ownership notes"
 }

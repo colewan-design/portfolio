@@ -729,6 +729,74 @@ function validatePricingTimelines(html) {
   return { validatedPricingTimelineCount: timelinesByPackage.size }
 }
 
+function validatePricingScopeLists(html) {
+  const expectedByPackage = new Map()
+  for (const { attributes, raw } of openingTags(html).filter(
+    ({ attributes }) => attributes['data-pricing-view'] === 'detail'
+  )) {
+    const id = attributes['data-pricing-id']?.trim()
+    const includesCount = Number(attributes['data-pricing-includes-count'])
+    const limitsCount = Number(attributes['data-pricing-limits-count'])
+    if (
+      !id ||
+      !Number.isInteger(includesCount) ||
+      includesCount < 1 ||
+      !Number.isInteger(limitsCount) ||
+      limitsCount < 1
+    ) {
+      fail(`Pricing scope: package must declare positive includes and limits counts: ${raw}`)
+    }
+    if (expectedByPackage.has(id)) fail(`Pricing scope: duplicate package ${JSON.stringify(id)}`)
+    expectedByPackage.set(id, { includesCount, limitsCount })
+  }
+
+  const collect = (attribute, label) => {
+    const entries = new Map()
+    for (const { attributes, content, raw } of elementsWithContentAttribute(html, attribute)) {
+      const id = attributes[attribute]?.trim()
+      const text = renderedText(content)
+      if (!id || !text) fail(`Pricing scope: ${label} must identify its package and have text: ${raw}`)
+      if (!expectedByPackage.has(id)) {
+        fail(`Pricing scope: ${label} references unknown package ${JSON.stringify(id)}`)
+      }
+      const items = entries.get(id) || []
+      if (items.includes(text)) {
+        fail(`Pricing scope: duplicate ${label} for ${JSON.stringify(id)}: ${JSON.stringify(text)}`)
+      }
+      items.push(text)
+      entries.set(id, items)
+    }
+    return entries
+  }
+
+  const includesByPackage = collect('data-pricing-includes-for', 'included feature')
+  const limitsByPackage = collect('data-pricing-limits-for', 'written limit')
+  let pricingInclusionCount = 0
+  let pricingLimitCount = 0
+
+  if (expectedByPackage.size !== 5) {
+    fail(`Pricing scope: expected five packages, found ${expectedByPackage.size}`)
+  }
+  for (const [id, expected] of expectedByPackage) {
+    const includes = includesByPackage.get(id) || []
+    const limits = limitsByPackage.get(id) || []
+    if (includes.length !== expected.includesCount || limits.length !== expected.limitsCount) {
+      fail(
+        `Pricing scope: ${JSON.stringify(id)} expected ${expected.includesCount} included features ` +
+          `and ${expected.limitsCount} limits; found ${includes.length} and ${limits.length}`
+      )
+    }
+    pricingInclusionCount += includes.length
+    pricingLimitCount += limits.length
+  }
+
+  return {
+    validatedPricingScopePackageCount: expectedByPackage.size,
+    pricingInclusionCount,
+    pricingLimitCount
+  }
+}
+
 function validateCommercialTerms(html) {
   const collect = (attribute) => {
     const values = new Map()
@@ -1602,6 +1670,11 @@ const {
 } = validatePricingPackageConsistency(generatedPages)
 const { pricingMetadataPriceCount } = validatePricingMetadata(generatedPages[1])
 const { validatedPricingTimelineCount } = validatePricingTimelines(generatedPages[1])
+const {
+  validatedPricingScopePackageCount,
+  pricingInclusionCount,
+  pricingLimitCount
+} = validatePricingScopeLists(generatedPages[1])
 const { synchronizedCommercialTermCount } = validateCommercialTerms(generatedPages[1])
 const runtimeAssets = validateRuntimeAssets(generatedPages)
 
@@ -1778,5 +1851,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects with ${pricingEnquiryAccessibleNameCount} package-specific accessible names, ${consistentPricingPackageCount} pricing packages with matching names, prices, taglines and audiences and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${descriptivePricingPackageCount} synchronized package descriptions, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels, ${pricingMetadataPriceCount} synchronized metadata prices, ${validatedPricingTimelineCount} well-formed visible package timelines and ${synchronizedCommercialTermCount} synchronized commercial terms, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects with ${pricingEnquiryAccessibleNameCount} package-specific accessible names, ${consistentPricingPackageCount} pricing packages with matching names, prices, taglines and audiences and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${descriptivePricingPackageCount} synchronized package descriptions, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels, ${pricingMetadataPriceCount} synchronized metadata prices, ${validatedPricingTimelineCount} well-formed visible package timelines, ${validatedPricingScopePackageCount} packages with ${pricingInclusionCount} included features and ${pricingLimitCount} written limits, and ${synchronizedCommercialTermCount} synchronized commercial terms, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

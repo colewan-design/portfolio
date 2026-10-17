@@ -99,6 +99,8 @@ useHead({
           :data-pricing-tagline="plan.tagline"
           :data-pricing-audience="plan.bestFor"
           :data-pricing-timeline="plan.timeline"
+          :data-pricing-includes-count="plan.includes.length"
+          :data-pricing-limits-count="plan.limits.length"
           data-pricing-view="detail"
           class="flex flex-col border-b px-1 py-8 md:border-l md:px-6 md:first:border-l-0 md:first:pl-1 md:last:pr-1"
         >
@@ -137,6 +139,7 @@ useHead({
             <li
               v-for="line in plan.includes"
               :key="line"
+              :data-pricing-includes-for="plan.id"
               class="grid grid-cols-[0.9rem_1fr] text-sm text-gray-700"
             >
               <span aria-hidden="true" class="font-mono text-2xs text-gray-500">+</span>
@@ -152,6 +155,7 @@ useHead({
             <li
               v-for="line in plan.limits"
               :key="line"
+              :data-pricing-limits-for="plan.id"
               class="grid grid-cols-[0.9rem_1fr] text-sm text-gray-500"
             >
               <span aria-hidden="true" class="font-mono text-2xs">—</span>
@@ -197,6 +201,8 @@ useHead({
           :data-pricing-tagline="item.tagline"
           :data-pricing-audience="item.bestFor"
           :data-pricing-timeline="item.timeline"
+          :data-pricing-includes-count="item.includes.length"
+          :data-pricing-limits-count="item.limits.length"
           data-pricing-view="detail"
           class="border-t pt-8"
         >
@@ -236,6 +242,7 @@ useHead({
             <li
               v-for="line in item.includes"
               :key="line"
+              :data-pricing-includes-for="item.id"
               class="grid grid-cols-[0.9rem_1fr] text-sm text-gray-700"
             >
               <span aria-hidden="true" class="font-mono text-2xs text-gray-500">+</span>
@@ -248,6 +255,7 @@ useHead({
             <li
               v-for="line in item.limits"
               :key="line"
+              :data-pricing-limits-for="item.id"
               class="grid grid-cols-[0.9rem_1fr] text-sm text-gray-500"
             >
               <span aria-hidden="true" class="font-mono text-2xs">—</span>
