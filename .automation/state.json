@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T03:21:30Z",
-  "last_outcome": "validated_project_layout_consistency",
+  "updated_at": "2026-10-17T04:21:43Z",
+  "last_outcome": "validated_unlinked_project_semantics",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -45,17 +45,18 @@
     "Hide decorative external-link arrows from assistive technology while retaining the new-tab announcements",
     "Validate that the generated sr-only utility keeps new-tab announcements visually hidden",
     "Ensure external project links keep descriptive accessible names in addition to new-tab context",
-    "Validate that each linked project renders consistently in both the project index and work grid"
+    "Validate that each linked project renders consistently in both the project index and work grid",
+    "Validate that unlinked projects remain non-interactive and render consistently in both project layouts"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (8 linked projects have matching names and URLs across 2 project layouts)",
-    "project_layout_consistency_checks": "passed (project index and work grid contain the same linked project set and destinations)",
-    "project_layout_consistency_failure_checks": "passed (rejected a mismatched Xponent Global URL)",
+    "npm run validate": "passed on retry (1 unlinked project remains non-interactive and consistent across 2 layouts)",
+    "unlinked_project_checks": "passed (unlinked entries render as divs without link, focus, ARIA-label, or interactive-role attributes)",
+    "unlinked_project_failure_checks": "passed (rejected a focusable tabindex=0 mutation)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that unlinked projects remain non-interactive and render consistently in both project layouts"
+  "next_task": "Validate that project screenshot alternative text matches project names and image sources remain unique"
 }
