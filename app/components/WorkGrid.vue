@@ -19,6 +19,7 @@ import { projects } from '~/data/projects'
           <img
             :src="project.image"
             :alt="`Screenshot of ${project.name}`"
+            :data-project-name="project.name"
             :width="project.imageWidth"
             :height="project.imageHeight"
             loading="lazy"

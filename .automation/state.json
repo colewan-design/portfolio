@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T04:21:43Z",
-  "last_outcome": "validated_unlinked_project_semantics",
+  "updated_at": "2026-10-17T05:14:14Z",
+  "last_outcome": "validated_project_screenshot_identity",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -46,17 +46,18 @@
     "Validate that the generated sr-only utility keeps new-tab announcements visually hidden",
     "Ensure external project links keep descriptive accessible names in addition to new-tab context",
     "Validate that each linked project renders consistently in both the project index and work grid",
-    "Validate that unlinked projects remain non-interactive and render consistently in both project layouts"
+    "Validate that unlinked projects remain non-interactive and render consistently in both project layouts",
+    "Validate that project screenshot alternative text matches project names and image sources remain unique"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed on retry (1 unlinked project remains non-interactive and consistent across 2 layouts)",
-    "unlinked_project_checks": "passed (unlinked entries render as divs without link, focus, ARIA-label, or interactive-role attributes)",
-    "unlinked_project_failure_checks": "passed (rejected a focusable tabindex=0 mutation)",
+    "npm run validate": "passed (9 project screenshots have project-specific alternative text and unique sources)",
+    "project_screenshot_checks": "passed (every rendered project has one matching screenshot identity)",
+    "project_screenshot_failure_checks": "passed (rejected mismatched alt text and a reused image source)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that project screenshot alternative text matches project names and image sources remain unique"
+  "next_task": "Validate that contact links use well-formed destinations and retain readable labels"
 }
