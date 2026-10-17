@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { contactEmail } from '~/data/nav'
-import { plans, custom, running, process, terms } from '~/data/pricing'
+import { plans, custom, running, process, terms, commercialTerms } from '~/data/pricing'
 
 const pageTitle = 'Pricing — Christian Colewan'
 
@@ -59,11 +59,21 @@ useHead({
           </div>
           <div class="flex items-baseline justify-between gap-4 border-t py-3.5">
             <dt class="micro">Terms</dt>
-            <dd class="font-mono text-xs text-gray-800">50% / 50%</dd>
+            <dd
+              data-commercial-term-summary="payment"
+              class="font-mono text-xs text-gray-800"
+            >
+              {{ commercialTerms.payment.summary }}
+            </dd>
           </div>
           <div class="flex items-baseline justify-between gap-4 border-t py-3.5">
             <dt class="micro">Quote valid</dt>
-            <dd class="font-mono text-xs text-gray-800">30 days</dd>
+            <dd
+              data-commercial-term-summary="quote-validity"
+              class="font-mono text-xs text-gray-800"
+            >
+              {{ commercialTerms.quoteValidity.summary }}
+            </dd>
           </div>
           <div class="border-t" />
         </dl>
@@ -325,11 +335,13 @@ useHead({
         <ul class="rise max-w-[62ch] space-y-4">
           <li
             v-for="(term, i) in terms"
-            :key="term"
+            :key="term.id"
             class="grid grid-cols-[2.5rem_1fr] items-baseline gap-4 border-t py-4"
           >
             <span class="micro">{{ String(i + 1).padStart(2, '0') }}</span>
-            <span class="text-sm text-gray-700">{{ term }}</span>
+            <span :data-commercial-term-detail="term.id" class="text-sm text-gray-700">
+              {{ term.text }}
+            </span>
           </li>
           <li class="border-t" />
         </ul>

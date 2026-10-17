@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T17:22:22Z",
-  "last_outcome": "validated_pricing_descriptions",
+  "updated_at": "2026-10-17T18:15:10Z",
+  "last_outcome": "centralized_commercial_terms",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -59,17 +59,18 @@
     "Validate that fixed-price and from-price labels match package pricing semantics across both views",
     "Validate that pricing section range labels remain synchronized with package numbering",
     "Give pricing enquiry links package-specific accessible names and validate them",
-    "Validate pricing package taglines and audiences remain consistent across both views"
+    "Validate pricing package taglines and audiences remain consistent across both views",
+    "Centralize pricing payment split and quote-valid duration across summary and terms"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (5 package taglines and audiences match across 2 rendered views)",
-    "pricing_description_checks": "passed (all package taglines and best-for audiences remain synchronized)",
-    "pricing_description_failure_checks": "passed (rejected stale Starter tagline and audience mutations)",
+    "npm run validate": "passed (2 commercial terms synchronized between summary and fine print)",
+    "commercial_term_checks": "passed (payment percentages total 100% and quote validity matches its detail)",
+    "commercial_term_failure_checks": "passed (rejected stale payment split and quote-validity detail mutations)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Centralize pricing payment split and quote-valid duration across summary and terms"
+  "next_task": "Validate pricing package timelines remain present and well-formed on the full pricing page"
 }

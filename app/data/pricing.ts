@@ -227,11 +227,43 @@ export const process: Step[] = [
   }
 ]
 
-export const terms: string[] = [
-  'All prices are in Philippine pesos and exclude the running costs listed above.',
-  '50% to start, 50% on approval before the site goes live.',
-  'A revision cycle is one consolidated round of feedback, not an open queue of small changes.',
-  'Anything outside the agreed scope is quoted as a change request before work on it begins.',
-  'You own the site, the domain and every account. Source is handed over on final payment.',
-  'Quotes hold for 30 days.'
+const paymentDepositPercent = 50
+const paymentApprovalPercent = 50
+const quoteValidityDays = 30
+
+export const commercialTerms = {
+  payment: {
+    summary: `${paymentDepositPercent}% / ${paymentApprovalPercent}%`,
+    detail: `${paymentDepositPercent}% to start, ${paymentApprovalPercent}% on approval before the site goes live.`
+  },
+  quoteValidity: {
+    summary: `${quoteValidityDays} days`,
+    detail: `Quotes hold for ${quoteValidityDays} days.`
+  }
+} as const
+
+export interface Term {
+  id: string
+  text: string
+}
+
+export const terms: Term[] = [
+  {
+    id: 'currency',
+    text: 'All prices are in Philippine pesos and exclude the running costs listed above.'
+  },
+  { id: 'payment', text: commercialTerms.payment.detail },
+  {
+    id: 'revisions',
+    text: 'A revision cycle is one consolidated round of feedback, not an open queue of small changes.'
+  },
+  {
+    id: 'scope',
+    text: 'Anything outside the agreed scope is quoted as a change request before work on it begins.'
+  },
+  {
+    id: 'ownership',
+    text: 'You own the site, the domain and every account. Source is handed over on final payment.'
+  },
+  { id: 'quote-validity', text: commercialTerms.quoteValidity.detail }
 ]
