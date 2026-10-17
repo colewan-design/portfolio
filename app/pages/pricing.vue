@@ -3,8 +3,18 @@ import { contactEmail } from '~/data/nav'
 import { plans, custom, running, process, terms } from '~/data/pricing'
 
 const pageTitle = 'Pricing — Christian Colewan'
+
+function packagePrice(id: string) {
+  const item = [...plans, ...custom].find((entry) => entry.id === id)
+  if (!item) throw new Error(`Missing pricing package: ${id}`)
+  return item.price
+}
+
 const pageDescription =
-  'Website packages from ₱3,000, e-commerce from ₱18,000, and custom web systems from ₱30,000 — with scope, limits and running costs stated up front.'
+  `Website packages from ${packagePrice('starter')}, ` +
+  `e-commerce from ${packagePrice('ecommerce')}, and ` +
+  `custom web systems from ${packagePrice('systems')} — ` +
+  'with scope, limits and running costs stated up front.'
 
 /* Each package links to a pre-addressed mail, so the first message already
    says which tier the enquiry is about. */
