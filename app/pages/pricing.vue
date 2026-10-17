@@ -381,10 +381,19 @@ useHead({
           <li
             v-for="(term, i) in terms"
             :key="term.id"
+            :data-fine-print-key="term.id"
+            :data-fine-print-number="String(i + 1).padStart(2, '0')"
+            :data-fine-print-text="term.text"
             class="grid grid-cols-[2.5rem_1fr] items-baseline gap-4 border-t py-4"
           >
-            <span class="micro">{{ String(i + 1).padStart(2, '0') }}</span>
-            <span :data-commercial-term-detail="term.id" class="text-sm text-gray-700">
+            <span :data-fine-print-number-for="term.id" class="micro">
+              {{ String(i + 1).padStart(2, '0') }}
+            </span>
+            <span
+              :data-commercial-term-detail="term.id"
+              :data-fine-print-text-for="term.id"
+              class="text-sm text-gray-700"
+            >
               {{ term.text }}
             </span>
           </li>
