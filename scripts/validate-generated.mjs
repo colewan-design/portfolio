@@ -156,6 +156,16 @@ function isLabelableElement(element) {
   return ['button', 'meter', 'output', 'progress', 'select', 'textarea'].includes(element.name)
 }
 
+function hasNativeInputName(element) {
+  if (element.name !== 'input') return false
+
+  const type = element.attributes.type?.trim().toLowerCase() || 'text'
+  if (['reset', 'submit'].includes(type)) return true
+  if (type === 'image') return Boolean(element.attributes.alt?.trim())
+  if (type === 'button') return Boolean(element.attributes.value?.trim())
+  return false
+}
+
 function validateElementIdParsing() {
   const dataAttributeProbe =
     '<main id="main" data-probe-id="shared"></main><section data-probe-id="shared"></section>'
@@ -1502,7 +1512,8 @@ function validateAccessibility(html, label) {
     }
   }
 
-  for (const labelElement of labelElements(html)) {
+  const labels = labelElements(html)
+  for (const labelElement of labels) {
     const hasAttributeName = ['aria-label', 'aria-labelledby', 'title'].some(
       (attribute) => labelElement.attributes[attribute]?.trim()
     )
@@ -1513,6 +1524,24 @@ function validateAccessibility(html, label) {
 
     if (!hasAttributeName && !hasTextName && !hasImageName) {
       fail(`${label}: <label> has no accessible name: ${labelElement.raw}`)
+    }
+  }
+
+  const formControls = elements.filter(
+    (element) => element.name !== 'button' && isLabelableElement(element)
+  )
+  for (const control of formControls) {
+    const hasAttributeName = ['aria-label', 'aria-labelledby', 'title'].some(
+      (attribute) => control.attributes[attribute]?.trim()
+    )
+    const hasAssociatedLabel = labels.some(
+      (labelElement) =>
+        (control.attributes.id && labelElement.attributes.for?.trim() === control.attributes.id) ||
+        labelElement.content.includes(control.raw)
+    )
+
+    if (!hasAttributeName && !hasAssociatedLabel && !hasNativeInputName(control)) {
+      fail(`${label}: <${control.name}> has no accessible name: ${control.raw}`)
     }
   }
 
