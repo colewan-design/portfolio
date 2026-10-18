@@ -201,7 +201,23 @@ function validateAriaHiddenFocusParsing() {
     fail('ARIA-hidden focus parser: links with href must remain detectable as focusable')
   }
 
-  return { ariaHiddenFocusProbeCount: 2 }
+  const [decorativeContainer] = elementsWithContentAttribute(
+    '<div aria-hidden="true"><span>Decoration</span></div>',
+    'aria-hidden'
+  )
+  if (openingTags(decorativeContainer.content).some(isFocusableElement)) {
+    fail('ARIA-hidden focus parser: decorative descendants must remain non-focusable')
+  }
+
+  const [hiddenFocusContainer] = elementsWithContentAttribute(
+    '<div aria-hidden="true"><span><a href="/pricing">Hidden pricing link</a></span></div>',
+    'aria-hidden'
+  )
+  if (!openingTags(hiddenFocusContainer.content).some(isFocusableElement)) {
+    fail('ARIA-hidden focus parser: nested focusable descendants must remain detectable')
+  }
+
+  return { ariaHiddenFocusProbeCount: 4 }
 }
 
 function hasPositiveTabindex(element) {
@@ -1612,6 +1628,17 @@ function validateAccessibility(html, label) {
       isFocusableElement(element)
     ) {
       fail(`${label}: focusable <${element.name}> must not use aria-hidden=true: ${element.raw}`)
+    }
+  }
+
+  for (const container of elementsWithContentAttribute(html, 'aria-hidden')) {
+    if (container.attributes['aria-hidden']?.trim().toLowerCase() !== 'true') continue
+
+    const focusableDescendant = openingTags(container.content).find(isFocusableElement)
+    if (focusableDescendant) {
+      fail(
+        `${label}: aria-hidden <${container.name}> contains focusable descendant <${focusableDescendant.name}>: ${focusableDescendant.raw}`
+      )
     }
   }
 
