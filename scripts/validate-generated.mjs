@@ -1454,6 +1454,15 @@ function validateAccessibility(html, label) {
         fail(`${label}: ${attribute} must reference at least one id: ${element.raw}`)
       }
 
+      const duplicateReference = references.find(
+        (reference, index) => references.indexOf(reference) !== index
+      )
+      if (duplicateReference) {
+        fail(
+          `${label}: ${attribute} repeats id reference ${JSON.stringify(duplicateReference)}: ${element.raw}`
+        )
+      }
+
       for (const reference of references) {
         if (!seenIds.has(reference)) {
           fail(`${label}: ${attribute} references missing id ${JSON.stringify(reference)}`)
