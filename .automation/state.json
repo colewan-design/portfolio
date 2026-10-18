@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T15:20:48Z",
-  "last_outcome": "rejected_surrounding_href_whitespace",
+  "updated_at": "2026-10-18T16:19:16Z",
+  "last_outcome": "restored_corrupted_generated_site_validator",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -81,12 +81,14 @@
     "Reject nested interactive controls that create ambiguous keyboard targets",
     "Require every generated anchor to have a non-empty href",
     "Reject placeholder href values that do not identify a destination",
-    "Reject href values with leading or trailing whitespace"
+    "Reject href values with leading or trailing whitespace",
+    "Restore the generated-site validator after binary corruption while retaining href whitespace checks"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with href whitespace checks)",
+    "npm run validate": "passed (restored full generated-site validation with href whitespace checks)",
+    "validator_recovery": "passed (restored UTF-8 JavaScript, syntax check and complete validator execution)",
     "href_whitespace_checks": "passed (accepted clean route, fragment, contact and HTTPS destinations)",
     "href_whitespace_failure_checks": "passed (rejected leading, trailing and tab/newline padding)",
     "skill_md": "unchanged"
