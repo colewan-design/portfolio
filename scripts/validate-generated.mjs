@@ -138,6 +138,14 @@ function elementIds(html) {
   )
 }
 
+function isLabelableElement(element) {
+  if (element.name === 'input') {
+    return element.attributes.type?.trim().toLowerCase() !== 'hidden'
+  }
+
+  return ['button', 'meter', 'output', 'progress', 'select', 'textarea'].includes(element.name)
+}
+
 function validateElementIdParsing() {
   const dataAttributeProbe =
     '<main id="main" data-probe-id="shared"></main><section data-probe-id="shared"></section>'
@@ -1433,16 +1441,22 @@ function structuredData(html, label) {
 }
 
 function validateAccessibility(html, label) {
+  const elements = openingTags(html)
   const seenIds = new Set()
-  for (const id of elementIds(html)) {
+  const elementsById = new Map()
+  for (const element of elements) {
+    if (!Object.hasOwn(element.attributes, 'id')) continue
+
+    const id = element.attributes.id
     if (id.trim().length === 0) fail(`${label}: id attributes must not be empty`)
     if (/[\t\n\f\r ]/.test(id)) fail(`${label}: id attributes must not contain ASCII whitespace`)
     if (seenIds.has(id)) fail(`${label}: duplicate id attribute ${JSON.stringify(id)}`)
     seenIds.add(id)
+    elementsById.set(id, element)
   }
 
   const idReferenceAttributes = ['aria-controls', 'aria-describedby', 'aria-labelledby', 'aria-owns']
-  for (const element of openingTags(html)) {
+  for (const element of elements) {
     const referenceAttributes =
       element.name === 'label' ? ['for', ...idReferenceAttributes] : idReferenceAttributes
 
@@ -1470,6 +1484,9 @@ function validateAccessibility(html, label) {
       for (const reference of references) {
         if (!seenIds.has(reference)) {
           fail(`${label}: ${attribute} references missing id ${JSON.stringify(reference)}`)
+        }
+        if (attribute === 'for' && !isLabelableElement(elementsById.get(reference))) {
+          fail(`${label}: label for references non-labelable element ${JSON.stringify(reference)}`)
         }
       }
     }
