@@ -256,6 +256,10 @@ function hasMissingOrEmptyHref(element) {
   )
 }
 
+function hasPlaceholderHref(element) {
+  return element.name === 'a' && element.attributes.href?.trim() === '#'
+}
+
 function validateAnchorHrefParsing() {
   const validLinks = interactiveElements(
     '<a href="/pricing">Pricing</a><a href="#main">Main</a>' +
@@ -264,6 +268,9 @@ function validateAnchorHrefParsing() {
   const invalidLinks = interactiveElements(
     '<a>Missing</a><a href="">Empty</a><a href="   ">Whitespace</a>'
   )
+  const placeholderLinks = interactiveElements(
+    '<a href="#">Placeholder</a><a href="  #  ">Padded placeholder</a>'
+  )
 
   if (validLinks.some(hasMissingOrEmptyHref)) {
     fail('Anchor href parser: route, fragment, contact and HTTPS destinations must remain valid')
@@ -271,8 +278,16 @@ function validateAnchorHrefParsing() {
   if (invalidLinks.some((link) => !hasMissingOrEmptyHref(link))) {
     fail('Anchor href parser: missing, empty and whitespace-only destinations must remain invalid')
   }
+  if (
+    validLinks.some(hasPlaceholderHref) ||
+    placeholderLinks.some((link) => !hasPlaceholderHref(link))
+  ) {
+    fail('Anchor href parser: bare fragment placeholders must remain invalid')
+  }
 
-  return { anchorHrefProbeCount: validLinks.length + invalidLinks.length }
+  return {
+    anchorHrefProbeCount: validLinks.length + invalidLinks.length + placeholderLinks.length
+  }
 }
 
 function hasPositiveTabindex(element) {
@@ -555,6 +570,9 @@ function validateInternalLinks(pages, canonicalContactEmail) {
     )) {
       if (!Object.hasOwn(attributes, 'href') || attributes.href.trim().length === 0) {
         fail(`${label}: anchor must have a non-empty href`)
+      }
+      if (attributes.href.trim() === '#') {
+        fail(`${label}: anchor href must identify a real destination, not a bare fragment`)
       }
 
       let target

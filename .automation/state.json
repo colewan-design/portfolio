@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T13:18:49Z",
-  "last_outcome": "required_non_empty_anchor_destinations",
+  "updated_at": "2026-10-18T14:21:25Z",
+  "last_outcome": "rejected_placeholder_anchor_destinations",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -79,17 +79,18 @@
     "Reject invalid tabindex values that browsers cannot interpret consistently",
     "Reject focusable descendants inside aria-hidden containers",
     "Reject nested interactive controls that create ambiguous keyboard targets",
-    "Require every generated anchor to have a non-empty href"
+    "Require every generated anchor to have a non-empty href",
+    "Reject placeholder href values that do not identify a destination"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with anchor destination checks)",
-    "anchor_href_checks": "passed (accepted route, fragment, contact and HTTPS destinations)",
-    "anchor_href_failure_checks": "passed (rejected missing, empty and whitespace-only href values)",
+    "npm run validate": "passed (full generated-site validation with placeholder href checks)",
+    "anchor_href_checks": "passed (accepted named fragment destinations)",
+    "anchor_href_failure_checks": "passed (rejected bare and whitespace-padded fragment placeholders)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject placeholder href values that do not identify a destination"
+  "next_task": "Reject href values with leading or trailing whitespace"
 }
