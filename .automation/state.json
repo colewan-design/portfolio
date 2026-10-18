@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T09:18:04Z",
-  "last_outcome": "rejected_positive_tabindex_values",
+  "updated_at": "2026-10-18T10:20:21Z",
+  "last_outcome": "rejected_invalid_tabindex_values",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -75,17 +75,18 @@
     "Validate that every label retains a non-empty accessible name",
     "Validate that every generated form control has an accessible name",
     "Reject focusable elements hidden from assistive technology",
-    "Reject positive tabindex values that disrupt natural keyboard order"
+    "Reject positive tabindex values that disrupt natural keyboard order",
+    "Reject invalid tabindex values that browsers cannot interpret consistently"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with tabindex order checks)",
-    "tabindex_order_checks": "passed (accepted tabindex zero and negative one)",
-    "tabindex_order_failure_checks": "passed (rejected positive tabindex one)",
+    "npm run validate": "passed (full generated-site validation with tabindex syntax checks)",
+    "tabindex_value_checks": "passed (accepted zero and negative integers)",
+    "tabindex_value_failure_checks": "passed (rejected empty, padded, decimal, text and plus-prefixed values)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject invalid tabindex values that browsers cannot interpret consistently"
+  "next_task": "Reject focusable descendants inside aria-hidden containers"
 }
