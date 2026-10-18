@@ -1435,6 +1435,7 @@ function structuredData(html, label) {
 function validateAccessibility(html, label) {
   const seenIds = new Set()
   for (const id of elementIds(html)) {
+    if (id.trim().length === 0) fail(`${label}: id attributes must not be empty`)
     if (seenIds.has(id)) fail(`${label}: duplicate id attribute ${JSON.stringify(id)}`)
     seenIds.add(id)
   }

@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T00:17:17Z",
-  "last_outcome": "fixed_exact_duplicate_id_parsing",
+  "updated_at": "2026-10-18T01:16:06Z",
+  "last_outcome": "rejected_empty_html_ids",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -66,17 +66,18 @@
     "Validate recurring-cost rows retain complete item, price and responsive ownership notes",
     "Validate the five-step pricing process retains unique sequential numbering and complete visible descriptions",
     "Validate every pricing fine-print term retains a unique identifier and complete visible description",
-    "Tighten duplicate-id validation so data attributes ending in -id are not misclassified as HTML id attributes"
+    "Tighten duplicate-id validation so data attributes ending in -id are not misclassified as HTML id attributes",
+    "Validate that empty HTML id attributes are rejected before resolving ARIA references"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (2 exact-id parser probes plus full generated-site validation)",
-    "id_parser_checks": "passed (ignored repeated data-*-id attributes while retaining exact id attributes)",
-    "id_parser_failure_checks": "passed (rejected a duplicate real id mutation)",
+    "npm run validate": "passed (full generated-site validation with non-empty id enforcement)",
+    "empty_id_checks": "passed (all generated ids are non-empty before duplicate and ARIA reference validation)",
+    "empty_id_failure_checks": "passed (rejected a whitespace-only id mutation)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that empty HTML id attributes are rejected before resolving ARIA references"
+  "next_task": "Reject HTML id attribute values containing ASCII whitespace"
 }
