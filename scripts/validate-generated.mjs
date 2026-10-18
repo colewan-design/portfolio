@@ -166,6 +166,44 @@ function hasNativeInputName(element) {
   return false
 }
 
+function isFocusableElement(element) {
+  if (Object.hasOwn(element.attributes, 'tabindex')) return true
+
+  const contentEditable = element.attributes.contenteditable?.trim().toLowerCase()
+  if (contentEditable !== undefined && contentEditable !== 'false') return true
+
+  if (['a', 'area'].includes(element.name)) {
+    return Boolean(element.attributes.href?.trim())
+  }
+
+  const disabled = Object.hasOwn(element.attributes, 'disabled')
+  if (element.name === 'input') {
+    return !disabled && element.attributes.type?.trim().toLowerCase() !== 'hidden'
+  }
+  if (['button', 'select', 'textarea'].includes(element.name)) return !disabled
+  if (['audio', 'video'].includes(element.name)) {
+    return Object.hasOwn(element.attributes, 'controls')
+  }
+
+  return ['iframe', 'summary'].includes(element.name)
+}
+
+function validateAriaHiddenFocusParsing() {
+  const [decorativeElement] = openingTags('<span aria-hidden="true">Decoration</span>')
+  if (isFocusableElement(decorativeElement)) {
+    fail('ARIA-hidden focus parser: decorative elements must remain non-focusable')
+  }
+
+  const [hiddenLink] = openingTags(
+    '<a href="/pricing" aria-hidden="true">Hidden pricing link</a>'
+  )
+  if (!isFocusableElement(hiddenLink)) {
+    fail('ARIA-hidden focus parser: links with href must remain detectable as focusable')
+  }
+
+  return { ariaHiddenFocusProbeCount: 2 }
+}
+
 function validateElementIdParsing() {
   const dataAttributeProbe =
     '<main id="main" data-probe-id="shared"></main><section data-probe-id="shared"></section>'
@@ -1512,6 +1550,15 @@ function validateAccessibility(html, label) {
     }
   }
 
+  for (const element of elements) {
+    if (
+      element.attributes['aria-hidden']?.trim().toLowerCase() === 'true' &&
+      isFocusableElement(element)
+    ) {
+      fail(`${label}: focusable <${element.name}> must not use aria-hidden=true: ${element.raw}`)
+    }
+  }
+
   const labels = labelElements(html)
   for (const labelElement of labels) {
     const hasAttributeName = ['aria-label', 'aria-labelledby', 'title'].some(
@@ -1845,6 +1892,7 @@ async function requireIcoSizes(relativePath, expectedSizes) {
 
 const generatedPages = []
 const { idParserProbeCount } = validateElementIdParsing()
+const { ariaHiddenFocusProbeCount } = validateAriaHiddenFocusParsing()
 let accessibleControlCount = 0
 let primaryNavigationLinkCount = 0
 let informativeImageCount = 0
@@ -2165,5 +2213,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references backed by ${idParserProbeCount} exact-id parser probes, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects with ${pricingEnquiryAccessibleNameCount} package-specific accessible names, ${consistentPricingPackageCount} pricing packages with matching names, prices, taglines and audiences and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${descriptivePricingPackageCount} synchronized package descriptions, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels, ${pricingMetadataPriceCount} synchronized metadata prices, ${validatedPricingTimelineCount} well-formed visible package timelines, ${validatedPricingScopePackageCount} packages with ${pricingInclusionCount} included features and ${pricingLimitCount} written limits, ${runningCostRowCount} recurring-cost rows with ${runningCostVisibleFieldCount} synchronized responsive field renderings, ${pricingProcessStepCount} sequential process steps with ${pricingProcessFieldCount} synchronized visible fields, ${finePrintTermCount} fine-print terms with ${finePrintVisibleFieldCount} synchronized visible fields, and ${synchronizedCommercialTermCount} synchronized commercial terms, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references backed by ${idParserProbeCount} exact-id parser probes, ${ariaHiddenFocusProbeCount} aria-hidden focus probes, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects with ${pricingEnquiryAccessibleNameCount} package-specific accessible names, ${consistentPricingPackageCount} pricing packages with matching names, prices, taglines and audiences and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${descriptivePricingPackageCount} synchronized package descriptions, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels, ${pricingMetadataPriceCount} synchronized metadata prices, ${validatedPricingTimelineCount} well-formed visible package timelines, ${validatedPricingScopePackageCount} packages with ${pricingInclusionCount} included features and ${pricingLimitCount} written limits, ${runningCostRowCount} recurring-cost rows with ${runningCostVisibleFieldCount} synchronized responsive field renderings, ${pricingProcessStepCount} sequential process steps with ${pricingProcessFieldCount} synchronized visible fields, ${finePrintTermCount} fine-print terms with ${finePrintVisibleFieldCount} synchronized visible fields, and ${synchronizedCommercialTermCount} synchronized commercial terms, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )

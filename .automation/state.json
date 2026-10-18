@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T07:20:55Z",
-  "last_outcome": "validated_form_control_accessible_names",
+  "updated_at": "2026-10-18T08:22:55Z",
+  "last_outcome": "rejected_aria_hidden_focusable_elements",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -73,17 +73,18 @@
     "Require label for attributes to contain exactly one id-reference token",
     "Validate that label for attributes target labelable form controls",
     "Validate that every label retains a non-empty accessible name",
-    "Validate that every generated form control has an accessible name"
+    "Validate that every generated form control has an accessible name",
+    "Reject focusable elements hidden from assistive technology"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with named form controls)",
-    "form_control_name_checks": "passed (accepted a labeled text input)",
-    "form_control_name_failure_checks": "passed (rejected an unlabeled text input)",
+    "npm run validate": "passed (full generated-site validation with aria-hidden focus checks)",
+    "aria_hidden_focus_checks": "passed (accepted a non-focusable decorative hidden element)",
+    "aria_hidden_focus_failure_checks": "passed (rejected a hidden focusable link)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject focusable elements hidden from assistive technology"
+  "next_task": "Reject positive tabindex values that disrupt natural keyboard order"
 }
