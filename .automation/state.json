@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T16:19:16Z",
-  "last_outcome": "restored_corrupted_generated_site_validator",
+  "updated_at": "2026-10-18T17:19:20Z",
+  "last_outcome": "rejected_href_ascii_control_characters",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -82,18 +82,18 @@
     "Require every generated anchor to have a non-empty href",
     "Reject placeholder href values that do not identify a destination",
     "Reject href values with leading or trailing whitespace",
-    "Restore the generated-site validator after binary corruption while retaining href whitespace checks"
+    "Restore the generated-site validator after binary corruption while retaining href whitespace checks",
+    "Reject ASCII control characters inside generated href values"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (restored full generated-site validation with href whitespace checks)",
-    "validator_recovery": "passed (restored UTF-8 JavaScript, syntax check and complete validator execution)",
-    "href_whitespace_checks": "passed (accepted clean route, fragment, contact and HTTPS destinations)",
-    "href_whitespace_failure_checks": "passed (rejected leading, trailing and tab/newline padding)",
+    "npm run validate": "passed (full generated-site validation with href control-character checks)",
+    "href_control_checks": "passed (accepted clean route, fragment, contact and HTTPS destinations)",
+    "href_control_failure_checks": "passed (rejected embedded tab, line-break and DEL characters)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject control characters inside generated href values"
+  "next_task": "Reject character references that decode to ASCII controls in generated href values"
 }
