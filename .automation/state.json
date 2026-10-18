@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T03:14:44Z",
-  "last_outcome": "rejected_duplicate_id_references",
+  "updated_at": "2026-10-18T04:15:49Z",
+  "last_outcome": "enforced_single_label_targets",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -69,17 +69,18 @@
     "Tighten duplicate-id validation so data attributes ending in -id are not misclassified as HTML id attributes",
     "Validate that empty HTML id attributes are rejected before resolving ARIA references",
     "Reject HTML id attribute values containing ASCII whitespace",
-    "Reject duplicate tokens within label and ARIA id-reference attributes"
+    "Reject duplicate tokens within label and ARIA id-reference attributes",
+    "Require label for attributes to contain exactly one id-reference token"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with unique id-reference tokens)",
-    "id_reference_checks": "passed (label and ARIA id-reference token lists contain no duplicates)",
-    "id_reference_failure_checks": "passed (rejected a repeated aria-labelledby target)",
+    "npm run validate": "passed (full generated-site validation with single-target label references)",
+    "label_reference_checks": "passed (label for attributes contain exactly one id-reference token)",
+    "label_reference_failure_checks": "passed (rejected a label for value with two valid target ids)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Require label for attributes to contain exactly one id-reference token"
+  "next_task": "Validate that label for attributes target labelable form controls"
 }
