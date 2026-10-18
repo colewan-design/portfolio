@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-17T23:14:23Z",
-  "last_outcome": "validated_pricing_fine_print_terms",
+  "updated_at": "2026-10-18T00:17:17Z",
+  "last_outcome": "fixed_exact_duplicate_id_parsing",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -65,17 +65,18 @@
     "Validate every pricing package retains non-empty included features and written limits",
     "Validate recurring-cost rows retain complete item, price and responsive ownership notes",
     "Validate the five-step pricing process retains unique sequential numbering and complete visible descriptions",
-    "Validate every pricing fine-print term retains a unique identifier and complete visible description"
+    "Validate every pricing fine-print term retains a unique identifier and complete visible description",
+    "Tighten duplicate-id validation so data attributes ending in -id are not misclassified as HTML id attributes"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (6 fine-print terms and 12 synchronized visible number and description fields)",
-    "fine_print_checks": "passed (unique canonical keys, sequential numbering and complete visible descriptions)",
-    "fine_print_failure_checks": "passed (rejected duplicate key and empty visible description mutations)",
+    "npm run validate": "passed (2 exact-id parser probes plus full generated-site validation)",
+    "id_parser_checks": "passed (ignored repeated data-*-id attributes while retaining exact id attributes)",
+    "id_parser_failure_checks": "passed (rejected a duplicate real id mutation)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Tighten duplicate-id validation so data attributes ending in -id are not misclassified as HTML id attributes"
+  "next_task": "Validate that empty HTML id attributes are rejected before resolving ARIA references"
 }
