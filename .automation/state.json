@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T05:12:45Z",
-  "last_outcome": "validated_labelable_for_targets",
+  "updated_at": "2026-10-18T06:18:53Z",
+  "last_outcome": "validated_label_accessible_names",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -71,17 +71,18 @@
     "Reject HTML id attribute values containing ASCII whitespace",
     "Reject duplicate tokens within label and ARIA id-reference attributes",
     "Require label for attributes to contain exactly one id-reference token",
-    "Validate that label for attributes target labelable form controls"
+    "Validate that label for attributes target labelable form controls",
+    "Validate that every label retains a non-empty accessible name"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with labelable form-control targets)",
-    "label_target_checks": "passed (accepted a label targeting a text input)",
-    "label_target_failure_checks": "passed (rejected a label targeting a div)",
+    "npm run validate": "passed (full generated-site validation with named labels)",
+    "label_name_checks": "passed (accepted a text-named label targeting a text input)",
+    "label_name_failure_checks": "passed (rejected an empty label targeting a text input)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate that every label retains a non-empty accessible name"
+  "next_task": "Validate that every generated form control has an accessible name"
 }

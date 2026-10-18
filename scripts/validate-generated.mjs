@@ -105,6 +105,16 @@ function interactiveElements(html) {
   )
 }
 
+function labelElements(html) {
+  return [...html.matchAll(/<label\b([^>]*)>([\s\S]*?)<\/label>/gi)].map(
+    ([raw, attributes, content]) => ({
+      raw,
+      attributes: parseAttributes(attributes),
+      content
+    })
+  )
+}
+
 function elementsWithContentAttribute(html, attribute) {
   const pattern = new RegExp(
     `<([a-z][\\w:-]*)\\b([^>]*\\b${attribute}="[^"]+"[^>]*)>([\\s\\S]*?)<\\/\\1>`,
@@ -1489,6 +1499,20 @@ function validateAccessibility(html, label) {
           fail(`${label}: label for references non-labelable element ${JSON.stringify(reference)}`)
         }
       }
+    }
+  }
+
+  for (const labelElement of labelElements(html)) {
+    const hasAttributeName = ['aria-label', 'aria-labelledby', 'title'].some(
+      (attribute) => labelElement.attributes[attribute]?.trim()
+    )
+    const hasTextName = renderedText(labelElement.content).length > 0
+    const hasImageName = tags(labelElement.content, 'img').some(
+      ({ attributes }) => attributes.alt?.trim()
+    )
+
+    if (!hasAttributeName && !hasTextName && !hasImageName) {
+      fail(`${label}: <label> has no accessible name: ${labelElement.raw}`)
     }
   }
 
