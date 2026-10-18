@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T19:19:36Z",
-  "last_outcome": "rejected_malformed_href_percent_encoding",
+  "updated_at": "2026-10-18T20:21:28Z",
+  "last_outcome": "rejected_percent_encoded_href_ascii_controls",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -85,17 +85,18 @@
     "Restore the generated-site validator after binary corruption while retaining href whitespace checks",
     "Reject ASCII control characters inside generated href values",
     "Reject character references that decode to ASCII controls in generated href values",
-    "Reject malformed percent-encoding in every generated href before protocol handling"
+    "Reject malformed percent-encoding in every generated href before protocol handling",
+    "Reject percent-encoded ASCII control characters in every generated href"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with href percent-encoding checks)",
-    "href_percent_encoding_checks": "passed (accepted complete hexadecimal byte escapes across internal, contact and external links)",
-    "href_percent_encoding_failure_checks": "passed (rejected incomplete and non-hex byte escapes before protocol handling)",
+    "npm run validate": "passed (full generated-site validation with href encoded-control checks)",
+    "href_encoded_control_checks": "passed (accepted printable, separator and UTF-8 byte escapes)",
+    "href_encoded_control_failure_checks": "passed (rejected percent-encoded C0 controls and DEL across internal, contact and external links)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject percent-encoded ASCII control characters in every generated href"
+  "next_task": "Reject credentials embedded in generated HTTP(S) link destinations"
 }
