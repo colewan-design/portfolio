@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T18:14:34Z",
-  "last_outcome": "rejected_href_ascii_control_character_references",
+  "updated_at": "2026-10-18T19:19:36Z",
+  "last_outcome": "rejected_malformed_href_percent_encoding",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -84,17 +84,18 @@
     "Reject href values with leading or trailing whitespace",
     "Restore the generated-site validator after binary corruption while retaining href whitespace checks",
     "Reject ASCII control characters inside generated href values",
-    "Reject character references that decode to ASCII controls in generated href values"
+    "Reject character references that decode to ASCII controls in generated href values",
+    "Reject malformed percent-encoding in every generated href before protocol handling"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with href control-reference checks)",
-    "href_control_reference_checks": "passed (accepted escaped punctuation and printable numeric references)",
-    "href_control_reference_failure_checks": "passed (rejected decimal, hexadecimal and named ASCII control references)",
+    "npm run validate": "passed (full generated-site validation with href percent-encoding checks)",
+    "href_percent_encoding_checks": "passed (accepted complete hexadecimal byte escapes across internal, contact and external links)",
+    "href_percent_encoding_failure_checks": "passed (rejected incomplete and non-hex byte escapes before protocol handling)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject malformed percent-encoding in every generated href before protocol handling"
+  "next_task": "Reject percent-encoded ASCII control characters in every generated href"
 }
