@@ -1436,6 +1436,7 @@ function validateAccessibility(html, label) {
   const seenIds = new Set()
   for (const id of elementIds(html)) {
     if (id.trim().length === 0) fail(`${label}: id attributes must not be empty`)
+    if (/[\t\n\f\r ]/.test(id)) fail(`${label}: id attributes must not contain ASCII whitespace`)
     if (seenIds.has(id)) fail(`${label}: duplicate id attribute ${JSON.stringify(id)}`)
     seenIds.add(id)
   }
