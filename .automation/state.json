@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T11:22:14Z",
-  "last_outcome": "rejected_focusable_descendants_in_aria_hidden_containers",
+  "updated_at": "2026-10-18T12:13:06Z",
+  "last_outcome": "rejected_nested_interactive_controls",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -77,17 +77,18 @@
     "Reject focusable elements hidden from assistive technology",
     "Reject positive tabindex values that disrupt natural keyboard order",
     "Reject invalid tabindex values that browsers cannot interpret consistently",
-    "Reject focusable descendants inside aria-hidden containers"
+    "Reject focusable descendants inside aria-hidden containers",
+    "Reject nested interactive controls that create ambiguous keyboard targets"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with aria-hidden descendant checks)",
-    "aria_hidden_descendant_checks": "passed (accepted nested decorative content)",
-    "aria_hidden_descendant_failure_checks": "passed (rejected a nested focusable link)",
+    "npm run validate": "passed (full generated-site validation with nested interactive control checks)",
+    "nested_interactive_checks": "passed (accepted presentational descendants)",
+    "nested_interactive_failure_checks": "passed (rejected links inside buttons and buttons inside links)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject nested interactive controls that create ambiguous keyboard targets"
+  "next_task": "Reject empty href attributes on generated links"
 }
