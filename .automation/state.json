@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T17:19:20Z",
-  "last_outcome": "rejected_href_ascii_control_characters",
+  "updated_at": "2026-10-18T18:14:34Z",
+  "last_outcome": "rejected_href_ascii_control_character_references",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -83,17 +83,18 @@
     "Reject placeholder href values that do not identify a destination",
     "Reject href values with leading or trailing whitespace",
     "Restore the generated-site validator after binary corruption while retaining href whitespace checks",
-    "Reject ASCII control characters inside generated href values"
+    "Reject ASCII control characters inside generated href values",
+    "Reject character references that decode to ASCII controls in generated href values"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with href control-character checks)",
-    "href_control_checks": "passed (accepted clean route, fragment, contact and HTTPS destinations)",
-    "href_control_failure_checks": "passed (rejected embedded tab, line-break and DEL characters)",
+    "npm run validate": "passed (full generated-site validation with href control-reference checks)",
+    "href_control_reference_checks": "passed (accepted escaped punctuation and printable numeric references)",
+    "href_control_reference_failure_checks": "passed (rejected decimal, hexadecimal and named ASCII control references)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject character references that decode to ASCII controls in generated href values"
+  "next_task": "Reject malformed percent-encoding in every generated href before protocol handling"
 }
