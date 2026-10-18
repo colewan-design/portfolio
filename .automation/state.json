@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T20:21:28Z",
-  "last_outcome": "rejected_percent_encoded_href_ascii_controls",
+  "updated_at": "2026-10-18T21:22:26Z",
+  "last_outcome": "rejected_embedded_http_credentials",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -86,17 +86,18 @@
     "Reject ASCII control characters inside generated href values",
     "Reject character references that decode to ASCII controls in generated href values",
     "Reject malformed percent-encoding in every generated href before protocol handling",
-    "Reject percent-encoded ASCII control characters in every generated href"
+    "Reject percent-encoded ASCII control characters in every generated href",
+    "Reject credentials embedded in generated HTTP(S) link destinations"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with href encoded-control checks)",
-    "href_encoded_control_checks": "passed (accepted printable, separator and UTF-8 byte escapes)",
-    "href_encoded_control_failure_checks": "passed (rejected percent-encoded C0 controls and DEL across internal, contact and external links)",
+    "npm run validate": "passed (full generated-site validation with HTTP credential checks)",
+    "http_credential_checks": "passed (accepted ordinary internal, external and contact links)",
+    "http_credential_failure_checks": "passed (rejected username-only, username/password, encoded and protocol-relative credential URLs)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject credentials embedded in generated HTTP(S) link destinations"
+  "next_task": "Reject protocol-relative external links so HTTPS intent remains explicit"
 }
