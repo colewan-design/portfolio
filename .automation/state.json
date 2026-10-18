@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T21:22:26Z",
-  "last_outcome": "rejected_embedded_http_credentials",
+  "updated_at": "2026-10-18T22:16:15Z",
+  "last_outcome": "rejected_protocol_relative_external_links",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -87,17 +87,18 @@
     "Reject character references that decode to ASCII controls in generated href values",
     "Reject malformed percent-encoding in every generated href before protocol handling",
     "Reject percent-encoded ASCII control characters in every generated href",
-    "Reject credentials embedded in generated HTTP(S) link destinations"
+    "Reject credentials embedded in generated HTTP(S) link destinations",
+    "Reject protocol-relative external links so HTTPS intent remains explicit"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with HTTP credential checks)",
-    "http_credential_checks": "passed (accepted ordinary internal, external and contact links)",
-    "http_credential_failure_checks": "passed (rejected username-only, username/password, encoded and protocol-relative credential URLs)",
+    "npm run validate": "passed (full generated-site validation with protocol-relative external-link checks)",
+    "protocol_relative_external_checks": "passed (accepted relative, explicit HTTPS, contact and same-origin links)",
+    "protocol_relative_external_failure_checks": "passed (rejected cross-origin destinations without an explicit scheme)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject protocol-relative external links so HTTPS intent remains explicit"
+  "next_task": "Reject protocol-relative URLs in generated metadata and asset references"
 }
