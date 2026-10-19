@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-18T23:18:16Z",
-  "last_outcome": "rejected_protocol_relative_metadata_and_asset_urls",
+  "updated_at": "2026-10-19T00:16:18Z",
+  "last_outcome": "rejected_protocol_relative_machine_readable_urls",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -89,17 +89,18 @@
     "Reject percent-encoded ASCII control characters in every generated href",
     "Reject credentials embedded in generated HTTP(S) link destinations",
     "Reject protocol-relative external links so HTTPS intent remains explicit",
-    "Reject protocol-relative URLs in generated metadata and asset references"
+    "Reject protocol-relative URLs in generated metadata and asset references",
+    "Reject protocol-relative URLs in sitemap, robots, manifest and structured data references"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with protocol-relative metadata and asset checks)",
-    "protocol_relative_reference_checks": "passed (accepted relative, explicit HTTPS, data and fragment references)",
-    "protocol_relative_reference_failure_checks": "passed (rejected scheme-omitting metadata and runtime asset URLs)",
+    "npm run validate": "passed (full generated-site validation with protocol-relative machine-readable URL checks)",
+    "protocol_relative_machine_reference_checks": "passed (accepted relative paths and explicit HTTPS references)",
+    "protocol_relative_machine_reference_failure_checks": "passed (rejected scheme-omitting sitemap, robots, manifest and JSON-LD URLs)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject protocol-relative URLs in sitemap, robots, manifest and structured data references"
+  "next_task": "Reject embedded credentials in generated metadata, asset and machine-readable HTTP(S) URLs"
 }
