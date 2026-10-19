@@ -413,6 +413,7 @@ function parseSizesAttribute(value) {
   const components = splitTopLevelCommaList(value)
   if (!components) return null
 
+  const parsedComponents = []
   for (const component of components) {
     const valueStart = sourceSizeValueStart(component)
     const mediaCondition = component.slice(0, valueStart).trim()
@@ -422,9 +423,19 @@ function parseSizesAttribute(value) {
     if (mediaCondition && !(mediaCondition.startsWith('(') && mediaCondition.endsWith(')'))) {
       return null
     }
+    parsedComponents.push({ mediaCondition, sourceSizeValue })
   }
 
-  return components
+  return parsedComponents
+}
+
+function sizesHasUnconditionalFallback(components) {
+  return components?.at(-1)?.mediaCondition === ''
+}
+
+function hasValidSizesAttribute(value) {
+  const components = parseSizesAttribute(value)
+  return Boolean(components && sizesHasUnconditionalFallback(components))
 }
 
 function srcsetRequiresSizes(candidates) {
@@ -960,12 +971,24 @@ function validateSizesParsing() {
     '(max-width: 48rem) 100%',
     '(max-width: 48rem) -10vw'
   ]
+  const sizesWithoutFallback = [
+    '(max-width: 48rem) 100vw',
+    '(min-width: 64rem) 50vw, (min-width: 32rem) 75vw'
+  ]
 
-  if (validSizes.some((value) => !parseSizesAttribute(value))) {
+  if (validSizes.some((value) => !hasValidSizesAttribute(value))) {
     fail('Sizes parser: valid lengths, media conditions and CSS functions must remain valid')
   }
   if (invalidSizes.some((value) => parseSizesAttribute(value))) {
     fail('Sizes parser: empty, unbalanced and invalid source-size lists must remain invalid')
+  }
+  if (
+    sizesWithoutFallback.some((value) => {
+      const components = parseSizesAttribute(value)
+      return !components || sizesHasUnconditionalFallback(components)
+    })
+  ) {
+    fail('Sizes parser: conditional source-size lists must require an unconditional fallback')
   }
   if (
     !srcsetRequiresSizes(parseSrcsetCandidates('/small.webp 480w, /large.webp 960w')) ||
@@ -974,7 +997,9 @@ function validateSizesParsing() {
     fail('Sizes parser: only width-based srcset candidate lists must require sizes')
   }
 
-  return { sizesProbeCount: validSizes.length + invalidSizes.length + 2 }
+  return {
+    sizesProbeCount: validSizes.length + invalidSizes.length + sizesWithoutFallback.length + 2
+  }
 }
 
 function validateProtocolRelativeExternalParsing() {
@@ -2518,7 +2543,7 @@ function validateRuntimeAssets(pages) {
         }
         if (
           srcsetRequiresSizes(srcsetCandidates) &&
-          !parseSizesAttribute(element.attributes.sizes)
+          !hasValidSizesAttribute(element.attributes.sizes)
         ) {
           fail(`${label}: <${element.name}> width-based srcset requires a valid sizes attribute`)
         }
