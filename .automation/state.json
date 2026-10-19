@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-19T02:17:19Z",
-  "last_outcome": "rejected_malformed_percent_encoding_in_generated_url_references",
+  "updated_at": "2026-10-19T03:21:32Z",
+  "last_outcome": "rejected_percent_encoded_controls_in_generated_url_references",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -92,17 +92,18 @@
     "Reject protocol-relative URLs in generated metadata and asset references",
     "Reject protocol-relative URLs in sitemap, robots, manifest and structured data references",
     "Reject embedded credentials in generated metadata, asset and machine-readable HTTP(S) URLs",
-    "Reject malformed percent-encoding in generated metadata, asset and machine-readable URL references"
+    "Reject malformed percent-encoding in generated metadata, asset and machine-readable URL references",
+    "Reject percent-encoded ASCII controls in generated metadata, asset and machine-readable URL references"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with malformed percent-encoding reference checks)",
-    "url_reference_percent_encoding_checks": "passed (accepted complete hexadecimal escapes across site, asset, data and contact URLs)",
-    "url_reference_percent_encoding_failure_checks": "passed (rejected incomplete and non-hexadecimal escapes without logging their values)",
+    "npm run validate": "passed (full generated-site validation with percent-encoded ASCII control reference checks)",
+    "url_reference_encoded_control_checks": "passed (accepted printable and UTF-8 escapes across site, asset, data and contact URLs)",
+    "url_reference_encoded_control_failure_checks": "passed (rejected percent-encoded C0 controls and DEL without logging their values)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject percent-encoded ASCII controls in generated metadata, asset and machine-readable URL references"
+  "next_task": "Reject character references that decode to ASCII controls in generated metadata and asset URL references"
 }
