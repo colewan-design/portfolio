@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-19T14:28:07Z",
-  "last_outcome": "validated_sizes_media_conditions",
+  "updated_at": "2026-10-19T16:13:43Z",
+  "last_outcome": "validated_source_size_math_functions",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -103,17 +103,18 @@
     "Require generated srcset width descriptors to include a valid sizes attribute",
     "Require generated sizes lists to end with an unconditional fallback source size",
     "Allow sizes=auto only as the first component on eligible lazy-loaded images",
-    "Validate generated sizes media conditions and reject empty or malformed conditions"
+    "Validate generated sizes media conditions and reject empty or malformed conditions",
+    "Validate source-size math functions and reject empty or malformed expressions"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
     "npm run validate": "passed from clean generated Nuxt output",
-    "sizes_checks": "passed (accepted boolean, colon, range, negated and nested logical media conditions)",
-    "sizes_failure_checks": "passed (36 probes rejected empty features, missing operands and mixed top-level operators)",
+    "sizes_checks": "passed (51 probes, including nested calc, min, max and three-argument clamp expressions)",
+    "sizes_failure_checks": "passed (rejected empty arguments, malformed operators, invalid arity and commas in calc)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate source-size math functions and reject empty or malformed expressions"
+  "next_task": "Validate source-size math operands and reject unsupported units or adjacent operands"
 }

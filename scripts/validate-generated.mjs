@@ -398,13 +398,101 @@ function sourceSizeValueStart(component) {
   return 0
 }
 
+function matchingClosingParenthesis(value, openingPosition) {
+  let depth = 0
+
+  for (let position = openingPosition; position < value.length; position += 1) {
+    if (value[position] === '(') depth += 1
+    if (value[position] === ')') depth -= 1
+    if (depth === 0) return position
+    if (depth < 0) return -1
+  }
+
+  return -1
+}
+
+function hasValidMathOperatorSpacing(value) {
+  for (let position = 0; position < value.length; position += 1) {
+    const character = value[position]
+    if (character !== '+' && character !== '-') continue
+
+    const previousValue = value.slice(0, position).match(/\S(?=\s*$)/)?.[0]
+    const isUnary =
+      !previousValue ||
+      previousValue === '(' ||
+      previousValue === ',' ||
+      '+-*/'.includes(previousValue) ||
+      ((previousValue === 'e' || previousValue === 'E') && /\d/.test(value[position - 2] ?? ''))
+
+    if (!isUnary && (!/\s/.test(value[position - 1] ?? '') || !/\s/.test(value[position + 1] ?? ''))) {
+      return false
+    }
+  }
+
+  return true
+}
+
+function isValidMathExpression(value) {
+  const expression = value.trim()
+  const expressionParts = splitTopLevelCommaList(expression)
+  if (
+    !expression ||
+    !expressionParts ||
+    expressionParts.length !== 1 ||
+    /%/.test(expression) ||
+    /\(\s*\)|\(\s*,|,\s*,|,\s*\)/.test(expression) ||
+    /^[*/]|[+\-*/]$/.test(expression) ||
+    /[+*/]\s*[+*/]/.test(expression) ||
+    !hasValidMathOperatorSpacing(expression) ||
+    !/(?:\d+(?:\.\d*)?|\.\d+)/.test(expression)
+  ) {
+    return false
+  }
+
+  const functionPattern = /([a-z][a-z0-9-]*)\s*\(/gi
+  let match
+  while ((match = functionPattern.exec(expression))) {
+    if (!['calc', 'min', 'max', 'clamp'].includes(match[1].toLowerCase())) return false
+
+    const openingPosition = expression.indexOf('(', match.index)
+    const closingPosition = matchingClosingParenthesis(expression, openingPosition)
+    if (closingPosition < 0) return false
+    if (!isValidSourceSizeMathFunction(expression.slice(match.index, closingPosition + 1))) return false
+    functionPattern.lastIndex = closingPosition + 1
+  }
+
+  return true
+}
+
+function isValidSourceSizeMathFunction(value) {
+  const match = value.match(/^(calc|min|max|clamp)\((.*)\)$/is)
+  if (!match || matchingClosingParenthesis(value, value.indexOf('(')) !== value.length - 1) return false
+
+  const functionName = match[1].toLowerCase()
+  const argumentsList = splitTopLevelCommaList(match[2])
+  if (!argumentsList) return false
+
+  if (functionName === 'calc') {
+    return argumentsList.length === 1 && isValidMathExpression(argumentsList[0])
+  }
+  if (functionName === 'min' || functionName === 'max') {
+    return argumentsList.every(isValidMathExpression)
+  }
+  if (argumentsList.length !== 3 || argumentsList[1].toLowerCase() === 'none') return false
+
+  return argumentsList.every((argument, index) => {
+    if (argument.toLowerCase() === 'none') return index === 0 || index === 2
+    return isValidMathExpression(argument)
+  })
+}
+
 function isValidSourceSizeValue(value) {
   if (value === 'auto' || value === '0') return true
   if (/^(?:\d+(?:\.\d*)?|\.\d+)(?:px|em|rem|ch|ex|cap|ic|lh|rlh|vw|vh|vi|vb|vmin|vmax|cm|mm|q|in|pc|pt)$/i.test(value)) {
     return true
   }
 
-  return /^(?:calc|min|max|clamp)\(.+\)$/i.test(value)
+  return isValidSourceSizeMathFunction(value)
 }
 
 function splitMediaConditionAtTopLevel(value) {
@@ -1064,7 +1152,11 @@ function validateSizesParsing() {
     'not (color) 100vw, 48rem',
     '(width <= 48rem) 100vw, 48rem',
     '((hover: hover) and (pointer: fine)) 50vw, 100vw',
-    'clamp(20rem, 50vw, 60rem)'
+    'clamp(20rem, 50vw, 60rem)',
+    'clamp(none, 50vw, 60rem)',
+    'min(100vw, 48rem)',
+    'max(20rem, 50vw, 30rem)',
+    'calc(min(100vw, 60rem) - 2rem)'
   ]
   const invalidSizes = [
     '',
@@ -1081,7 +1173,18 @@ function validateSizesParsing() {
     '(color) and or (hover) 100vw, 48rem',
     '(color) and (pointer) or (hover) 100vw, 48rem',
     '(max-width: 48rem) 100%',
-    '(max-width: 48rem) -10vw'
+    '(max-width: 48rem) -10vw',
+    'calc()',
+    'calc(50vw +)',
+    'calc(50vw+2rem)',
+    'calc(50vw, 20rem)',
+    'calc(min(20rem,))',
+    'min()',
+    'min(20rem,)',
+    'max(, 50vw)',
+    'clamp(20rem, 50vw)',
+    'clamp(20rem, 50vw, 60rem, 70rem)',
+    'clamp(20rem, none, 60rem)'
   ]
   const sizesWithoutFallback = [
     '(max-width: 48rem) 100vw',
