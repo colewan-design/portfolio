@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-19T12:18:02Z",
-  "last_outcome": "required_unconditional_sizes_fallback",
+  "updated_at": "2026-10-19T13:31:16Z",
+  "last_outcome": "restricted_auto_sizes_to_lazy_images",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -101,17 +101,18 @@
     "Reject unsafe URL schemes in generated metadata, asset and machine-readable references",
     "Validate generated srcset candidate descriptors and reject empty candidates",
     "Require generated srcset width descriptors to include a valid sizes attribute",
-    "Require generated sizes lists to end with an unconditional fallback source size"
+    "Require generated sizes lists to end with an unconditional fallback source size",
+    "Allow sizes=auto only as the first component on eligible lazy-loaded images"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
     "npm run validate": "passed from clean generated Nuxt output",
-    "sizes_checks": "passed (accepted conditional entries followed by an unconditional fallback)",
-    "sizes_failure_checks": "passed (16 probes rejected missing fallbacks alongside empty, unbalanced and invalid sizes)",
+    "sizes_checks": "passed (accepted auto as the first component on lazy-loaded images)",
+    "sizes_failure_checks": "passed (26 probes rejected auto on eager images, source elements and invalid list positions)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Allow sizes=auto only on generated images eligible for lazy auto-sizing"
+  "next_task": "Validate generated sizes media conditions and reject empty or malformed conditions"
 }

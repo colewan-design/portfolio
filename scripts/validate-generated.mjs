@@ -433,9 +433,23 @@ function sizesHasUnconditionalFallback(components) {
   return components?.at(-1)?.mediaCondition === ''
 }
 
-function hasValidSizesAttribute(value) {
+function hasValidSizesAttribute(value, { allowsAuto = false } = {}) {
   const components = parseSizesAttribute(value)
-  return Boolean(components && sizesHasUnconditionalFallback(components))
+  if (!components || !sizesHasUnconditionalFallback(components)) return false
+
+  const autoComponents = components.filter(({ sourceSizeValue }) => sourceSizeValue === 'auto')
+  if (autoComponents.length === 0) return true
+
+  return (
+    allowsAuto &&
+    autoComponents.length === 1 &&
+    components[0].sourceSizeValue === 'auto' &&
+    components[0].mediaCondition === ''
+  )
+}
+
+function elementAllowsAutoSizes(element) {
+  return element.name === 'img' && element.attributes.loading?.trim().toLowerCase() === 'lazy'
 }
 
 function srcsetRequiresSizes(candidates) {
@@ -975,6 +989,12 @@ function validateSizesParsing() {
     '(max-width: 48rem) 100vw',
     '(min-width: 64rem) 50vw, (min-width: 32rem) 75vw'
   ]
+  const validAutoSizes = ['auto', 'auto, (max-width: 48rem) 100vw, 48rem']
+  const invalidAutoSizes = [
+    '100vw, auto',
+    '(max-width: 48rem) auto, 100vw',
+    'auto, auto, 100vw'
+  ]
 
   if (validSizes.some((value) => !hasValidSizesAttribute(value))) {
     fail('Sizes parser: valid lengths, media conditions and CSS functions must remain valid')
@@ -990,6 +1010,25 @@ function validateSizesParsing() {
   ) {
     fail('Sizes parser: conditional source-size lists must require an unconditional fallback')
   }
+  if (validAutoSizes.some((value) => !hasValidSizesAttribute(value, { allowsAuto: true }))) {
+    fail('Sizes parser: lazy-loaded images must allow auto as the first source-size component')
+  }
+  if (
+    validAutoSizes.some((value) => hasValidSizesAttribute(value)) ||
+    invalidAutoSizes.some((value) => hasValidSizesAttribute(value, { allowsAuto: true }))
+  ) {
+    fail('Sizes parser: auto must require eligibility and remain the first source-size component')
+  }
+  const [lazyImage] = openingTags('<img loading="lazy" src="/portrait.webp" alt="Portrait">')
+  const [eagerImage] = openingTags('<img loading="eager" src="/portrait.webp" alt="Portrait">')
+  const [sourceElement] = openingTags('<source srcset="/portrait.webp 480w">')
+  if (
+    !elementAllowsAutoSizes(lazyImage) ||
+    elementAllowsAutoSizes(eagerImage) ||
+    elementAllowsAutoSizes(sourceElement)
+  ) {
+    fail('Sizes parser: only lazy-loaded img elements must be eligible for auto sizing')
+  }
   if (
     !srcsetRequiresSizes(parseSrcsetCandidates('/small.webp 480w, /large.webp 960w')) ||
     srcsetRequiresSizes(parseSrcsetCandidates('/standard.webp 1x, /retina.webp 2x'))
@@ -998,7 +1037,13 @@ function validateSizesParsing() {
   }
 
   return {
-    sizesProbeCount: validSizes.length + invalidSizes.length + sizesWithoutFallback.length + 2
+    sizesProbeCount:
+      validSizes.length +
+      invalidSizes.length +
+      sizesWithoutFallback.length +
+      validAutoSizes.length * 2 +
+      invalidAutoSizes.length +
+      5
   }
 }
 
@@ -2543,7 +2588,9 @@ function validateRuntimeAssets(pages) {
         }
         if (
           srcsetRequiresSizes(srcsetCandidates) &&
-          !hasValidSizesAttribute(element.attributes.sizes)
+          !hasValidSizesAttribute(element.attributes.sizes, {
+            allowsAuto: elementAllowsAutoSizes(element)
+          })
         ) {
           fail(`${label}: <${element.name}> width-based srcset requires a valid sizes attribute`)
         }
