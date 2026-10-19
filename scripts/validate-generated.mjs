@@ -407,6 +407,96 @@ function isValidSourceSizeValue(value) {
   return /^(?:calc|min|max|clamp)\(.+\)$/i.test(value)
 }
 
+function splitMediaConditionAtTopLevel(value) {
+  const parts = []
+  const operators = []
+  let depth = 0
+  let partStart = 0
+
+  for (let position = 0; position < value.length; position += 1) {
+    const character = value[position]
+    if (character === '(') depth += 1
+    if (character === ')') {
+      depth -= 1
+      if (depth < 0) return null
+    }
+    if (depth !== 0 || !/\s/.test(character)) continue
+
+    const logicalMatch = value.slice(position).match(/^\s+(and|or)\s+/i)
+    if (!logicalMatch) continue
+
+    const part = value.slice(partStart, position).trim()
+    if (!part) return null
+    parts.push(part)
+    operators.push(logicalMatch[1].toLowerCase())
+    position += logicalMatch[0].length - 1
+    partStart = position + 1
+  }
+
+  if (depth !== 0) return null
+  const finalPart = value.slice(partStart).trim()
+  if (!finalPart) return null
+  parts.push(finalPart)
+  return { parts, operators }
+}
+
+function outerParenthesizedContent(value) {
+  if (!value.startsWith('(') || !value.endsWith(')')) return null
+
+  let depth = 0
+  for (let position = 0; position < value.length; position += 1) {
+    if (value[position] === '(') depth += 1
+    if (value[position] === ')') depth -= 1
+    if (depth === 0 && position < value.length - 1) return null
+    if (depth < 0) return null
+  }
+
+  return depth === 0 ? value.slice(1, -1).trim() : null
+}
+
+function isValidMediaFeature(value) {
+  if (/^[a-z][a-z0-9-]*$/i.test(value)) return true
+
+  const colonMatch = value.match(/^([a-z][a-z0-9-]*)\s*:\s*(.+)$/i)
+  if (colonMatch) return colonMatch[2].trim().length > 0
+  if (value.includes(':')) return false
+
+  const rangeParts = value.split(/\s*(<=|>=|<|>|=)\s*/)
+  if (rangeParts.length !== 3 && rangeParts.length !== 5) return false
+
+  const operands = rangeParts.filter((_, index) => index % 2 === 0)
+  return (
+    operands.every((operand) => operand.trim().length > 0 && !/[<>=]/.test(operand)) &&
+    operands.some((operand) => /^[a-z][a-z0-9-]*$/i.test(operand.trim()))
+  )
+}
+
+function isValidMediaInParens(value) {
+  const content = outerParenthesizedContent(value.trim())
+  if (!content) return false
+
+  if (/^not\s/i.test(content) || content.startsWith('(')) {
+    return isValidMediaCondition(content)
+  }
+
+  return isValidMediaFeature(content) || /^[a-z][a-z0-9-]*\(.+\)$/i.test(content)
+}
+
+function isValidMediaCondition(value) {
+  const condition = value.trim()
+  if (!condition) return false
+
+  const notMatch = condition.match(/^not\s+(.+)$/i)
+  if (notMatch) return isValidMediaInParens(notMatch[1])
+
+  const splitCondition = splitMediaConditionAtTopLevel(condition)
+  if (!splitCondition) return false
+  if (splitCondition.operators.length === 0) return isValidMediaInParens(condition)
+  if (new Set(splitCondition.operators).size !== 1) return false
+
+  return splitCondition.parts.every(isValidMediaInParens)
+}
+
 function parseSizesAttribute(value) {
   if (typeof value !== 'string' || value.trim().length === 0) return null
 
@@ -420,9 +510,7 @@ function parseSizesAttribute(value) {
     const sourceSizeValue = component.slice(valueStart).trim()
 
     if (!isValidSourceSizeValue(sourceSizeValue)) return null
-    if (mediaCondition && !(mediaCondition.startsWith('(') && mediaCondition.endsWith(')'))) {
-      return null
-    }
+    if (mediaCondition && !isValidMediaCondition(mediaCondition)) return null
     parsedComponents.push({ mediaCondition, sourceSizeValue })
   }
 
@@ -973,6 +1061,9 @@ function validateSizesParsing() {
     '100vw',
     '(max-width: 48rem) 100vw, 48rem',
     '(min-width: 64rem) calc(50vw - 2rem), 100vw',
+    'not (color) 100vw, 48rem',
+    '(width <= 48rem) 100vw, 48rem',
+    '((hover: hover) and (pointer: fine)) 50vw, 100vw',
     'clamp(20rem, 50vw, 60rem)'
   ]
   const invalidSizes = [
@@ -982,6 +1073,13 @@ function validateSizesParsing() {
     '100vw,',
     '(max-width: 48rem 100vw',
     'max-width: 48rem 100vw',
+    '() 100vw, 48rem',
+    '(max-width:) 100vw, 48rem',
+    '(: 48rem) 100vw, 48rem',
+    '(max-width 48rem) 100vw, 48rem',
+    '(width <) 100vw, 48rem',
+    '(color) and or (hover) 100vw, 48rem',
+    '(color) and (pointer) or (hover) 100vw, 48rem',
     '(max-width: 48rem) 100%',
     '(max-width: 48rem) -10vw'
   ]
