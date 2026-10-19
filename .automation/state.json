@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-19T10:17:19Z",
-  "last_outcome": "validated_generated_srcset_candidates",
+  "updated_at": "2026-10-19T11:14:06Z",
+  "last_outcome": "required_sizes_for_width_based_srcset",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -99,17 +99,18 @@
     "Reject leading or trailing whitespace in generated metadata, asset and machine-readable URL references",
     "Reject empty or whitespace-only generated metadata, asset and machine-readable URL references",
     "Reject unsafe URL schemes in generated metadata, asset and machine-readable references",
-    "Validate generated srcset candidate descriptors and reject empty candidates"
+    "Validate generated srcset candidate descriptors and reject empty candidates",
+    "Require generated srcset width descriptors to include a valid sizes attribute"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed after clearing generated Nuxt output so the asset budget measured one static build",
-    "srcset_checks": "passed (accepted URL-only, width, density and data URL candidate lists)",
-    "srcset_failure_checks": "passed (15 probes rejected empty, malformed, mixed and duplicate candidates)",
+    "npm run validate": "passed from clean generated Nuxt output",
+    "sizes_checks": "passed (accepted lengths, media conditions and supported CSS sizing functions)",
+    "sizes_failure_checks": "passed (14 probes rejected missing, empty, unbalanced and invalid sizes while preserving density srcset behavior)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Require generated srcset width descriptors to include a valid sizes attribute"
+  "next_task": "Require generated sizes lists to end with an unconditional fallback source size"
 }
