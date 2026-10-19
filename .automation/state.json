@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-19T09:18:13Z",
-  "last_outcome": "rejected_unsafe_schemes_in_generated_url_references",
+  "updated_at": "2026-10-19T10:17:19Z",
+  "last_outcome": "validated_generated_srcset_candidates",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -98,17 +98,18 @@
     "Reject literal ASCII control characters in generated metadata, asset and machine-readable URL references",
     "Reject leading or trailing whitespace in generated metadata, asset and machine-readable URL references",
     "Reject empty or whitespace-only generated metadata, asset and machine-readable URL references",
-    "Reject unsafe URL schemes in generated metadata, asset and machine-readable references"
+    "Reject unsafe URL schemes in generated metadata, asset and machine-readable references",
+    "Validate generated srcset candidate descriptors and reject empty candidates"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with explicit scheme allowlists across generated URL references)",
-    "url_scheme_checks": "passed (accepted relative and HTTPS references plus runtime data and blob assets)",
-    "url_scheme_failure_checks": "passed (rejected HTTP, executable, local and contact schemes without logging URL values)",
+    "npm run validate": "passed after clearing generated Nuxt output so the asset budget measured one static build",
+    "srcset_checks": "passed (accepted URL-only, width, density and data URL candidate lists)",
+    "srcset_failure_checks": "passed (15 probes rejected empty, malformed, mixed and duplicate candidates)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate generated srcset candidate descriptors and reject empty candidates"
+  "next_task": "Require generated srcset width descriptors to include a valid sizes attribute"
 }
