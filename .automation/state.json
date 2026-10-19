@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-19T04:19:38Z",
-  "last_outcome": "rejected_control_character_references_in_metadata_and_asset_urls",
+  "updated_at": "2026-10-19T05:14:55Z",
+  "last_outcome": "rejected_literal_ascii_controls_in_generated_url_references",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -94,17 +94,18 @@
     "Reject embedded credentials in generated metadata, asset and machine-readable HTTP(S) URLs",
     "Reject malformed percent-encoding in generated metadata, asset and machine-readable URL references",
     "Reject percent-encoded ASCII controls in generated metadata, asset and machine-readable URL references",
-    "Reject character references that decode to ASCII controls in generated metadata and asset URL references"
+    "Reject character references that decode to ASCII controls in generated metadata and asset URL references",
+    "Reject literal ASCII control characters in generated metadata, asset and machine-readable URL references"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with ASCII control character-reference checks)",
-    "url_character_reference_checks": "passed (accepted printable numeric references and escaped punctuation across URL reference types)",
-    "url_character_reference_failure_checks": "passed (rejected numeric and named references resolving to ASCII controls without logging their values)",
+    "npm run validate": "passed (full generated-site validation with literal ASCII control checks across generated URL references)",
+    "url_literal_control_checks": "passed (accepted ordinary site, asset, data and contact URL references)",
+    "url_literal_control_failure_checks": "passed (rejected C0 and DEL characters without logging their values)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject literal ASCII control characters in generated metadata, asset and machine-readable URL references"
+  "next_task": "Reject leading or trailing whitespace in generated metadata, asset and machine-readable URL references"
 }
