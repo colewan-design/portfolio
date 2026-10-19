@@ -314,6 +314,16 @@ function hasHttpCredentials(target) {
   )
 }
 
+function referenceHasHttpCredentials(value) {
+  if (typeof value !== 'string' || !value) return false
+
+  try {
+    return hasHttpCredentials(new URL(value, siteUrl))
+  } catch {
+    return false
+  }
+}
+
 function isProtocolRelativeExternalHref(href, pageUrl) {
   if (!href.startsWith('//')) return false
   return new URL(href, pageUrl).origin !== pageUrl.origin
@@ -499,6 +509,32 @@ function validateHttpCredentialParsing() {
   }
 }
 
+function validateHttpCredentialReferenceParsing() {
+  const validReferences = [
+    '/images/logo.png',
+    'https://christiancolewan.tech/sitemap.xml',
+    'data:image/svg+xml,%3Csvg%3E%3C/svg%3E',
+    'mailto:hello@example.com'
+  ]
+  const invalidReferences = [
+    'https://user@christiancolewan.tech/images/logo.png',
+    'https://user:password@example.com/sitemap.xml',
+    'https://user%40name@example.com/profile',
+    'http://user:password@example.com/legacy.css'
+  ]
+
+  if (validReferences.some(referenceHasHttpCredentials)) {
+    fail('HTTP credential reference parser: ordinary site, asset, data and contact URLs must remain valid')
+  }
+  if (invalidReferences.some((value) => !referenceHasHttpCredentials(value))) {
+    fail('HTTP credential reference parser: embedded URL usernames and passwords must remain detectable')
+  }
+
+  return {
+    httpCredentialReferenceProbeCount: validReferences.length + invalidReferences.length
+  }
+}
+
 function validateProtocolRelativeExternalParsing() {
   const pageUrl = new URL('https://christiancolewan.tech/')
   const validHrefs = [
@@ -577,6 +613,17 @@ function validateExplicitSchemeReferences(values, label) {
       fail(`${label}: URL must declare the HTTPS scheme explicitly`)
     }
   }
+}
+
+function validateCredentialFreeReferences(values, label) {
+  if (values.some(referenceHasHttpCredentials)) {
+    fail(`${label}: HTTP(S) URL must not include embedded credentials`)
+  }
+}
+
+function validateSafeUrlReferences(values, label) {
+  validateExplicitSchemeReferences(values, label)
+  validateCredentialFreeReferences(values, label)
 }
 
 function hasPositiveTabindex(element) {
@@ -747,9 +794,7 @@ function validateMetadataUrlReferences(html, label) {
   ]
 
   for (const [reference, value] of references) {
-    if (value && isProtocolRelativeReference(value)) {
-      fail(`${label}: ${reference} must declare the HTTPS scheme explicitly`)
-    }
+    validateSafeUrlReferences([value], `${label}: ${reference}`)
   }
 }
 
@@ -1631,6 +1676,9 @@ function validateRuntimeUrl(value, label, reference, runtimeAssets) {
     fail(`${label}: invalid runtime asset URL ${JSON.stringify(value)} in ${reference}`)
   }
 
+  if (hasHttpCredentials(url)) {
+    fail(`${label}: runtime asset in ${reference} must not include embedded HTTP(S) credentials`)
+  }
   if (url.protocol === 'data:' || url.protocol === 'blob:') return
   if (url.origin !== new URL(siteUrl).origin) {
     fail(`${label}: third-party runtime asset is not allowed in ${reference}: ${value}`)
@@ -2412,6 +2460,7 @@ const { hrefControlReferenceProbeCount } = validateHrefControlCharacterReference
 const { hrefPercentEncodingProbeCount } = validateHrefPercentEncodingParsing()
 const { hrefPercentEncodedControlProbeCount } = validateHrefPercentEncodedControlParsing()
 const { httpCredentialProbeCount } = validateHttpCredentialParsing()
+const { httpCredentialReferenceProbeCount } = validateHttpCredentialReferenceParsing()
 const { protocolRelativeExternalProbeCount } = validateProtocolRelativeExternalParsing()
 const { protocolRelativeReferenceProbeCount } = validateProtocolRelativeReferenceParsing()
 const { protocolRelativeMachineReferenceProbeCount } =
@@ -2586,7 +2635,7 @@ if (!/<button\b[^>]*>[\s\S]*?Return home[\s\S]*?<\/button>/i.test(errorPageSourc
 
 const homeStructuredData = structuredData(generatedPages[0], 'route /')
 for (const schema of homeStructuredData) {
-  validateExplicitSchemeReferences(
+  validateSafeUrlReferences(
     [schema['@context'], schema.url, schema.image, ...(schema.sameAs || [])],
     'route /: JSON-LD'
   )
@@ -2633,7 +2682,7 @@ const expectedManifest = {
   theme_color: '#0a0a0a'
 }
 
-validateExplicitSchemeReferences(
+validateSafeUrlReferences(
   [manifest.id, manifest.start_url, manifest.scope, ...(manifest.icons || []).map(({ src }) => src)],
   'site.webmanifest'
 )
@@ -2667,7 +2716,7 @@ const sitemap = await readFile(join(outputDir, 'sitemap.xml'), 'utf8')
 const sitemapUrls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url)
 const expectedUrls = routes.map(({ path }) => new URL(path, siteUrl).toString())
 
-validateExplicitSchemeReferences(sitemapUrls, 'sitemap.xml')
+validateSafeUrlReferences(sitemapUrls, 'sitemap.xml')
 
 if (JSON.stringify(sitemapUrls) !== JSON.stringify(expectedUrls)) {
   fail(`Sitemap URLs differ from routes: ${JSON.stringify(sitemapUrls)}`)
@@ -2691,7 +2740,7 @@ if (blockingRule) {
 }
 
 const advertisedSitemaps = crawlerDirectives.filter(({ name }) => name === 'sitemap')
-validateExplicitSchemeReferences(
+validateSafeUrlReferences(
   advertisedSitemaps.map(({ value }) => value),
   'robots.txt Sitemap directive'
 )
@@ -2758,5 +2807,5 @@ for (const budget of assetBudgets) {
 }
 
 console.log(
-  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references backed by ${idParserProbeCount} exact-id parser probes, ${ariaHiddenFocusProbeCount} aria-hidden focus probes, ${nestedInteractiveProbeCount} nested-interactive probes, ${anchorHrefProbeCount} anchor href probes, ${hrefWhitespaceProbeCount} href whitespace probes, ${hrefControlProbeCount} href control-character probes, ${hrefControlReferenceProbeCount} href control-reference probes, ${hrefPercentEncodingProbeCount} href percent-encoding probes, ${hrefPercentEncodedControlProbeCount} href encoded-control probes, ${httpCredentialProbeCount} HTTP credential probes, ${protocolRelativeExternalProbeCount} protocol-relative external-link probes, ${protocolRelativeReferenceProbeCount} protocol-relative metadata/asset probes, ${protocolRelativeMachineReferenceProbeCount} protocol-relative machine-reference probes, ${tabindexOrderProbeCount} tabindex order probes and ${tabindexValueProbeCount} tabindex value probes, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects with ${pricingEnquiryAccessibleNameCount} package-specific accessible names, ${consistentPricingPackageCount} pricing packages with matching names, prices, taglines and audiences and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${descriptivePricingPackageCount} synchronized package descriptions, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels, ${pricingMetadataPriceCount} synchronized metadata prices, ${validatedPricingTimelineCount} well-formed visible package timelines, ${validatedPricingScopePackageCount} packages with ${pricingInclusionCount} included features and ${pricingLimitCount} written limits, ${runningCostRowCount} recurring-cost rows with ${runningCostVisibleFieldCount} synchronized responsive field renderings, ${pricingProcessStepCount} sequential process steps with ${pricingProcessFieldCount} synchronized visible fields, ${finePrintTermCount} fine-print terms with ${finePrintVisibleFieldCount} synchronized visible fields, and ${synchronizedCommercialTermCount} synchronized commercial terms, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
+  `Validated ${routes.length} indexable routes with resolved router elements and ${primaryNavigationLinkCount} prerendered primary navigation links backed by ${mobileNavigation.mobileTargetRuleCount} mobile target rule, unique ids and resolved accessibility references backed by ${idParserProbeCount} exact-id parser probes, ${ariaHiddenFocusProbeCount} aria-hidden focus probes, ${nestedInteractiveProbeCount} nested-interactive probes, ${anchorHrefProbeCount} anchor href probes, ${hrefWhitespaceProbeCount} href whitespace probes, ${hrefControlProbeCount} href control-character probes, ${hrefControlReferenceProbeCount} href control-reference probes, ${hrefPercentEncodingProbeCount} href percent-encoding probes, ${hrefPercentEncodedControlProbeCount} href encoded-control probes, ${httpCredentialProbeCount} HTTP credential probes, ${httpCredentialReferenceProbeCount} HTTP credential reference probes, ${protocolRelativeExternalProbeCount} protocol-relative external-link probes, ${protocolRelativeReferenceProbeCount} protocol-relative metadata/asset probes, ${protocolRelativeMachineReferenceProbeCount} protocol-relative machine-reference probes, ${tabindexOrderProbeCount} tabindex order probes and ${tabindexValueProbeCount} tabindex value probes, ${accessibleControlCount} links and buttons with accessible names including ${descriptiveProjectLinkCount} descriptive project links representing ${projectConsistency.linkedProjectCount} linked projects consistently across ${projectConsistency.projectLayoutCount} layouts, ${unlinkedProjectConsistency.unlinkedProjectCount} unlinked project remaining non-interactive across ${unlinkedProjectConsistency.projectLayoutCount} layouts, ${projectScreenshots.projectScreenshotCount} uniquely sourced project screenshots with matching alternative text, and ${newTabLinkCount} new-tab announcements backed by ${screenReaderOnly.screenReaderOnlyRuleCount} visually-hidden CSS rules, ${hiddenExternalArrowCount} hidden decorative external-link arrows, and ${focusStyles.focusRuleCount} visible focus style, ${informativeImageCount} informative and ${decorativeImageCount} explicitly decorative images, ${eagerImageCount} eager high-priority and ${lazyImageCount} lazy images with asynchronous decoding, intrinsic dimensions for ${renderedImageDimensions.size} rendered image assets, ${runtimeAssets.size} self-hosted runtime assets, ${reducedMotion.keyframeCount} animation definitions with ${reducedMotion.reducedMotionBlockCount} reduced-motion fallbacks, ${internalLinkCount} internal links and fragments, ${externalHttpsLinkCount} HTTPS external links, ${contactLinkCount} readable contact links across ${contactDestinationCount} well-formed destinations including ${pricingEnquiryCount} package-specific enquiry subjects with ${pricingEnquiryAccessibleNameCount} package-specific accessible names, ${consistentPricingPackageCount} pricing packages with matching names, prices, taglines and audiences and ${orderedPricingPackageCount}-item order across ${pricingViewCount} views, ${descriptivePricingPackageCount} synchronized package descriptions, ${numberedPricingPackageCount} unique sequential package numbers, ${semanticPricingLabelCount} fixed/from price labels matching package semantics, ${pricingRangeLabelCount} synchronized package range labels, ${pricingMetadataPriceCount} synchronized metadata prices, ${validatedPricingTimelineCount} well-formed visible package timelines, ${validatedPricingScopePackageCount} packages with ${pricingInclusionCount} included features and ${pricingLimitCount} written limits, ${runningCostRowCount} recurring-cost rows with ${runningCostVisibleFieldCount} synchronized responsive field renderings, ${pricingProcessStepCount} sequential process steps with ${pricingProcessFieldCount} synchronized visible fields, ${finePrintTermCount} fine-print terms with ${finePrintVisibleFieldCount} synchronized visible fields, and ${synchronizedCommercialTermCount} synchronized commercial terms, document setup, custom 404 recovery, accessibility, unique route metadata, social share image, optimized favicon, install icons, ${serviceImages.length} optimized service images, web manifest, Person structured data, robots access and sitemap discovery, ${assetPaths.size} page assets, and asset budgets (${budgetSummary.join(', ')}).`
 )
