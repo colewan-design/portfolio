@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-19T07:48:42Z",
-  "last_outcome": "rejected_surrounding_whitespace_in_generated_url_references",
+  "updated_at": "2026-10-19T08:17:47Z",
+  "last_outcome": "rejected_empty_generated_url_references",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -96,17 +96,18 @@
     "Reject percent-encoded ASCII controls in generated metadata, asset and machine-readable URL references",
     "Reject character references that decode to ASCII controls in generated metadata and asset URL references",
     "Reject literal ASCII control characters in generated metadata, asset and machine-readable URL references",
-    "Reject leading or trailing whitespace in generated metadata, asset and machine-readable URL references"
+    "Reject leading or trailing whitespace in generated metadata, asset and machine-readable URL references",
+    "Reject empty or whitespace-only generated metadata, asset and machine-readable URL references"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
-    "npm run validate": "passed (full generated-site validation with surrounding-whitespace checks across generated URL references)",
-    "url_whitespace_checks": "passed (accepted unpadded site, asset, data and contact URL references)",
-    "url_whitespace_failure_checks": "passed (rejected leading and trailing ASCII and Unicode whitespace without logging URL values)",
+    "npm run validate": "passed (full generated-site validation with non-empty checks across generated URL references)",
+    "url_non_empty_checks": "passed (accepted populated site, asset, data and contact URL references)",
+    "url_empty_failure_checks": "passed (rejected missing, empty and whitespace-only URL values without logging their contents)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject empty or whitespace-only generated metadata, asset and machine-readable URL references"
+  "next_task": "Reject unsafe URL schemes in generated metadata, asset and machine-readable references"
 }
