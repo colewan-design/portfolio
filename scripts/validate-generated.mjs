@@ -435,7 +435,7 @@ const sourceSizeLengthUnits = new Set([
   'pt'
 ])
 
-function mathFunctionType(value) {
+function mathFunctionResult(value) {
   const match = value.match(/^(calc|min|max|clamp)\((.*)\)$/is)
   if (!match || matchingClosingParenthesis(value, value.indexOf('(')) !== value.length - 1) return null
 
@@ -444,27 +444,42 @@ function mathFunctionType(value) {
   if (!argumentsList) return null
 
   if (functionName === 'calc') {
-    return argumentsList.length === 1 ? mathExpressionType(argumentsList[0]) : null
+    return argumentsList.length === 1 ? mathExpressionResult(argumentsList[0]) : null
   }
   if (functionName === 'min' || functionName === 'max') {
-    const argumentTypes = argumentsList.map(mathExpressionType)
-    return argumentTypes[0] && argumentTypes.every((type) => type === argumentTypes[0])
-      ? argumentTypes[0]
-      : null
+    const argumentResults = argumentsList.map(mathExpressionResult)
+    if (!argumentResults[0] || !argumentResults.every((result) => result?.type === argumentResults[0].type)) {
+      return null
+    }
+    if (argumentResults[0].type === 'length') return { type: 'length', value: null }
+
+    const numericValues = argumentResults.map(({ value: numericValue }) => numericValue)
+    const numericValue = functionName === 'min' ? Math.min(...numericValues) : Math.max(...numericValues)
+    return Number.isFinite(numericValue) ? { type: 'number', value: numericValue } : null
   }
   if (argumentsList.length !== 3 || argumentsList[1].toLowerCase() === 'none') return null
 
-  const argumentTypes = argumentsList.map((argument, index) => {
+  const argumentResults = argumentsList.map((argument, index) => {
     if (argument.toLowerCase() === 'none') return index === 0 || index === 2 ? 'none' : null
-    return mathExpressionType(argument)
+    return mathExpressionResult(argument)
   })
-  const concreteTypes = argumentTypes.filter((type) => type !== 'none')
-  return argumentTypes.every(Boolean) && concreteTypes.every((type) => type === concreteTypes[0])
-    ? concreteTypes[0]
-    : null
+  const concreteResults = argumentResults.filter((result) => result !== 'none')
+  if (
+    !argumentResults.every(Boolean) ||
+    !concreteResults.every((result) => result.type === concreteResults[0].type)
+  ) {
+    return null
+  }
+  if (concreteResults[0].type === 'length') return { type: 'length', value: null }
+
+  const minimum = argumentResults[0] === 'none' ? -Infinity : argumentResults[0].value
+  const preferred = argumentResults[1].value
+  const maximum = argumentResults[2] === 'none' ? Infinity : argumentResults[2].value
+  const numericValue = Math.min(Math.max(preferred, minimum), maximum)
+  return Number.isFinite(numericValue) ? { type: 'number', value: numericValue } : null
 }
 
-function mathExpressionType(value) {
+function mathExpressionResult(value) {
   let position = 0
 
   function skipWhitespace() {
@@ -476,11 +491,11 @@ function mathExpressionType(value) {
 
     if (value[position] === '(') {
       position += 1
-      const type = parseSum()
+      const result = parseSum()
       skipWhitespace()
-      if (!type || value[position] !== ')') return null
+      if (!result || value[position] !== ')') return null
       position += 1
-      return type
+      return result
     }
 
     const functionMatch = value.slice(position).match(/^(calc|min|max|clamp)\s*\(/i)
@@ -489,9 +504,9 @@ function mathExpressionType(value) {
       const closingPosition = matchingClosingParenthesis(value, openingPosition)
       if (closingPosition < 0) return null
 
-      const type = mathFunctionType(value.slice(position, closingPosition + 1))
+      const result = mathFunctionResult(value.slice(position, closingPosition + 1))
       position = closingPosition + 1
-      return type
+      return result
     }
 
     const numberMatch = value
@@ -499,57 +514,75 @@ function mathExpressionType(value) {
       .match(/^[+\-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+\-]?\d+)?/i)
     if (!numberMatch) return null
     position += numberMatch[0].length
+    const numericValue = Number(numberMatch[0])
+    if (!Number.isFinite(numericValue)) return null
 
     const unitMatch = value.slice(position).match(/^[a-z]+/i)
-    if (!unitMatch) return 'number'
+    if (!unitMatch) return { type: 'number', value: numericValue }
     position += unitMatch[0].length
-    return sourceSizeLengthUnits.has(unitMatch[0].toLowerCase()) ? 'length' : null
+    return sourceSizeLengthUnits.has(unitMatch[0].toLowerCase())
+      ? { type: 'length', value: null }
+      : null
   }
 
   function parseProduct() {
-    let leftType = parseValue()
-    if (!leftType) return null
+    let leftResult = parseValue()
+    if (!leftResult) return null
 
     while (true) {
       skipWhitespace()
       const operator = value[position]
-      if (operator !== '*' && operator !== '/') return leftType
+      if (operator !== '*' && operator !== '/') return leftResult
       position += 1
 
-      const rightType = parseValue()
-      if (!rightType) return null
-      if (operator === '/' && rightType !== 'number') return null
-      if (operator === '*' && leftType === 'length' && rightType === 'length') return null
-      if (operator === '*' && rightType === 'length') leftType = 'length'
+      const rightResult = parseValue()
+      if (!rightResult) return null
+      if (operator === '/' && (rightResult.type !== 'number' || rightResult.value === 0)) return null
+      if (operator === '*' && leftResult.type === 'length' && rightResult.type === 'length') return null
+
+      if (leftResult.type === 'number' && rightResult.type === 'number') {
+        const numericValue =
+          operator === '*' ? leftResult.value * rightResult.value : leftResult.value / rightResult.value
+        if (!Number.isFinite(numericValue)) return null
+        leftResult = { type: 'number', value: numericValue }
+      } else {
+        leftResult = { type: 'length', value: null }
+      }
     }
   }
 
   function parseSum() {
-    let leftType = parseProduct()
-    if (!leftType) return null
+    let leftResult = parseProduct()
+    if (!leftResult) return null
 
     while (true) {
       skipWhitespace()
       const operatorPosition = position
       const operator = value[position]
-      if (operator !== '+' && operator !== '-') return leftType
+      if (operator !== '+' && operator !== '-') return leftResult
       if (!/\s/.test(value[operatorPosition - 1] ?? '') || !/\s/.test(value[operatorPosition + 1] ?? '')) {
         return null
       }
       position += 1
 
-      const rightType = parseProduct()
-      if (!rightType || rightType !== leftType) return null
+      const rightResult = parseProduct()
+      if (!rightResult || rightResult.type !== leftResult.type) return null
+      if (leftResult.type === 'number') {
+        const numericValue =
+          operator === '+' ? leftResult.value + rightResult.value : leftResult.value - rightResult.value
+        if (!Number.isFinite(numericValue)) return null
+        leftResult = { type: 'number', value: numericValue }
+      }
     }
   }
 
-  const type = parseSum()
+  const result = parseSum()
   skipWhitespace()
-  return type && position === value.length ? type : null
+  return result && position === value.length ? result : null
 }
 
 function isValidSourceSizeMathFunction(value) {
-  return mathFunctionType(value) === 'length'
+  return mathFunctionResult(value)?.type === 'length'
 }
 
 function isValidSourceSizeValue(value) {
@@ -1226,7 +1259,9 @@ function validateSizesParsing() {
     'calc(2 * 25vw)',
     'calc((100vw - 2rem) / 2)',
     'min(calc(40vw + 1rem), 48rem)',
-    'calc(1e2px - 2rem)'
+    'calc(1e2px - 2rem)',
+    'calc(100vw / 1e-3)',
+    'calc(100vw / calc(2 + 2))'
   ]
   const invalidSizes = [
     '',
@@ -1264,7 +1299,15 @@ function validateSizesParsing() {
     'calc(10px / 2rem)',
     'min(10px, 2)',
     'clamp(none, 50vw, 2)',
-    'calc(var(--size) + 2rem)'
+    'calc(var(--size) + 2rem)',
+    'calc(100vw / 0)',
+    'calc(100vw / -0)',
+    'calc(100vw / 0e10)',
+    'calc(100vw / calc(2 - 2))',
+    'calc(100vw / min(0, 1))',
+    'calc(1e999px)',
+    'calc(1e999 * 1px)',
+    'calc((1e308 * 1e308) * 1px)'
   ]
   const sizesWithoutFallback = [
     '(max-width: 48rem) 100vw',
