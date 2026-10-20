@@ -436,9 +436,42 @@ const sourceSizeLengthUnits = new Set([
 ])
 
 const maximumSourceSizeMathDepth = 12
+const maximumSourceSizeMathLength = 1024
+const maximumSourceSizeMathTokens = 128
+
+function sourceSizeMathTokenCount(value) {
+  const tokenPattern = /\s+|[+\-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+\-]?\d+)?(?:[a-z]+)?|(?:calc|min|max|clamp|none)\b|[(),*/+\-]/iy
+  let position = 0
+  let tokenCount = 0
+
+  while (position < value.length) {
+    tokenPattern.lastIndex = position
+    const match = tokenPattern.exec(value)
+    if (!match) return Number.POSITIVE_INFINITY
+
+    position = tokenPattern.lastIndex
+    if (/^\s+$/.test(match[0])) continue
+    tokenCount += 1
+    if (tokenCount > maximumSourceSizeMathTokens) return tokenCount
+  }
+
+  return tokenCount
+}
+
+function sourceSizeMathIsWithinComplexityLimits(value) {
+  return (
+    value.length <= maximumSourceSizeMathLength &&
+    sourceSizeMathTokenCount(value) <= maximumSourceSizeMathTokens
+  )
+}
 
 function mathFunctionResult(value, depth = 1) {
-  if (depth > maximumSourceSizeMathDepth) return null
+  if (
+    depth > maximumSourceSizeMathDepth ||
+    (depth === 1 && !sourceSizeMathIsWithinComplexityLimits(value))
+  ) {
+    return null
+  }
 
   const match = value.match(/^(calc|min|max|clamp)\((.*)\)$/is)
   if (!match || matchingClosingParenthesis(value, value.indexOf('(')) !== value.length - 1) return null
@@ -1256,6 +1289,10 @@ function validateSizesParsing() {
   const nestedMathOverLimit = `${'calc('.repeat(maximumSourceSizeMathDepth + 1)}1px${')'.repeat(maximumSourceSizeMathDepth + 1)}`
   const groupedMathAtLimit = `calc(${'('.repeat(maximumSourceSizeMathDepth - 1)}1px${')'.repeat(maximumSourceSizeMathDepth - 1)})`
   const groupedMathOverLimit = `calc(${'('.repeat(maximumSourceSizeMathDepth)}1px${')'.repeat(maximumSourceSizeMathDepth)})`
+  const mathLengthAtLimit = `calc(1px${' '.repeat(maximumSourceSizeMathLength - 'calc(1px)'.length)})`
+  const mathLengthOverLimit = `calc(1px${' '.repeat(maximumSourceSizeMathLength - 'calc(1px)'.length + 1)})`
+  const mathTokenCountAtLimit = `calc(${Array.from({ length: 63 }, () => '1px').join(' + ')})`
+  const mathTokenCountOverLimit = `calc(${Array.from({ length: 64 }, () => '1px').join(' + ')})`
   const validSizes = [
     '100vw',
     '(max-width: 48rem) 100vw, 48rem',
@@ -1275,7 +1312,9 @@ function validateSizesParsing() {
     'calc(100vw / 1e-3)',
     'calc(100vw / calc(2 + 2))',
     nestedMathAtLimit,
-    groupedMathAtLimit
+    groupedMathAtLimit,
+    mathLengthAtLimit,
+    mathTokenCountAtLimit
   ]
   const invalidSizes = [
     '',
@@ -1323,7 +1362,9 @@ function validateSizesParsing() {
     'calc(1e999 * 1px)',
     'calc((1e308 * 1e308) * 1px)',
     nestedMathOverLimit,
-    groupedMathOverLimit
+    groupedMathOverLimit,
+    mathLengthOverLimit,
+    mathTokenCountOverLimit
   ]
   const sizesWithoutFallback = [
     '(max-width: 48rem) 100vw',
