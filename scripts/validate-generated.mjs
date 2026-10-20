@@ -411,79 +411,145 @@ function matchingClosingParenthesis(value, openingPosition) {
   return -1
 }
 
-function hasValidMathOperatorSpacing(value) {
-  for (let position = 0; position < value.length; position += 1) {
-    const character = value[position]
-    if (character !== '+' && character !== '-') continue
+const sourceSizeLengthUnits = new Set([
+  'px',
+  'em',
+  'rem',
+  'ch',
+  'ex',
+  'cap',
+  'ic',
+  'lh',
+  'rlh',
+  'vw',
+  'vh',
+  'vi',
+  'vb',
+  'vmin',
+  'vmax',
+  'cm',
+  'mm',
+  'q',
+  'in',
+  'pc',
+  'pt'
+])
 
-    const previousValue = value.slice(0, position).match(/\S(?=\s*$)/)?.[0]
-    const isUnary =
-      !previousValue ||
-      previousValue === '(' ||
-      previousValue === ',' ||
-      '+-*/'.includes(previousValue) ||
-      ((previousValue === 'e' || previousValue === 'E') && /\d/.test(value[position - 2] ?? ''))
-
-    if (!isUnary && (!/\s/.test(value[position - 1] ?? '') || !/\s/.test(value[position + 1] ?? ''))) {
-      return false
-    }
-  }
-
-  return true
-}
-
-function isValidMathExpression(value) {
-  const expression = value.trim()
-  const expressionParts = splitTopLevelCommaList(expression)
-  if (
-    !expression ||
-    !expressionParts ||
-    expressionParts.length !== 1 ||
-    /%/.test(expression) ||
-    /\(\s*\)|\(\s*,|,\s*,|,\s*\)/.test(expression) ||
-    /^[*/]|[+\-*/]$/.test(expression) ||
-    /[+*/]\s*[+*/]/.test(expression) ||
-    !hasValidMathOperatorSpacing(expression) ||
-    !/(?:\d+(?:\.\d*)?|\.\d+)/.test(expression)
-  ) {
-    return false
-  }
-
-  const functionPattern = /([a-z][a-z0-9-]*)\s*\(/gi
-  let match
-  while ((match = functionPattern.exec(expression))) {
-    if (!['calc', 'min', 'max', 'clamp'].includes(match[1].toLowerCase())) return false
-
-    const openingPosition = expression.indexOf('(', match.index)
-    const closingPosition = matchingClosingParenthesis(expression, openingPosition)
-    if (closingPosition < 0) return false
-    if (!isValidSourceSizeMathFunction(expression.slice(match.index, closingPosition + 1))) return false
-    functionPattern.lastIndex = closingPosition + 1
-  }
-
-  return true
-}
-
-function isValidSourceSizeMathFunction(value) {
+function mathFunctionType(value) {
   const match = value.match(/^(calc|min|max|clamp)\((.*)\)$/is)
-  if (!match || matchingClosingParenthesis(value, value.indexOf('(')) !== value.length - 1) return false
+  if (!match || matchingClosingParenthesis(value, value.indexOf('(')) !== value.length - 1) return null
 
   const functionName = match[1].toLowerCase()
   const argumentsList = splitTopLevelCommaList(match[2])
-  if (!argumentsList) return false
+  if (!argumentsList) return null
 
   if (functionName === 'calc') {
-    return argumentsList.length === 1 && isValidMathExpression(argumentsList[0])
+    return argumentsList.length === 1 ? mathExpressionType(argumentsList[0]) : null
   }
   if (functionName === 'min' || functionName === 'max') {
-    return argumentsList.every(isValidMathExpression)
+    const argumentTypes = argumentsList.map(mathExpressionType)
+    return argumentTypes[0] && argumentTypes.every((type) => type === argumentTypes[0])
+      ? argumentTypes[0]
+      : null
   }
-  if (argumentsList.length !== 3 || argumentsList[1].toLowerCase() === 'none') return false
+  if (argumentsList.length !== 3 || argumentsList[1].toLowerCase() === 'none') return null
 
-  return argumentsList.every((argument, index) => {
-    if (argument.toLowerCase() === 'none') return index === 0 || index === 2
-    return isValidMathExpression(argument)
+  const argumentTypes = argumentsList.map((argument, index) => {
+    if (argument.toLowerCase() === 'none') return index === 0 || index === 2 ? 'none' : null
+    return mathExpressionType(argument)
   })
+  const concreteTypes = argumentTypes.filter((type) => type !== 'none')
+  return argumentTypes.every(Boolean) && concreteTypes.every((type) => type === concreteTypes[0])
+    ? concreteTypes[0]
+    : null
+}
+
+function mathExpressionType(value) {
+  let position = 0
+
+  function skipWhitespace() {
+    while (/\s/.test(value[position] ?? '')) position += 1
+  }
+
+  function parseValue() {
+    skipWhitespace()
+
+    if (value[position] === '(') {
+      position += 1
+      const type = parseSum()
+      skipWhitespace()
+      if (!type || value[position] !== ')') return null
+      position += 1
+      return type
+    }
+
+    const functionMatch = value.slice(position).match(/^(calc|min|max|clamp)\s*\(/i)
+    if (functionMatch) {
+      const openingPosition = position + functionMatch[0].lastIndexOf('(')
+      const closingPosition = matchingClosingParenthesis(value, openingPosition)
+      if (closingPosition < 0) return null
+
+      const type = mathFunctionType(value.slice(position, closingPosition + 1))
+      position = closingPosition + 1
+      return type
+    }
+
+    const numberMatch = value
+      .slice(position)
+      .match(/^[+\-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+\-]?\d+)?/i)
+    if (!numberMatch) return null
+    position += numberMatch[0].length
+
+    const unitMatch = value.slice(position).match(/^[a-z]+/i)
+    if (!unitMatch) return 'number'
+    position += unitMatch[0].length
+    return sourceSizeLengthUnits.has(unitMatch[0].toLowerCase()) ? 'length' : null
+  }
+
+  function parseProduct() {
+    let leftType = parseValue()
+    if (!leftType) return null
+
+    while (true) {
+      skipWhitespace()
+      const operator = value[position]
+      if (operator !== '*' && operator !== '/') return leftType
+      position += 1
+
+      const rightType = parseValue()
+      if (!rightType) return null
+      if (operator === '/' && rightType !== 'number') return null
+      if (operator === '*' && leftType === 'length' && rightType === 'length') return null
+      if (operator === '*' && rightType === 'length') leftType = 'length'
+    }
+  }
+
+  function parseSum() {
+    let leftType = parseProduct()
+    if (!leftType) return null
+
+    while (true) {
+      skipWhitespace()
+      const operatorPosition = position
+      const operator = value[position]
+      if (operator !== '+' && operator !== '-') return leftType
+      if (!/\s/.test(value[operatorPosition - 1] ?? '') || !/\s/.test(value[operatorPosition + 1] ?? '')) {
+        return null
+      }
+      position += 1
+
+      const rightType = parseProduct()
+      if (!rightType || rightType !== leftType) return null
+    }
+  }
+
+  const type = parseSum()
+  skipWhitespace()
+  return type && position === value.length ? type : null
+}
+
+function isValidSourceSizeMathFunction(value) {
+  return mathFunctionType(value) === 'length'
 }
 
 function isValidSourceSizeValue(value) {
@@ -1156,7 +1222,11 @@ function validateSizesParsing() {
     'clamp(none, 50vw, 60rem)',
     'min(100vw, 48rem)',
     'max(20rem, 50vw, 30rem)',
-    'calc(min(100vw, 60rem) - 2rem)'
+    'calc(min(100vw, 60rem) - 2rem)',
+    'calc(2 * 25vw)',
+    'calc((100vw - 2rem) / 2)',
+    'min(calc(40vw + 1rem), 48rem)',
+    'calc(1e2px - 2rem)'
   ]
   const invalidSizes = [
     '',
@@ -1184,7 +1254,17 @@ function validateSizesParsing() {
     'max(, 50vw)',
     'clamp(20rem, 50vw)',
     'clamp(20rem, 50vw, 60rem, 70rem)',
-    'clamp(20rem, none, 60rem)'
+    'clamp(20rem, none, 60rem)',
+    'calc(10bananas + 2rem)',
+    'calc(foo + 2rem)',
+    'calc(10px 20px)',
+    'calc(10px min(20vw, 30rem))',
+    'calc(10px + 2)',
+    'calc(10px * 2rem)',
+    'calc(10px / 2rem)',
+    'min(10px, 2)',
+    'clamp(none, 50vw, 2)',
+    'calc(var(--size) + 2rem)'
   ]
   const sizesWithoutFallback = [
     '(max-width: 48rem) 100vw',
