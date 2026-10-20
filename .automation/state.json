@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-20T12:17:55Z",
-  "last_outcome": "bounded_srcset_complexity",
+  "updated_at": "2026-10-20T13:22:11Z",
+  "last_outcome": "validated_srcset_candidate_urls",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -110,7 +110,8 @@
     "Limit source-size math nesting depth across functions and parenthesized groups",
     "Bound source-size math values by character length and lexical token count",
     "Bound sizes lists by attribute length and top-level component count",
-    "Bound srcset attributes by character length and candidate count"
+    "Bound srcset attributes by character length and candidate count",
+    "Validate every generated srcset candidate URL with shared runtime-asset safety rules"
   ],
   "validation": {
     "npm ci": "passed",
@@ -120,9 +121,11 @@
     "sizes_failure_checks": "passed (rejected lists exceeding attribute-length and component-count limits)",
     "srcset_checks": "passed (19 probes, including attributes at the 4,096-character and 32-candidate limits)",
     "srcset_failure_checks": "passed (rejected attributes exceeding length and candidate-count limits)",
+    "srcset_url_checks": "passed (13 probes covering safe relative, same-origin HTTPS, data and blob candidates)",
+    "srcset_url_failure_checks": "passed (rejected unsafe schemes, HTTP, protocol-relative and third-party URLs, embedded credentials, malformed encoding and encoded controls)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Validate generated srcset candidate URLs for safe schemes, credentials and malformed encodings"
+  "next_task": "Reject duplicate URLs within generated srcset candidate lists"
 }
