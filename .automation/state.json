@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-20T10:13:45Z",
-  "last_outcome": "bounded_source_size_math_complexity",
+  "updated_at": "2026-10-20T11:14:09Z",
+  "last_outcome": "bounded_sizes_list_complexity",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -108,17 +108,18 @@
     "Validate source-size math operands and reject unsupported units or adjacent operands",
     "Reject division by zero and non-finite numeric values in source-size math expressions",
     "Limit source-size math nesting depth across functions and parenthesized groups",
-    "Bound source-size math values by character length and lexical token count"
+    "Bound source-size math values by character length and lexical token count",
+    "Bound sizes lists by attribute length and top-level component count"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
     "npm run validate": "passed from clean generated Nuxt output",
-    "sizes_checks": "passed (83 probes, including values at the 1,024-character and 128-token limits)",
-    "sizes_failure_checks": "passed (rejected values exceeding character and token complexity limits)",
+    "sizes_checks": "passed (87 probes, including lists at the 2,048-character and 32-component limits)",
+    "sizes_failure_checks": "passed (rejected lists exceeding attribute-length and component-count limits)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Limit sizes list length and component count to keep responsive-image validation bounded"
+  "next_task": "Limit srcset attribute length and candidate count to keep responsive-image validation bounded"
 }

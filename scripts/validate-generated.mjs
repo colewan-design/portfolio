@@ -358,7 +358,7 @@ function parseSrcsetCandidates(value) {
   return candidates
 }
 
-function splitTopLevelCommaList(value) {
+function splitTopLevelCommaList(value, maximumItems = Number.POSITIVE_INFINITY) {
   const items = []
   let depth = 0
   let itemStart = 0
@@ -371,6 +371,7 @@ function splitTopLevelCommaList(value) {
       if (depth < 0) return null
     }
     if (character === ',' && depth === 0) {
+      if (items.length >= maximumItems) return null
       const item = value.slice(itemStart, position).trim()
       if (!item) return null
       items.push(item)
@@ -379,6 +380,7 @@ function splitTopLevelCommaList(value) {
   }
 
   if (depth !== 0) return null
+  if (items.length >= maximumItems) return null
   const finalItem = value.slice(itemStart).trim()
   if (!finalItem) return null
   items.push(finalItem)
@@ -725,10 +727,19 @@ function isValidMediaCondition(value) {
   return splitCondition.parts.every(isValidMediaInParens)
 }
 
-function parseSizesAttribute(value) {
-  if (typeof value !== 'string' || value.trim().length === 0) return null
+const maximumSizesAttributeLength = 2048
+const maximumSizesComponents = 32
 
-  const components = splitTopLevelCommaList(value)
+function parseSizesAttribute(value) {
+  if (
+    typeof value !== 'string' ||
+    value.length > maximumSizesAttributeLength ||
+    value.trim().length === 0
+  ) {
+    return null
+  }
+
+  const components = splitTopLevelCommaList(value, maximumSizesComponents)
   if (!components) return null
 
   const parsedComponents = []
@@ -1293,6 +1304,13 @@ function validateSizesParsing() {
   const mathLengthOverLimit = `calc(1px${' '.repeat(maximumSourceSizeMathLength - 'calc(1px)'.length + 1)})`
   const mathTokenCountAtLimit = `calc(${Array.from({ length: 63 }, () => '1px').join(' + ')})`
   const mathTokenCountOverLimit = `calc(${Array.from({ length: 64 }, () => '1px').join(' + ')})`
+  const sizesLengthAtLimit = `${' '.repeat(maximumSizesAttributeLength - '1px'.length)}1px`
+  const sizesLengthOverLimit = ` ${sizesLengthAtLimit}`
+  const sizesComponentsAtLimit = `${Array.from(
+    { length: maximumSizesComponents - 1 },
+    () => '(max-width: 48rem) 1px'
+  ).join(', ')}, 1px`
+  const sizesComponentsOverLimit = `(max-width: 48rem) 1px, ${sizesComponentsAtLimit}`
   const validSizes = [
     '100vw',
     '(max-width: 48rem) 100vw, 48rem',
@@ -1314,7 +1332,9 @@ function validateSizesParsing() {
     nestedMathAtLimit,
     groupedMathAtLimit,
     mathLengthAtLimit,
-    mathTokenCountAtLimit
+    mathTokenCountAtLimit,
+    sizesLengthAtLimit,
+    sizesComponentsAtLimit
   ]
   const invalidSizes = [
     '',
@@ -1364,7 +1384,9 @@ function validateSizesParsing() {
     nestedMathOverLimit,
     groupedMathOverLimit,
     mathLengthOverLimit,
-    mathTokenCountOverLimit
+    mathTokenCountOverLimit,
+    sizesLengthOverLimit,
+    sizesComponentsOverLimit
   ]
   const sizesWithoutFallback = [
     '(max-width: 48rem) 100vw',
