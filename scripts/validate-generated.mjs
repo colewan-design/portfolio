@@ -286,13 +286,23 @@ function referenceUsesAllowedScheme(value, allowedSchemes) {
   }
 }
 
+const maximumSrcsetAttributeLength = 4096
+const maximumSrcsetCandidates = 32
+
 function parseSrcsetCandidates(value) {
-  if (typeof value !== 'string' || value.trim().length === 0) return null
+  if (
+    typeof value !== 'string' ||
+    value.length > maximumSrcsetAttributeLength ||
+    value.trim().length === 0
+  ) {
+    return null
+  }
 
   const candidates = []
   let position = 0
 
   while (position < value.length) {
+    if (candidates.length >= maximumSrcsetCandidates) return null
     while (/\s/.test(value[position] || '')) position += 1
     if (position >= value.length || value[position] === ',') return null
 
@@ -1265,11 +1275,22 @@ function validateReferenceSchemeParsing() {
 }
 
 function validateSrcsetParsing() {
+  const srcsetLengthAtLimit = `${' '.repeat(
+    maximumSrcsetAttributeLength - '/images/portrait.webp'.length
+  )}/images/portrait.webp`
+  const srcsetLengthOverLimit = ` ${srcsetLengthAtLimit}`
+  const srcsetCandidatesAtLimit = Array.from(
+    { length: maximumSrcsetCandidates },
+    (_, index) => `/images/portrait-${index + 1}.webp ${index + 1}x`
+  ).join(', ')
+  const srcsetCandidatesOverLimit = `${srcsetCandidatesAtLimit}, /images/portrait-over.webp 33x`
   const validSrcsets = [
     '/images/portrait.webp',
     '/images/portrait-small.webp 480w, /images/portrait-large.webp 960w',
     '/images/portrait.webp 1x, /images/portrait@2x.webp 2x',
-    'data:image/svg+xml,%3Csvg%3E%3C/svg%3E 1x, /images/portrait.webp 2x'
+    'data:image/svg+xml,%3Csvg%3E%3C/svg%3E 1x, /images/portrait.webp 2x',
+    srcsetLengthAtLimit,
+    srcsetCandidatesAtLimit
   ]
   const invalidSrcsets = [
     '',
@@ -1282,7 +1303,9 @@ function validateSrcsetParsing() {
     '/images/portrait.webp 1x 2x',
     '/images/portrait.webp 480w, /images/portrait@2x.webp 2x',
     '/images/portrait.webp 1x, /images/portrait@2x.webp 1x',
-    '/images/portrait.webp, /images/portrait@2x.webp 1x'
+    '/images/portrait.webp, /images/portrait@2x.webp 1x',
+    srcsetLengthOverLimit,
+    srcsetCandidatesOverLimit
   ]
 
   if (validSrcsets.some((value) => !parseSrcsetCandidates(value))) {
