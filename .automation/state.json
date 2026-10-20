@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-20T14:20:01Z",
-  "last_outcome": "rejected_duplicate_srcset_urls",
+  "updated_at": "2026-10-20T15:16:21Z",
+  "last_outcome": "rejected_fragment_only_srcset_urls",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -112,7 +112,8 @@
     "Bound sizes lists by attribute length and top-level component count",
     "Bound srcset attributes by character length and candidate count",
     "Validate every generated srcset candidate URL with shared runtime-asset safety rules",
-    "Reject duplicate and canonically equivalent URLs within generated srcset candidate lists"
+    "Reject duplicate and canonically equivalent URLs within generated srcset candidate lists",
+    "Reject fragment-only URLs in generated srcset candidate lists while allowing file fragments"
   ],
   "validation": {
     "npm ci": "passed",
@@ -120,13 +121,13 @@
     "npm run validate": "passed from clean generated Nuxt output",
     "sizes_checks": "passed (87 probes, including lists at the 2,048-character and 32-component limits)",
     "sizes_failure_checks": "passed (rejected lists exceeding attribute-length and component-count limits)",
-    "srcset_checks": "passed (23 probes, including URL uniqueness and attributes at the 4,096-character and 32-candidate limits)",
-    "srcset_failure_checks": "passed (rejected duplicate or canonically equivalent URLs and attributes exceeding length or candidate-count limits)",
+    "srcset_checks": "passed (26 probes, including URL uniqueness, file-fragment handling and attributes at the 4,096-character and 32-candidate limits)",
+    "srcset_failure_checks": "passed (rejected fragment-only URLs, duplicate or canonically equivalent URLs, and attributes exceeding length or candidate-count limits)",
     "srcset_url_checks": "passed (13 probes covering safe relative, same-origin HTTPS, data and blob candidates)",
     "srcset_url_failure_checks": "passed (rejected unsafe schemes, HTTP, protocol-relative and third-party URLs, embedded credentials, malformed encoding and encoded controls)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Reject fragment-only URLs in generated srcset candidate lists"
+  "next_task": "Require data URLs in generated srcset candidates to use an image media type"
 }

@@ -317,6 +317,7 @@ function parseSrcsetCandidates(value) {
       url = withoutSeparator
       separatedByUrlComma = true
     }
+    if (url.startsWith('#')) return null
 
     const descriptors = []
     if (!separatedByUrlComma) {
@@ -1297,6 +1298,7 @@ function validateSrcsetParsing() {
     '/images/portrait-small.webp 480w, /images/portrait-large.webp 960w',
     '/images/portrait.webp 1x, /images/portrait@2x.webp 2x',
     '/images/portrait.webp?width=480 1x, /images/portrait.webp?width=960 2x',
+    '/images/icons.svg#portrait 1x',
     'data:image/svg+xml,%3Csvg%3E%3C/svg%3E 1x, /images/portrait.webp 2x',
     srcsetLengthAtLimit,
     srcsetCandidatesAtLimit
@@ -1316,6 +1318,8 @@ function validateSrcsetParsing() {
     '/images/portrait.webp 1x, /images/portrait.webp 2x',
     '/images/../portrait.webp 1x, /portrait.webp 2x',
     '/images/portrait.webp 1x, https://christiancolewan.tech/images/portrait.webp 2x',
+    '#portrait 1x',
+    '/images/portrait.webp 1x, #portrait 2x',
     srcsetLengthOverLimit,
     srcsetCandidatesOverLimit
   ]
@@ -1325,7 +1329,7 @@ function validateSrcsetParsing() {
   }
   if (invalidSrcsets.some((value) => parseSrcsetCandidates(value))) {
     fail(
-      'Srcset parser: empty, malformed, mixed and duplicate descriptor or URL candidates must remain invalid'
+      'Srcset parser: empty, malformed, fragment-only, mixed and duplicate descriptor or URL candidates must remain invalid'
     )
   }
 
