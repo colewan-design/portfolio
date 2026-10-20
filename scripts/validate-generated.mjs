@@ -365,6 +365,14 @@ function parseSrcsetCandidates(value) {
   const descriptorValues = candidates.map(({ descriptorValue }) => descriptorValue)
   if (new Set(descriptorValues).size !== descriptorValues.length) return null
 
+  let canonicalUrls
+  try {
+    canonicalUrls = candidates.map(({ url }) => new URL(url, siteUrl).href)
+  } catch {
+    return null
+  }
+  if (new Set(canonicalUrls).size !== canonicalUrls.length) return null
+
   return candidates
 }
 
@@ -1288,6 +1296,7 @@ function validateSrcsetParsing() {
     '/images/portrait.webp',
     '/images/portrait-small.webp 480w, /images/portrait-large.webp 960w',
     '/images/portrait.webp 1x, /images/portrait@2x.webp 2x',
+    '/images/portrait.webp?width=480 1x, /images/portrait.webp?width=960 2x',
     'data:image/svg+xml,%3Csvg%3E%3C/svg%3E 1x, /images/portrait.webp 2x',
     srcsetLengthAtLimit,
     srcsetCandidatesAtLimit
@@ -1304,6 +1313,9 @@ function validateSrcsetParsing() {
     '/images/portrait.webp 480w, /images/portrait@2x.webp 2x',
     '/images/portrait.webp 1x, /images/portrait@2x.webp 1x',
     '/images/portrait.webp, /images/portrait@2x.webp 1x',
+    '/images/portrait.webp 1x, /images/portrait.webp 2x',
+    '/images/../portrait.webp 1x, /portrait.webp 2x',
+    '/images/portrait.webp 1x, https://christiancolewan.tech/images/portrait.webp 2x',
     srcsetLengthOverLimit,
     srcsetCandidatesOverLimit
   ]
@@ -1312,7 +1324,9 @@ function validateSrcsetParsing() {
     fail('Srcset parser: valid URL, width and density candidate lists must remain valid')
   }
   if (invalidSrcsets.some((value) => parseSrcsetCandidates(value))) {
-    fail('Srcset parser: empty, malformed, mixed and duplicate candidates must remain invalid')
+    fail(
+      'Srcset parser: empty, malformed, mixed and duplicate descriptor or URL candidates must remain invalid'
+    )
   }
 
   return { srcsetProbeCount: validSrcsets.length + invalidSrcsets.length }
