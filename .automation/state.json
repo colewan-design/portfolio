@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-10-20T08:17:38Z",
-  "last_outcome": "rejected_non_finite_source_size_math",
+  "updated_at": "2026-10-20T09:16:14Z",
+  "last_outcome": "limited_source_size_math_nesting",
   "completed_tasks": [
     "Repair incomplete package-lock.json so npm ci succeeds",
     "Use aria-current=location for active in-page navigation links while retaining aria-current=page for routed pages",
@@ -106,17 +106,18 @@
     "Validate generated sizes media conditions and reject empty or malformed conditions",
     "Validate source-size math functions and reject empty or malformed expressions",
     "Validate source-size math operands and reject unsupported units or adjacent operands",
-    "Reject division by zero and non-finite numeric values in source-size math expressions"
+    "Reject division by zero and non-finite numeric values in source-size math expressions",
+    "Limit source-size math nesting depth across functions and parenthesized groups"
   ],
   "validation": {
     "npm ci": "passed",
     "npm run build": "passed",
     "npm run validate": "passed from clean generated Nuxt output",
-    "sizes_checks": "passed (75 probes, including finite scalar division and nested numeric expressions)",
-    "sizes_failure_checks": "passed (rejected zero divisors, non-finite literals and overflowing scalar arithmetic)",
+    "sizes_checks": "passed (79 probes, including math functions and parenthesized groups at the nesting limit)",
+    "sizes_failure_checks": "passed (rejected math functions and parenthesized groups beyond the nesting limit)",
     "skill_md": "unchanged"
   },
   "resolved_blocker": "Repository write access confirmed by the previous lockfile repair commit",
   "blocker": null,
-  "next_task": "Limit source-size math nesting depth to prevent pathological validator input"
+  "next_task": "Limit source-size math expression length and token count to keep validator work bounded"
 }

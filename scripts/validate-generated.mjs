@@ -435,7 +435,11 @@ const sourceSizeLengthUnits = new Set([
   'pt'
 ])
 
-function mathFunctionResult(value) {
+const maximumSourceSizeMathDepth = 12
+
+function mathFunctionResult(value, depth = 1) {
+  if (depth > maximumSourceSizeMathDepth) return null
+
   const match = value.match(/^(calc|min|max|clamp)\((.*)\)$/is)
   if (!match || matchingClosingParenthesis(value, value.indexOf('(')) !== value.length - 1) return null
 
@@ -444,10 +448,10 @@ function mathFunctionResult(value) {
   if (!argumentsList) return null
 
   if (functionName === 'calc') {
-    return argumentsList.length === 1 ? mathExpressionResult(argumentsList[0]) : null
+    return argumentsList.length === 1 ? mathExpressionResult(argumentsList[0], depth) : null
   }
   if (functionName === 'min' || functionName === 'max') {
-    const argumentResults = argumentsList.map(mathExpressionResult)
+    const argumentResults = argumentsList.map((argument) => mathExpressionResult(argument, depth))
     if (!argumentResults[0] || !argumentResults.every((result) => result?.type === argumentResults[0].type)) {
       return null
     }
@@ -461,7 +465,7 @@ function mathFunctionResult(value) {
 
   const argumentResults = argumentsList.map((argument, index) => {
     if (argument.toLowerCase() === 'none') return index === 0 || index === 2 ? 'none' : null
-    return mathExpressionResult(argument)
+    return mathExpressionResult(argument, depth)
   })
   const concreteResults = argumentResults.filter((result) => result !== 'none')
   if (
@@ -479,19 +483,22 @@ function mathFunctionResult(value) {
   return Number.isFinite(numericValue) ? { type: 'number', value: numericValue } : null
 }
 
-function mathExpressionResult(value) {
+function mathExpressionResult(value, depth = 0) {
+  if (depth > maximumSourceSizeMathDepth) return null
+
   let position = 0
 
   function skipWhitespace() {
     while (/\s/.test(value[position] ?? '')) position += 1
   }
 
-  function parseValue() {
+  function parseValue(currentDepth) {
     skipWhitespace()
 
     if (value[position] === '(') {
+      if (currentDepth >= maximumSourceSizeMathDepth) return null
       position += 1
-      const result = parseSum()
+      const result = parseSum(currentDepth + 1)
       skipWhitespace()
       if (!result || value[position] !== ')') return null
       position += 1
@@ -500,11 +507,12 @@ function mathExpressionResult(value) {
 
     const functionMatch = value.slice(position).match(/^(calc|min|max|clamp)\s*\(/i)
     if (functionMatch) {
+      if (currentDepth >= maximumSourceSizeMathDepth) return null
       const openingPosition = position + functionMatch[0].lastIndexOf('(')
       const closingPosition = matchingClosingParenthesis(value, openingPosition)
       if (closingPosition < 0) return null
 
-      const result = mathFunctionResult(value.slice(position, closingPosition + 1))
+      const result = mathFunctionResult(value.slice(position, closingPosition + 1), currentDepth + 1)
       position = closingPosition + 1
       return result
     }
@@ -525,8 +533,8 @@ function mathExpressionResult(value) {
       : null
   }
 
-  function parseProduct() {
-    let leftResult = parseValue()
+  function parseProduct(currentDepth) {
+    let leftResult = parseValue(currentDepth)
     if (!leftResult) return null
 
     while (true) {
@@ -535,7 +543,7 @@ function mathExpressionResult(value) {
       if (operator !== '*' && operator !== '/') return leftResult
       position += 1
 
-      const rightResult = parseValue()
+      const rightResult = parseValue(currentDepth)
       if (!rightResult) return null
       if (operator === '/' && (rightResult.type !== 'number' || rightResult.value === 0)) return null
       if (operator === '*' && leftResult.type === 'length' && rightResult.type === 'length') return null
@@ -551,8 +559,8 @@ function mathExpressionResult(value) {
     }
   }
 
-  function parseSum() {
-    let leftResult = parseProduct()
+  function parseSum(currentDepth) {
+    let leftResult = parseProduct(currentDepth)
     if (!leftResult) return null
 
     while (true) {
@@ -565,7 +573,7 @@ function mathExpressionResult(value) {
       }
       position += 1
 
-      const rightResult = parseProduct()
+      const rightResult = parseProduct(currentDepth)
       if (!rightResult || rightResult.type !== leftResult.type) return null
       if (leftResult.type === 'number') {
         const numericValue =
@@ -576,7 +584,7 @@ function mathExpressionResult(value) {
     }
   }
 
-  const result = parseSum()
+  const result = parseSum(depth)
   skipWhitespace()
   return result && position === value.length ? result : null
 }
@@ -1244,6 +1252,10 @@ function validateSrcsetParsing() {
 }
 
 function validateSizesParsing() {
+  const nestedMathAtLimit = `${'calc('.repeat(maximumSourceSizeMathDepth)}1px${')'.repeat(maximumSourceSizeMathDepth)}`
+  const nestedMathOverLimit = `${'calc('.repeat(maximumSourceSizeMathDepth + 1)}1px${')'.repeat(maximumSourceSizeMathDepth + 1)}`
+  const groupedMathAtLimit = `calc(${'('.repeat(maximumSourceSizeMathDepth - 1)}1px${')'.repeat(maximumSourceSizeMathDepth - 1)})`
+  const groupedMathOverLimit = `calc(${'('.repeat(maximumSourceSizeMathDepth)}1px${')'.repeat(maximumSourceSizeMathDepth)})`
   const validSizes = [
     '100vw',
     '(max-width: 48rem) 100vw, 48rem',
@@ -1261,7 +1273,9 @@ function validateSizesParsing() {
     'min(calc(40vw + 1rem), 48rem)',
     'calc(1e2px - 2rem)',
     'calc(100vw / 1e-3)',
-    'calc(100vw / calc(2 + 2))'
+    'calc(100vw / calc(2 + 2))',
+    nestedMathAtLimit,
+    groupedMathAtLimit
   ]
   const invalidSizes = [
     '',
@@ -1307,7 +1321,9 @@ function validateSizesParsing() {
     'calc(100vw / min(0, 1))',
     'calc(1e999px)',
     'calc(1e999 * 1px)',
-    'calc((1e308 * 1e308) * 1px)'
+    'calc((1e308 * 1e308) * 1px)',
+    nestedMathOverLimit,
+    groupedMathOverLimit
   ]
   const sizesWithoutFallback = [
     '(max-width: 48rem) 100vw',
